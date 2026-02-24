@@ -60,7 +60,7 @@ export function FacetSidebar({ facets }: FacetSidebarProps) {
               <button
                 key={f.key}
                 onClick={() => removeFilter(f.key)}
-                className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-700 hover:bg-blue-200"
+                className="inline-flex items-center gap-1 rounded-full bg-primary-subtle px-2 py-0.5 text-xs text-primary-subtle-text hover:opacity-80"
                 aria-label={`Remove ${f.label} filter`}
               >
                 {f.label} &times;
@@ -80,7 +80,7 @@ export function FacetSidebar({ facets }: FacetSidebarProps) {
             className="flex items-center justify-between w-full text-sm font-semibold mb-1"
           >
             <span>{facet.name}</span>
-            <span className="text-gray-500">{collapsed[facet.key] ? "+" : "-"}</span>
+            <span className="text-text-muted">{collapsed[facet.key] ? "+" : "-"}</span>
           </button>
           {!collapsed[facet.key] && (
             <ul className="space-y-0.5">
@@ -90,12 +90,12 @@ export function FacetSidebar({ facets }: FacetSidebarProps) {
                   <li key={v.value}>
                     <button
                       onClick={() => toggleParam(facet.key, v.value)}
-                      className={`text-sm w-full text-left px-1 py-0.5 rounded hover:bg-gray-100 flex justify-between ${
-                        isActive ? "font-medium text-blue-700 bg-blue-50" : "text-gray-700"
+                      className={`text-sm w-full text-left px-1 py-0.5 rounded hover:bg-surface-alt flex justify-between ${
+                        isActive ? "font-medium text-primary-subtle-text bg-primary-subtle" : "text-text-secondary"
                       }`}
                     >
                       <span>{v.label}</span>
-                      <span className="text-gray-500 text-xs">{v.count}</span>
+                      <span className="text-text-muted text-xs">{v.count}</span>
                     </button>
                   </li>
                 );

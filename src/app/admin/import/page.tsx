@@ -88,7 +88,7 @@ export default function AdminImportPage() {
 
       <div className="max-w-2xl space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-text-secondary">
             Organization
           </label>
           <select
@@ -105,7 +105,7 @@ export default function AdminImportPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-text-secondary">
             File (CSV or DCAT-US JSON)
           </label>
           <input
@@ -114,7 +114,7 @@ export default function AdminImportPage() {
             onChange={handleFileChange}
             className="mt-1"
           />
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="mt-1 text-xs text-text-muted">
             CSV: title, description, keywords (semicolon-separated), accessLevel columns required
           </p>
         </div>
@@ -124,7 +124,7 @@ export default function AdminImportPage() {
             <table className="text-xs border divide-y">
               <tbody>
                 {preview.map((row, i) => (
-                  <tr key={i} className={i === 0 ? "bg-gray-50 font-medium" : ""}>
+                  <tr key={i} className={i === 0 ? "bg-surface font-medium" : ""}>
                     {row.map((cell, j) => (
                       <td key={j} className="px-2 py-1 border-r truncate max-w-[200px]">
                         {cell}
@@ -141,28 +141,28 @@ export default function AdminImportPage() {
           type="button"
           onClick={handleImport}
           disabled={!file || !organizationId || isPending}
-          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+          className="rounded bg-primary px-4 py-2 text-white hover:bg-primary-hover disabled:opacity-50"
         >
           {isPending ? "Importing..." : "Import"}
         </button>
 
         {error && (
-          <div className="rounded bg-red-50 p-3 text-sm text-red-600">
+          <div className="rounded bg-danger-subtle p-3 text-sm text-danger-text">
             {error}
           </div>
         )}
 
         {result && (
-          <div className="rounded bg-green-50 p-4">
-            <p className="font-medium text-green-800">
+          <div className="rounded bg-success-subtle p-4">
+            <p className="font-medium text-success-text">
               Import complete: {result.created} created, {result.skipped} skipped
             </p>
             {result.errors.length > 0 && (
               <div className="mt-2">
-                <p className="text-sm font-medium text-red-600">
+                <p className="text-sm font-medium text-danger">
                   {result.errors.length} error(s):
                 </p>
-                <ul className="mt-1 text-xs text-red-600 list-disc list-inside">
+                <ul className="mt-1 text-xs text-danger list-disc list-inside">
                   {result.errors.slice(0, 10).map((e, i) => (
                     <li key={i}>
                       Row {e.row}: {e.message}

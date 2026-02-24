@@ -248,7 +248,7 @@ export function DatasetForm({
   return (
     <form onSubmit={handleSubmit} className="max-w-3xl space-y-6">
       {error && (
-        <div className="rounded bg-red-50 p-3 text-sm text-red-600" role="alert">
+        <div className="rounded bg-danger-subtle p-3 text-sm text-danger-text" role="alert">
           {error}
         </div>
       )}
@@ -331,13 +331,13 @@ export function DatasetForm({
               {keywords.map((kw) => (
                 <span
                   key={kw}
-                  className="inline-flex items-center gap-1 rounded bg-blue-100 px-2 py-0.5 text-sm text-blue-700"
+                  className="inline-flex items-center gap-1 rounded bg-primary-subtle px-2 py-0.5 text-sm text-primary-subtle-text"
                 >
                   {kw}
                   <button
                     type="button"
                     onClick={() => removeKeyword(kw)}
-                    className="text-blue-500 hover:text-blue-800"
+                    className="text-primary hover:opacity-80"
                     aria-label={`Remove keyword ${kw}`}
                   >
                     &times;
@@ -784,7 +784,7 @@ export function DatasetForm({
           <button
             type="button"
             onClick={() => setShowDistForm(true)}
-            className="rounded border border-dashed border-gray-300 px-3 py-2 text-sm text-gray-600 hover:border-gray-400 hover:text-gray-800"
+            className="rounded border border-dashed border-border px-3 py-2 text-sm text-text-tertiary hover:border-text-muted hover:text-text-secondary"
           >
             + Add Distribution
           </button>
@@ -796,14 +796,14 @@ export function DatasetForm({
         <button
           type="submit"
           disabled={loading}
-          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+          className="rounded bg-primary px-4 py-2 text-white hover:bg-primary-hover disabled:opacity-50"
         >
           {loading ? "Saving..." : initialData ? "Update" : "Create"}
         </button>
         <button
           type="button"
           onClick={() => router.push("/admin/datasets")}
-          className="rounded border px-4 py-2 hover:bg-gray-50"
+          className="rounded border border-border px-4 py-2 hover:bg-surface"
         >
           Cancel
         </button>

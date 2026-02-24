@@ -11,13 +11,13 @@ export default async function AdminDatasetsPage() {
         <h1 className="text-2xl font-bold">Datasets</h1>
         <Link
           href="/admin/datasets/new"
-          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          className="rounded bg-primary px-4 py-2 text-white hover:bg-primary-hover"
         >
           New Dataset
         </Link>
       </div>
       {datasets.length === 0 ? (
-        <p className="text-gray-500">No datasets yet.</p>
+        <p className="text-text-muted">No datasets yet.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {datasets.map((dataset) => (

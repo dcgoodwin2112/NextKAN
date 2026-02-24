@@ -44,7 +44,7 @@ export default async function EditOrganizationPage({ params }: Props) {
         <form action={handleDelete}>
           <button
             type="submit"
-            className="rounded border border-red-300 px-4 py-2 text-red-600 hover:bg-red-50"
+            className="rounded border border-danger px-4 py-2 text-danger hover:bg-danger-subtle"
           >
             Delete
           </button>

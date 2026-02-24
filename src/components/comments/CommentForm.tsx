@@ -57,16 +57,16 @@ export function CommentForm({ datasetId, parentId, onSubmitted }: CommentFormPro
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       {status === "success" && (
-        <p className="text-sm text-green-600 bg-green-50 px-3 py-2 rounded">
+        <p className="text-sm text-success-text bg-success-subtle px-3 py-2 rounded">
           Comment submitted for moderation.
         </p>
       )}
       {status === "error" && errorMsg && (
-        <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">{errorMsg}</p>
+        <p className="text-sm text-danger-text bg-danger-subtle px-3 py-2 rounded">{errorMsg}</p>
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label htmlFor="authorName" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="authorName" className="block text-sm font-medium text-text-secondary mb-1">
             Name
           </label>
           <input
@@ -79,7 +79,7 @@ export function CommentForm({ datasetId, parentId, onSubmitted }: CommentFormPro
           />
         </div>
         <div>
-          <label htmlFor="authorEmail" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="authorEmail" className="block text-sm font-medium text-text-secondary mb-1">
             Email
           </label>
           <input
@@ -93,7 +93,7 @@ export function CommentForm({ datasetId, parentId, onSubmitted }: CommentFormPro
         </div>
       </div>
       <div>
-        <label htmlFor="commentContent" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="commentContent" className="block text-sm font-medium text-text-secondary mb-1">
           Comment
         </label>
         <textarea
@@ -108,7 +108,7 @@ export function CommentForm({ datasetId, parentId, onSubmitted }: CommentFormPro
       <button
         type="submit"
         disabled={status === "submitting"}
-        className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+        className="rounded bg-primary px-4 py-2 text-sm text-white hover:bg-primary-hover disabled:opacity-50"
       >
         {status === "submitting" ? "Submitting..." : "Submit Comment"}
       </button>

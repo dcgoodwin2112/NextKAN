@@ -69,7 +69,7 @@ export function DataDictionaryEditor({
 
   if (fields.length === 0) {
     return (
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-text-muted">
         No data dictionary. Import CSV data to auto-generate one.
       </p>
     );
@@ -78,19 +78,19 @@ export function DataDictionaryEditor({
   return (
     <div>
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-border text-sm">
+          <thead className="bg-surface">
             <tr>
-              <th className="px-3 py-2 text-left font-medium text-gray-500">Name</th>
-              <th className="px-3 py-2 text-left font-medium text-gray-500">Title</th>
-              <th className="px-3 py-2 text-left font-medium text-gray-500">Type</th>
-              <th className="px-3 py-2 text-left font-medium text-gray-500">Description</th>
+              <th className="px-3 py-2 text-left font-medium text-text-muted">Name</th>
+              <th className="px-3 py-2 text-left font-medium text-text-muted">Title</th>
+              <th className="px-3 py-2 text-left font-medium text-text-muted">Type</th>
+              <th className="px-3 py-2 text-left font-medium text-text-muted">Description</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-border">
             {fields.map((field, index) => (
               <tr key={field.name}>
-                <td className="px-3 py-2 font-mono text-gray-700">
+                <td className="px-3 py-2 font-mono text-text-secondary">
                   {field.name}
                 </td>
                 <td className="px-3 py-2">
@@ -136,7 +136,7 @@ export function DataDictionaryEditor({
           type="button"
           onClick={handleSave}
           disabled={isPending}
-          className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+          className="rounded bg-primary px-4 py-2 text-sm text-white hover:bg-primary-hover disabled:opacity-50"
         >
           {isPending ? "Saving..." : "Save Data Dictionary"}
         </button>

@@ -33,12 +33,12 @@ export function SearchBar({
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder={placeholder}
-        className="flex-1 rounded border px-3 py-2"
+        className="flex-1 rounded border border-input-border bg-input-bg px-3 py-2"
         aria-label="Search datasets"
       />
       <button
         type="submit"
-        className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+        className="rounded bg-primary px-4 py-2 text-white hover:bg-primary-hover"
       >
         Search
       </button>

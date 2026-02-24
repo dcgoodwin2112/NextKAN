@@ -19,35 +19,35 @@ function formatValue(value: unknown): string {
 
 export function VersionDiff({ diffs }: VersionDiffProps) {
   if (diffs.length === 0) {
-    return <p className="text-sm text-gray-500">No differences found.</p>;
+    return <p className="text-sm text-text-muted">No differences found.</p>;
   }
 
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm border-collapse">
         <thead>
-          <tr className="border-b bg-gray-50">
-            <th className="text-left px-3 py-2 font-medium text-gray-600">
+          <tr className="border-b border-border bg-surface">
+            <th className="text-left px-3 py-2 font-medium text-text-tertiary">
               Field
             </th>
-            <th className="text-left px-3 py-2 font-medium text-gray-600">
+            <th className="text-left px-3 py-2 font-medium text-text-tertiary">
               Before
             </th>
-            <th className="text-left px-3 py-2 font-medium text-gray-600">
+            <th className="text-left px-3 py-2 font-medium text-text-tertiary">
               After
             </th>
           </tr>
         </thead>
         <tbody>
           {diffs.map((diff) => (
-            <tr key={diff.field} className="border-b">
+            <tr key={diff.field} className="border-b border-border">
               <td className="px-3 py-2 font-medium">{diff.field}</td>
-              <td className="px-3 py-2 text-red-700 bg-red-50">
+              <td className="px-3 py-2 text-diff-remove-text bg-diff-remove-bg">
                 <pre className="whitespace-pre-wrap break-words">
                   {formatValue(diff.from)}
                 </pre>
               </td>
-              <td className="px-3 py-2 text-green-700 bg-green-50">
+              <td className="px-3 py-2 text-diff-add-text bg-diff-add-bg">
                 <pre className="whitespace-pre-wrap break-words">
                   {formatValue(diff.to)}
                 </pre>

@@ -35,8 +35,8 @@ export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
           onClick={togglePreview}
           className={`rounded px-3 py-1 text-sm ${
             preview
-              ? "bg-blue-600 text-white"
-              : "bg-gray-100 text-gray-700"
+              ? "bg-primary text-white"
+              : "bg-surface-alt text-text-secondary"
           }`}
         >
           {preview ? "Edit" : "Preview"}
@@ -44,7 +44,7 @@ export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
       </div>
       {preview ? (
         <div
-          className="prose max-w-none rounded border p-4"
+          className="prose dark:prose-invert max-w-none rounded border border-border p-4"
           dangerouslySetInnerHTML={{ __html: renderedHtml }}
         />
       ) : (

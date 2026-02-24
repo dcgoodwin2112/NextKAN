@@ -11,13 +11,13 @@ export default async function AdminOrganizationsPage() {
         <h1 className="text-2xl font-bold">Organizations</h1>
         <Link
           href="/admin/organizations/new"
-          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          className="rounded bg-primary px-4 py-2 text-white hover:bg-primary-hover"
         >
           New Organization
         </Link>
       </div>
       {organizations.length === 0 ? (
-        <p className="text-gray-500">No organizations yet.</p>
+        <p className="text-text-muted">No organizations yet.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {organizations.map((org) => (

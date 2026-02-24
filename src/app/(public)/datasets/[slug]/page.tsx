@@ -85,14 +85,14 @@ export default async function DatasetDetailPage({
       <PageViewTracker entityType="dataset" entityId={dataset.id} />
 
       <h1 className="text-3xl font-bold mb-2">{dataset.title}</h1>
-      <p className="text-sm text-gray-500 mb-2">
+      <p className="text-sm text-text-muted mb-2">
         Published by {dataset.publisher.name}
       </p>
       {(dataset as any).series && (
         <p className="text-sm mb-6">
           <Link
             href={`/series/${(dataset as any).series.slug}`}
-            className="inline-flex items-center rounded bg-purple-50 px-2 py-1 text-purple-700 hover:bg-purple-100"
+            className="inline-flex items-center rounded bg-primary-subtle px-2 py-1 text-primary-subtle-text hover:opacity-80"
           >
             Part of series: {(dataset as any).series.title}
           </Link>
@@ -101,7 +101,7 @@ export default async function DatasetDetailPage({
       {!(dataset as any).series && <div className="mb-4" />}
 
       <section className="mb-8">
-        <p className="text-gray-700 whitespace-pre-wrap">
+        <p className="text-text-secondary whitespace-pre-wrap">
           {dataset.description}
         </p>
       </section>
@@ -113,7 +113,7 @@ export default async function DatasetDetailPage({
             {dataset.keywords.map((k) => (
               <span
                 key={k.keyword}
-                className="rounded bg-gray-100 px-2 py-1 text-sm text-gray-600"
+                className="rounded bg-surface-alt px-2 py-1 text-sm text-text-tertiary"
               >
                 {k.keyword}
               </span>
@@ -129,7 +129,7 @@ export default async function DatasetDetailPage({
             {dataset.themes.map((t) => (
               <span
                 key={t.theme.id}
-                className="rounded bg-blue-50 px-2 py-1 text-sm text-blue-700"
+                className="rounded bg-primary-subtle px-2 py-1 text-sm text-primary-subtle-text"
               >
                 {t.theme.name}
               </span>
@@ -190,13 +190,13 @@ export default async function DatasetDetailPage({
         <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
           {dataset.accessLevel && (
             <div>
-              <dt className="font-medium text-gray-500">Access Level</dt>
+              <dt className="font-medium text-text-muted">Access Level</dt>
               <dd>{dataset.accessLevel}</dd>
             </div>
           )}
           {dataset.contactName && (
             <div>
-              <dt className="font-medium text-gray-500">Contact</dt>
+              <dt className="font-medium text-text-muted">Contact</dt>
               <dd>
                 {dataset.contactName}
                 {dataset.contactEmail && (
@@ -207,36 +207,36 @@ export default async function DatasetDetailPage({
           )}
           {dataset.license && (
             <div>
-              <dt className="font-medium text-gray-500">License</dt>
+              <dt className="font-medium text-text-muted">License</dt>
               <dd>{dataset.license}</dd>
             </div>
           )}
           {dataset.accrualPeriodicity && (
             <div>
-              <dt className="font-medium text-gray-500">Update Frequency</dt>
+              <dt className="font-medium text-text-muted">Update Frequency</dt>
               <dd>{dataset.accrualPeriodicity}</dd>
             </div>
           )}
           {dataset.temporal && (
             <div>
-              <dt className="font-medium text-gray-500">Temporal Coverage</dt>
+              <dt className="font-medium text-text-muted">Temporal Coverage</dt>
               <dd>{dataset.temporal}</dd>
             </div>
           )}
           {dataset.spatial && (
             <div>
-              <dt className="font-medium text-gray-500">Spatial Coverage</dt>
+              <dt className="font-medium text-text-muted">Spatial Coverage</dt>
               <dd>{dataset.spatial}</dd>
             </div>
           )}
           {dataset.issued && (
             <div>
-              <dt className="font-medium text-gray-500">Release Date</dt>
+              <dt className="font-medium text-text-muted">Release Date</dt>
               <dd>{new Date(dataset.issued).toLocaleDateString()}</dd>
             </div>
           )}
           <div>
-            <dt className="font-medium text-gray-500">Last Modified</dt>
+            <dt className="font-medium text-text-muted">Last Modified</dt>
             <dd>{new Date(dataset.modified).toLocaleDateString()}</dd>
           </div>
         </dl>

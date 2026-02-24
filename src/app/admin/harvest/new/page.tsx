@@ -72,13 +72,13 @@ export default function NewHarvestSourcePage() {
     <div>
       <h1 className="text-2xl font-bold mb-6">New Harvest Source</h1>
       {error && (
-        <div className="mb-4 rounded bg-red-50 p-3 text-sm text-red-600">
+        <div className="mb-4 rounded bg-danger-subtle p-3 text-sm text-danger-text">
           {error}
         </div>
       )}
       <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="name" className="block text-sm font-medium text-text-secondary">
             Name
           </label>
           <input
@@ -91,7 +91,7 @@ export default function NewHarvestSourcePage() {
           />
         </div>
         <div>
-          <label htmlFor="url" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="url" className="block text-sm font-medium text-text-secondary">
             URL
           </label>
           <input
@@ -105,7 +105,7 @@ export default function NewHarvestSourcePage() {
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label htmlFor="type" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="type" className="block text-sm font-medium text-text-secondary">
               Type
             </label>
             <select
@@ -119,7 +119,7 @@ export default function NewHarvestSourcePage() {
             </select>
           </div>
           <div>
-            <label htmlFor="organizationId" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="organizationId" className="block text-sm font-medium text-text-secondary">
               Organization
             </label>
             <select
@@ -137,7 +137,7 @@ export default function NewHarvestSourcePage() {
           </div>
         </div>
         <div>
-          <label htmlFor="schedule" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="schedule" className="block text-sm font-medium text-text-secondary">
             Schedule (cron expression, optional)
           </label>
           <input
@@ -149,13 +149,13 @@ export default function NewHarvestSourcePage() {
             placeholder="0 2 * * *"
           />
           {schedulePreview && (
-            <p className="mt-1 text-xs text-gray-500">{schedulePreview}</p>
+            <p className="mt-1 text-xs text-text-muted">{schedulePreview}</p>
           )}
         </div>
         <button
           type="submit"
           disabled={isPending}
-          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+          className="rounded bg-primary px-4 py-2 text-white hover:bg-primary-hover disabled:opacity-50"
         >
           {isPending ? "Creating..." : "Create Source"}
         </button>

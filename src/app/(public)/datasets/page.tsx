@@ -50,7 +50,7 @@ export default async function DatasetsPage({
         </div>
 
         <div className="flex-1">
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm text-text-muted mb-4">
             {total} dataset{total !== 1 ? "s" : ""} found
             {search ? ` for "${search}"` : ""}
             {hasActiveFilters ? " (filtered)" : ""}
@@ -63,7 +63,7 @@ export default async function DatasetsPage({
               ))}
             </div>
           ) : (
-            <p className="text-gray-500">
+            <p className="text-text-muted">
               {search
                 ? `No datasets found for "${search}".`
                 : hasActiveFilters

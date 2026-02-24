@@ -54,7 +54,7 @@ export function OrganizationForm({
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl space-y-4">
       {error && (
-        <div className="rounded bg-red-50 p-3 text-sm text-red-600">
+        <div className="rounded bg-danger-subtle p-3 text-sm text-danger-text">
           {error}
         </div>
       )}
@@ -122,14 +122,14 @@ export function OrganizationForm({
         <button
           type="submit"
           disabled={loading}
-          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+          className="rounded bg-primary px-4 py-2 text-white hover:bg-primary-hover disabled:opacity-50"
         >
           {loading ? "Saving..." : initialData ? "Update" : "Create"}
         </button>
         <button
           type="button"
           onClick={() => router.push("/admin/organizations")}
-          className="rounded border px-4 py-2 hover:bg-gray-50"
+          className="rounded border border-border px-4 py-2 hover:bg-surface"
         >
           Cancel
         </button>

@@ -39,7 +39,7 @@ export default async function OrganizationDetailPage({
     <div className="mx-auto max-w-7xl px-4 py-8">
       <h1 className="text-3xl font-bold mb-2">{org.name}</h1>
       {org.description && (
-        <p className="text-gray-600 mb-6">{org.description}</p>
+        <p className="text-text-tertiary mb-6">{org.description}</p>
       )}
 
       <section>
@@ -60,7 +60,7 @@ export default async function OrganizationDetailPage({
             ))}
           </div>
         ) : (
-          <p className="text-gray-500">No published datasets yet.</p>
+          <p className="text-text-muted">No published datasets yet.</p>
         )}
       </section>
     </div>

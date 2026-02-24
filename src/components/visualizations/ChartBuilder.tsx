@@ -111,12 +111,12 @@ export function ChartBuilder({ distributionId }: ChartBuilderProps) {
   }
 
   return (
-    <div className="space-y-4 rounded border p-4">
+    <div className="space-y-4 rounded border border-border p-4">
       <h3 className="font-semibold">Chart Builder</h3>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-text-secondary">
             Chart Type
           </label>
           <select
@@ -133,7 +133,7 @@ export function ChartBuilder({ distributionId }: ChartBuilderProps) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-text-secondary">
             X Axis
           </label>
           <select
@@ -151,7 +151,7 @@ export function ChartBuilder({ distributionId }: ChartBuilderProps) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-text-secondary mb-1">
           Y Axis (numeric columns)
         </label>
         <div className="flex flex-wrap gap-2">
@@ -173,7 +173,7 @@ export function ChartBuilder({ distributionId }: ChartBuilderProps) {
           type="button"
           onClick={loadPreview}
           disabled={loading || !xColumn || yColumns.length === 0}
-          className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+          className="rounded bg-primary px-4 py-2 text-sm text-white hover:bg-primary-hover disabled:opacity-50"
         >
           {loading ? "Loading..." : "Preview"}
         </button>
@@ -188,13 +188,13 @@ export function ChartBuilder({ distributionId }: ChartBuilderProps) {
           type="button"
           onClick={handleSave}
           disabled={data.length === 0}
-          className="rounded border border-blue-600 px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 disabled:opacity-50"
+          className="rounded border border-primary px-4 py-2 text-sm text-primary hover:bg-primary-subtle disabled:opacity-50"
         >
           Save
         </button>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
 
       {data.length > 0 && (
         <ChartRenderer
@@ -206,11 +206,11 @@ export function ChartBuilder({ distributionId }: ChartBuilderProps) {
       )}
 
       {savedId && (
-        <div className="rounded bg-green-50 p-3 text-sm">
-          <p className="font-medium text-green-800">Chart saved!</p>
-          <p className="mt-1 text-green-700">
+        <div className="rounded bg-success-subtle p-3 text-sm">
+          <p className="font-medium text-success-text">Chart saved!</p>
+          <p className="mt-1 text-success-text">
             Embed code:{" "}
-            <code className="rounded bg-green-100 px-1">
+            <code className="rounded bg-surface-alt px-1">
               {`<iframe src="${typeof window !== "undefined" ? window.location.origin : ""}/embed/chart/${savedId}" width="800" height="500"></iframe>`}
             </code>
           </p>

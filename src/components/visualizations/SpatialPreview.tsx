@@ -83,7 +83,7 @@ export function SpatialPreview({ spatial }: SpatialPreviewProps) {
 
   if (isText) {
     return (
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-text-tertiary">
         <span className="font-medium">Spatial coverage:</span> {spatial}
       </p>
     );

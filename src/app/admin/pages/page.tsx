@@ -10,47 +10,47 @@ export default async function AdminPagesPage() {
         <h1 className="text-2xl font-bold">Pages</h1>
         <Link
           href="/admin/pages/new"
-          className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+          className="rounded bg-primary px-4 py-2 text-sm text-white hover:bg-primary-hover"
         >
           New Page
         </Link>
       </div>
 
       {pages.length === 0 ? (
-        <p className="text-gray-500">No pages yet.</p>
+        <p className="text-text-muted">No pages yet.</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-border text-sm">
+            <thead className="bg-surface">
               <tr>
-                <th className="px-4 py-2 text-left font-medium text-gray-500">Title</th>
-                <th className="px-4 py-2 text-left font-medium text-gray-500">Slug</th>
-                <th className="px-4 py-2 text-left font-medium text-gray-500">Status</th>
-                <th className="px-4 py-2 text-left font-medium text-gray-500">Order</th>
+                <th className="px-4 py-2 text-left font-medium text-text-muted">Title</th>
+                <th className="px-4 py-2 text-left font-medium text-text-muted">Slug</th>
+                <th className="px-4 py-2 text-left font-medium text-text-muted">Status</th>
+                <th className="px-4 py-2 text-left font-medium text-text-muted">Order</th>
                 <th className="px-4 py-2"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {pages.map((page) => (
                 <tr key={page.id}>
                   <td className="px-4 py-2 font-medium">{page.title}</td>
-                  <td className="px-4 py-2 text-gray-500">/pages/{page.slug}</td>
+                  <td className="px-4 py-2 text-text-muted">/pages/{page.slug}</td>
                   <td className="px-4 py-2">
                     <span
                       className={`rounded px-2 py-0.5 text-xs ${
                         page.published
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-600"
+                          ? "bg-success-subtle text-success-text"
+                          : "bg-surface-alt text-text-tertiary"
                       }`}
                     >
                       {page.published ? "Published" : "Draft"}
                     </span>
                   </td>
-                  <td className="px-4 py-2 text-gray-500">{page.sortOrder}</td>
+                  <td className="px-4 py-2 text-text-muted">{page.sortOrder}</td>
                   <td className="px-4 py-2">
                     <Link
                       href={`/admin/pages/${page.id}/edit`}
-                      className="text-blue-600 hover:underline"
+                      className="text-primary hover:underline"
                     >
                       Edit
                     </Link>

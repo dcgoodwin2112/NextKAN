@@ -15,7 +15,7 @@ export default async function OrganizationsPage() {
           ))}
         </div>
       ) : (
-        <p className="text-gray-500">No organizations yet.</p>
+        <p className="text-text-muted">No organizations yet.</p>
       )}
     </div>
   );

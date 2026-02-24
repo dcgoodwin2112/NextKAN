@@ -31,11 +31,11 @@ export default async function CommentsPage() {
       <h1 className="text-2xl font-bold mb-6">Comment Moderation</h1>
 
       {comments.length === 0 ? (
-        <p className="text-gray-500">No pending comments.</p>
+        <p className="text-text-muted">No pending comments.</p>
       ) : (
-        <div className="rounded border bg-white overflow-hidden">
+        <div className="rounded border bg-background overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b">
+            <thead className="bg-surface border-b">
               <tr>
                 <th className="text-left px-4 py-3 font-medium">Author</th>
                 <th className="text-left px-4 py-3 font-medium">Content</th>
@@ -49,13 +49,13 @@ export default async function CommentsPage() {
                 <tr key={comment.id} className="border-b last:border-0">
                   <td className="px-4 py-3">
                     <div className="font-medium">{comment.authorName}</div>
-                    <div className="text-xs text-gray-500">{comment.authorEmail}</div>
+                    <div className="text-xs text-text-muted">{comment.authorEmail}</div>
                   </td>
                   <td className="px-4 py-3 max-w-xs truncate">{comment.content}</td>
-                  <td className="px-4 py-3 text-gray-600">
+                  <td className="px-4 py-3 text-text-tertiary">
                     {comment.dataset?.title ?? "Unknown"}
                   </td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">
+                  <td className="px-4 py-3 text-text-muted text-xs">
                     {new Date(comment.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3">
@@ -64,7 +64,7 @@ export default async function CommentsPage() {
                         <input type="hidden" name="id" value={comment.id} />
                         <button
                           type="submit"
-                          className="rounded bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-700"
+                          className="rounded bg-success px-3 py-1 text-xs text-white hover:opacity-90"
                         >
                           Approve
                         </button>
@@ -73,7 +73,7 @@ export default async function CommentsPage() {
                         <input type="hidden" name="id" value={comment.id} />
                         <button
                           type="submit"
-                          className="rounded bg-red-600 px-3 py-1 text-xs text-white hover:bg-red-700"
+                          className="rounded bg-danger px-3 py-1 text-xs text-white hover:opacity-90"
                         >
                           Delete
                         </button>

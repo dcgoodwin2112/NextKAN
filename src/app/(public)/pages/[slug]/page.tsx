@@ -45,7 +45,7 @@ export default async function PublicPage({ params }: PageProps) {
     <div className="mx-auto max-w-4xl px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">{page.title}</h1>
       <div
-        className="prose max-w-none"
+        className="prose dark:prose-invert max-w-none"
         dangerouslySetInnerHTML={{ __html: contentHtml }}
       />
     </div>

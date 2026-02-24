@@ -54,12 +54,12 @@ function CsvTable({ data }: { data: CsvPreviewData }) {
 
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full text-sm border">
+      <table className="min-w-full text-sm border border-border">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id} className="bg-gray-50">
+            <tr key={headerGroup.id} className="bg-surface">
               {headerGroup.headers.map((header) => (
-                <th key={header.id} className="border px-3 py-2 text-left font-medium">
+                <th key={header.id} className="border border-border px-3 py-2 text-left font-medium">
                   {flexRender(header.column.columnDef.header, header.getContext())}
                 </th>
               ))}
@@ -68,9 +68,9 @@ function CsvTable({ data }: { data: CsvPreviewData }) {
         </thead>
         <tbody>
           {table.getRowModel().rows.map((row) => (
-            <tr key={row.id} className="hover:bg-gray-50">
+            <tr key={row.id} className="hover:bg-surface">
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="border px-3 py-1.5">
+                <td key={cell.id} className="border border-border px-3 py-1.5">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
@@ -79,7 +79,7 @@ function CsvTable({ data }: { data: CsvPreviewData }) {
         </tbody>
       </table>
       {data.truncated && (
-        <p className="text-xs text-gray-500 mt-2">
+        <p className="text-xs text-text-muted mt-2">
           Showing {data.rows.length} of {data.totalRows} rows
         </p>
       )}
@@ -119,7 +119,7 @@ export function DataPreview({ distributionId, format, filePath, downloadURL }: D
     return (
       <iframe
         src={downloadURL}
-        className="w-full h-96 border rounded"
+        className="w-full h-96 border border-border rounded"
         title="PDF Preview"
       />
     );
@@ -129,7 +129,7 @@ export function DataPreview({ distributionId, format, filePath, downloadURL }: D
     return (
       <a
         href={downloadURL!}
-        className="text-blue-600 hover:underline text-sm"
+        className="text-primary hover:underline text-sm"
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -139,11 +139,11 @@ export function DataPreview({ distributionId, format, filePath, downloadURL }: D
   }
 
   if (loading) {
-    return <p className="text-sm text-gray-500">Loading preview...</p>;
+    return <p className="text-sm text-text-muted">Loading preview...</p>;
   }
 
   if (error) {
-    return <p className="text-sm text-red-500">Preview unavailable: {error}</p>;
+    return <p className="text-sm text-danger">Preview unavailable: {error}</p>;
   }
 
   if (!preview) return null;
@@ -155,23 +155,23 @@ export function DataPreview({ distributionId, format, filePath, downloadURL }: D
   if (preview.type === "json") {
     return (
       <div className="overflow-auto max-h-96">
-        <pre className="text-xs bg-gray-50 p-4 rounded border whitespace-pre-wrap">
+        <pre className="text-xs bg-surface p-4 rounded border border-border whitespace-pre-wrap">
           {preview.content}
         </pre>
         {preview.truncated && (
-          <p className="text-xs text-gray-500 mt-2">Content truncated (first 500KB shown)</p>
+          <p className="text-xs text-text-muted mt-2">Content truncated (first 500KB shown)</p>
         )}
       </div>
     );
   }
 
   return (
-    <p className="text-sm text-gray-500">
+    <p className="text-sm text-text-muted">
       Preview not available for {format || "this"} format.
       {downloadURL && (
         <>
           {" "}
-          <a href={downloadURL} className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">
+          <a href={downloadURL} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
             Download instead
           </a>
         </>

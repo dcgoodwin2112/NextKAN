@@ -37,7 +37,7 @@ export default function LoginPage() {
         <h1 className="text-2xl font-bold text-center">Sign In</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded bg-red-50 p-3 text-sm text-red-600">
+            <div className="rounded bg-danger-subtle p-3 text-sm text-danger-text">
               {error}
             </div>
           )}
@@ -73,7 +73,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+            className="w-full rounded bg-primary px-4 py-2 text-white hover:bg-primary-hover disabled:opacity-50"
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>

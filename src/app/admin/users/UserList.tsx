@@ -106,7 +106,7 @@ export function UserList({ users, organizations }: UserListProps) {
         {showCreateForm ? (
           <form onSubmit={handleCreate} className="space-y-3 max-w-md border rounded p-4">
             {error && (
-              <div className="text-sm text-red-600 bg-red-50 p-2 rounded">{error}</div>
+              <div className="text-sm text-danger-text bg-danger-subtle p-2 rounded">{error}</div>
             )}
             <div>
               <label htmlFor="new-email" className="block text-sm font-medium mb-1">Email *</label>
@@ -170,10 +170,10 @@ export function UserList({ users, organizations }: UserListProps) {
               </select>
             </div>
             <div className="flex gap-2">
-              <button type="submit" disabled={loading} className="rounded bg-blue-600 px-4 py-2 text-white text-sm hover:bg-blue-700 disabled:opacity-50">
+              <button type="submit" disabled={loading} className="rounded bg-primary px-4 py-2 text-white text-sm hover:bg-primary-hover disabled:opacity-50">
                 {loading ? "Creating..." : "Create User"}
               </button>
-              <button type="button" onClick={() => setShowCreateForm(false)} className="rounded border px-4 py-2 text-sm hover:bg-gray-50">
+              <button type="button" onClick={() => setShowCreateForm(false)} className="rounded border px-4 py-2 text-sm hover:bg-surface">
                 Cancel
               </button>
             </div>
@@ -181,7 +181,7 @@ export function UserList({ users, organizations }: UserListProps) {
         ) : (
           <button
             onClick={() => setShowCreateForm(true)}
-            className="rounded bg-blue-600 px-4 py-2 text-white text-sm hover:bg-blue-700"
+            className="rounded bg-primary px-4 py-2 text-white text-sm hover:bg-primary-hover"
           >
             Create User
           </button>
@@ -191,7 +191,7 @@ export function UserList({ users, organizations }: UserListProps) {
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm border">
           <thead>
-            <tr className="bg-gray-50">
+            <tr className="bg-surface">
               <th className="border px-3 py-2 text-left">Email</th>
               <th className="border px-3 py-2 text-left">Name</th>
               <th className="border px-3 py-2 text-left">Role</th>
@@ -220,7 +220,7 @@ export function UserList({ users, organizations }: UserListProps) {
                 <td className="border px-3 py-2">
                   <button
                     onClick={() => handleDelete(user.id)}
-                    className="text-red-600 hover:text-red-800 text-xs"
+                    className="text-danger hover:opacity-80 text-xs"
                   >
                     Delete
                   </button>
