@@ -1,0 +1,229 @@
+{
+  "conformsTo": "https://project-open-data.cio.gov/v1.1/schema",
+  "describedBy": "https://project-open-data.cio.gov/v1.1/schema/catalog.json",
+  "@context": "https://project-open-data.cio.gov/v1.1/schema/catalog.jsonld",
+  "@type": "dcat:Catalog",
+  "@id": "https://example.gov/data.json",
+  "dataset": [
+    {
+      "@type": "dcat:Dataset",
+      "title": "County Health Rankings 2024",
+      "description": "Annual county-level health rankings measuring health outcomes and health factors for nearly every county in the nation. Includes data on premature death, quality of life, health behaviors, clinical care, social and economic factors, and physical environment.",
+      "keyword": [
+        "health",
+        "county",
+        "rankings",
+        "public health",
+        "mortality",
+        "morbidity"
+      ],
+      "modified": "2024-03-15",
+      "publisher": {
+        "@type": "org:Organization",
+        "name": "Department of Health and Human Services",
+        "subOrganizationOf": {
+          "@type": "org:Organization",
+          "name": "U.S. Government"
+        }
+      },
+      "contactPoint": {
+        "@type": "vcard:Contact",
+        "fn": "Jane Rodriguez",
+        "hasEmail": "mailto:jane.rodriguez@hhs.gov"
+      },
+      "identifier": "HHS-2024-0042",
+      "accessLevel": "public",
+      "bureauCode": [
+        "009:00"
+      ],
+      "programCode": [
+        "009:076"
+      ],
+      "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "spatial": "United States",
+      "temporal": "2018-01-01/2023-12-31",
+      "issued": "2024-03-15",
+      "accrualPeriodicity": "R/P1Y",
+      "dataQuality": true,
+      "landingPage": "https://example.gov/datasets/county-health-rankings",
+      "language": [
+        "en-us"
+      ],
+      "theme": [
+        "Health"
+      ],
+      "references": [
+        "https://example.gov/methodology/chr-2024.pdf"
+      ],
+      "distribution": [
+        {
+          "@type": "dcat:Distribution",
+          "title": "County Health Rankings 2024 (CSV)",
+          "description": "Complete dataset in comma-separated values format",
+          "downloadURL": "https://example.gov/downloads/chr-2024.csv",
+          "mediaType": "text/csv",
+          "format": "CSV"
+        },
+        {
+          "@type": "dcat:Distribution",
+          "title": "County Health Rankings 2024 (JSON)",
+          "description": "Complete dataset in JSON format",
+          "downloadURL": "https://example.gov/downloads/chr-2024.json",
+          "mediaType": "application/json",
+          "format": "JSON"
+        },
+        {
+          "@type": "dcat:Distribution",
+          "title": "County Health Rankings API",
+          "description": "RESTful API for querying county health data",
+          "accessURL": "https://example.gov/api/v1/health-rankings",
+          "mediaType": "application/json",
+          "format": "API"
+        }
+      ]
+    },
+    {
+      "@type": "dcat:Dataset",
+      "title": "Federal Building Energy Usage",
+      "description": "Monthly energy consumption data for federal buildings including electricity, natural gas, and water usage. Reported by building, agency, and region.",
+      "keyword": [
+        "energy",
+        "buildings",
+        "federal",
+        "electricity",
+        "sustainability"
+      ],
+      "modified": "2024-06-01",
+      "publisher": {
+        "@type": "org:Organization",
+        "name": "General Services Administration"
+      },
+      "contactPoint": {
+        "@type": "vcard:Contact",
+        "fn": "Michael Chen",
+        "hasEmail": "mailto:michael.chen@gsa.gov"
+      },
+      "identifier": "GSA-2024-ENERGY-001",
+      "accessLevel": "public",
+      "bureauCode": [
+        "023:00"
+      ],
+      "programCode": [
+        "023:010"
+      ],
+      "license": "https://www.usa.gov/publicdomain/label/1.0/",
+      "spatial": "United States",
+      "temporal": "2020-01-01/2024-05-31",
+      "accrualPeriodicity": "R/P1M",
+      "dataQuality": true,
+      "language": [
+        "en-us"
+      ],
+      "theme": [
+        "Energy"
+      ],
+      "distribution": [
+        {
+          "@type": "dcat:Distribution",
+          "title": "Energy Usage Data (CSV)",
+          "downloadURL": "https://example.gov/downloads/energy-usage-2024.csv",
+          "mediaType": "text/csv",
+          "format": "CSV"
+        }
+      ]
+    },
+    {
+      "@type": "dcat:Dataset",
+      "title": "Public Transit Ridership Statistics",
+      "description": "Quarterly ridership data for public transit systems receiving federal funding. Includes bus, rail, ferry, and demand-response service types.",
+      "keyword": [
+        "transit",
+        "ridership",
+        "transportation",
+        "public transit"
+      ],
+      "modified": "2024-04-30",
+      "publisher": {
+        "@type": "org:Organization",
+        "name": "Department of Transportation"
+      },
+      "contactPoint": {
+        "@type": "vcard:Contact",
+        "fn": "Sarah Kim",
+        "hasEmail": "mailto:sarah.kim@dot.gov"
+      },
+      "identifier": "DOT-FTA-RIDERSHIP-2024",
+      "accessLevel": "public",
+      "bureauCode": [
+        "021:00"
+      ],
+      "programCode": [
+        "021:001"
+      ],
+      "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "rights": "N/A",
+      "spatial": "United States",
+      "temporal": "2019-01-01/2024-03-31",
+      "accrualPeriodicity": "R/P3M",
+      "dataQuality": true,
+      "describedBy": "https://example.gov/schemas/transit-ridership-schema.json",
+      "landingPage": "https://example.gov/datasets/transit-ridership",
+      "language": [
+        "en-us"
+      ],
+      "theme": [
+        "Transportation"
+      ],
+      "distribution": [
+        {
+          "@type": "dcat:Distribution",
+          "title": "Transit Ridership (XLSX)",
+          "description": "Ridership data with pivot tables by agency and mode",
+          "downloadURL": "https://example.gov/downloads/transit-ridership-2024.xlsx",
+          "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          "format": "XLSX",
+          "describedBy": "https://example.gov/schemas/transit-ridership-schema.json"
+        },
+        {
+          "@type": "dcat:Distribution",
+          "title": "Transit Ridership (CSV)",
+          "downloadURL": "https://example.gov/downloads/transit-ridership-2024.csv",
+          "mediaType": "text/csv",
+          "format": "CSV"
+        }
+      ]
+    },
+    {
+      "@type": "dcat:Dataset",
+      "title": "Enterprise Data Inventory",
+      "description": "This data.json file represents the agency's public data listing as required by the Open Data Policy.",
+      "keyword": [
+        "data inventory",
+        "open data",
+        "DCAT-US"
+      ],
+      "modified": "2024-06-15",
+      "publisher": {
+        "@type": "org:Organization",
+        "name": "Example Agency"
+      },
+      "contactPoint": {
+        "@type": "vcard:Contact",
+        "fn": "Open Data Team",
+        "hasEmail": "mailto:opendata@example.gov"
+      },
+      "identifier": "AGENCY-DATA-INVENTORY",
+      "accessLevel": "public",
+      "distribution": [
+        {
+          "@type": "dcat:Distribution",
+          "accessURL": "https://example.gov/data.json",
+          "title": "data.json",
+          "mediaType": "application/json",
+          "format": "JSON",
+          "conformsTo": "https://project-open-data.cio.gov/v1.1/schema"
+        }
+      ]
+    }
+  ]
+}
