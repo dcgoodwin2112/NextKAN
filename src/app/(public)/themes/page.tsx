@@ -33,7 +33,7 @@ export default async function ThemesPage() {
             {theme.description && (
               <p className="text-sm text-gray-500 mb-2">{theme.description}</p>
             )}
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-gray-500">
               {theme._count.datasets} dataset{theme._count.datasets !== 1 ? "s" : ""}
             </p>
           </Link>

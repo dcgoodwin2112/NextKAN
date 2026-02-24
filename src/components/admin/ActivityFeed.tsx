@@ -54,7 +54,7 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
             </span>{" "}
             <span className="font-medium">{activity.entityName}</span>
           </div>
-          <span className="text-gray-400 whitespace-nowrap text-xs">
+          <span className="text-gray-500 whitespace-nowrap text-xs">
             {formatRelativeTime(activity.createdAt)}
           </span>
         </li>

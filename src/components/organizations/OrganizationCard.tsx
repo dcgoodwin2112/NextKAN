@@ -29,7 +29,7 @@ export function OrganizationCard({
           </p>
         )}
         {organization._count && (
-          <p className="text-xs text-gray-400 mt-2">
+          <p className="text-xs text-gray-500 mt-2">
             {organization._count.datasets} dataset
             {organization._count.datasets !== 1 ? "s" : ""}
           </p>

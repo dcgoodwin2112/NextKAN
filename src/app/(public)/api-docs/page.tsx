@@ -1,12 +1,6 @@
-import dynamic from "next/dynamic";
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/config";
-
-const SwaggerClient = dynamic(
-  () =>
-    import("./SwaggerClient").then((mod) => mod.SwaggerClient),
-  { ssr: false }
-);
+import { SwaggerClient } from "./SwaggerClient";
 
 export const metadata: Metadata = {
   title: `API Documentation | ${siteConfig.name}`,
