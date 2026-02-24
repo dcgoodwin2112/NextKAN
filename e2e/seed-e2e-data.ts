@@ -58,9 +58,12 @@ async function main() {
     data: {
       datasetId: dataset.id,
       title: "CSV Download",
-      downloadURL: "https://example.com/data.csv",
+      downloadURL: "/sample-data/annual-budget.csv",
       format: "CSV",
       mediaType: "text/csv",
+      filePath: "public/sample-data/annual-budget.csv",
+      fileName: "annual-budget.csv",
+      fileSize: 1054,
     },
   });
 

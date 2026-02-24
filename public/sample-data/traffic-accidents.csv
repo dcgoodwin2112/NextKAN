@@ -1,0 +1,26 @@
+Date,Location,Type,Severity,Injuries,Fatalities,Latitude,Longitude
+2024-01-05,Main St & 3rd Ave,Rear-end,Minor,0,0,39.7823,-89.6437
+2024-01-12,Oak Park Blvd,Sideswipe,Minor,1,0,39.7891,-89.6512
+2024-01-18,Highway 55 Ramp,Rollover,Major,2,0,39.7756,-89.6301
+2024-02-02,Elm St & Washington,Intersection,Moderate,1,0,39.7834,-89.6489
+2024-02-14,Lincoln Ave,Pedestrian,Major,1,0,39.7902,-89.6553
+2024-02-28,Sangamon Ave & Cook,Rear-end,Minor,0,0,39.7948,-89.6271
+2024-03-10,Veterans Pkwy,Single vehicle,Moderate,1,0,39.7711,-89.6198
+2024-03-22,Jefferson St,Sideswipe,Minor,0,0,39.7867,-89.6445
+2024-04-05,Dirksen Pkwy & Stevenson,Intersection,Major,3,1,39.7634,-89.6337
+2024-04-15,Clear Lake Ave,Rear-end,Minor,0,0,39.7989,-89.6401
+2024-05-01,South Grand Ave,Pedestrian,Moderate,1,0,39.7745,-89.6520
+2024-05-18,MacArthur Blvd,Sideswipe,Minor,0,0,39.7812,-89.6688
+2024-06-02,Wabash Ave & 9th St,Intersection,Moderate,2,0,39.7856,-89.6412
+2024-06-20,Stanford Ave,Single vehicle,Minor,0,0,39.7723,-89.6345
+2024-07-04,Lake Springfield Dr,Rollover,Major,2,1,39.7401,-89.6201
+2024-07-19,Chatham Rd & White Oaks,Rear-end,Minor,1,0,39.7634,-89.6634
+2024-08-08,Stevenson Dr,Single vehicle,Moderate,1,0,39.7567,-89.6489
+2024-08-25,Peoria Rd & Sangamon,Intersection,Minor,0,0,39.8012,-89.6378
+2024-09-10,Iles Ave & Meadowbrook,Rear-end,Minor,0,0,39.7512,-89.6512
+2024-09-28,Old Jacksonville Rd,Head-on,Major,3,0,39.7834,-89.6890
+2024-10-14,Monroe St & 6th,Intersection,Moderate,1,0,39.7978,-89.6456
+2024-11-01,Toronto Rd,Single vehicle,Minor,0,0,39.7645,-89.6123
+2024-11-20,Spring St & Capitol Ave,Pedestrian,Major,1,0,39.7989,-89.6501
+2024-12-05,Dirksen Pkwy,Rear-end,Minor,0,0,39.7701,-89.6334
+2024-12-22,Archer Elevator Rd,Sideswipe,Minor,1,0,39.7423,-89.6267

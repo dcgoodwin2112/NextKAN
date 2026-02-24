@@ -1,0 +1,16 @@
+SchoolName,District,GradRate,MathProf,ReadingProf,Enrollment,Rating
+Springfield High,Springfield USD,89.2,72.5,81.3,1842,B+
+Lincoln Middle School,Springfield USD,0,65.8,74.2,956,B
+Washington Elementary,Springfield USD,0,78.3,85.1,624,A-
+Roosevelt Academy,Springfield USD,92.1,80.1,87.6,1203,A
+Jefferson STEM Magnet,Springfield USD,95.4,91.2,89.7,487,A+
+Lakeside Elementary,Lakeside Dist,0,70.2,76.8,412,B
+Lakeside Middle,Lakeside Dist,0,62.4,69.5,578,B-
+Lakeside High,Lakeside Dist,84.7,67.3,73.1,1156,B
+Westfield Prep,Westfield Dist,91.8,85.6,88.9,734,A
+Westfield Elementary,Westfield Dist,0,82.1,86.4,398,A-
+Eastview High,Eastern Dist,78.3,58.9,64.2,1567,C+
+Eastview Middle,Eastern Dist,0,55.7,61.8,823,C
+Northside Elementary,Northern Dist,0,74.6,79.3,345,B+
+Northside High,Northern Dist,86.5,69.8,75.4,1089,B
+Central Charter Academy,Springfield USD,88.9,76.4,82.7,392,B+

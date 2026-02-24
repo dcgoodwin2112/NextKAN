@@ -1,0 +1,21 @@
+RoadID,Name,Type,Condition,Length,Lanes,LastInspection
+RD-001,Main Street,Arterial,Good,4.2,4,2024-03-15
+RD-002,Oak Park Boulevard,Collector,Fair,2.8,2,2024-01-22
+RD-003,Veterans Parkway,Highway,Good,8.5,4,2024-06-10
+RD-004,Dirksen Parkway,Arterial,Good,6.1,4,2024-04-05
+RD-005,MacArthur Boulevard,Arterial,Fair,5.3,4,2023-11-18
+RD-006,Wabash Avenue,Arterial,Poor,3.7,4,2024-02-28
+RD-007,South Grand Avenue,Collector,Fair,2.1,2,2023-09-12
+RD-008,Stevenson Drive,Arterial,Good,4.8,4,2024-05-20
+RD-009,Chatham Road,Collector,Good,3.4,2,2024-07-03
+RD-010,Toronto Road,Local,Fair,1.9,2,2023-08-15
+RD-011,Peoria Road,Arterial,Poor,5.6,2,2024-01-10
+RD-012,Old Jacksonville Road,Collector,Fair,4.1,2,2023-12-05
+RD-013,Archer Elevator Road,Local,Good,2.3,2,2024-08-22
+RD-014,Clear Lake Avenue,Collector,Good,2.7,2,2024-06-15
+RD-015,Sangamon Avenue,Arterial,Fair,3.9,4,2024-03-28
+RD-016,Jefferson Street,Local,Good,1.5,2,2024-09-10
+RD-017,Monroe Street,Local,Good,1.8,2,2024-04-18
+RD-018,Lincoln Avenue,Collector,Fair,2.4,2,2023-10-25
+RD-019,Spring Street,Local,Poor,1.2,2,2024-02-14
+RD-020,Capitol Avenue,Arterial,Good,2.9,4,2024-07-30

@@ -7,6 +7,7 @@ import {
   flexRender,
   createColumnHelper,
 } from "@tanstack/react-table";
+import { DownloadLink } from "@/components/analytics/DownloadLink";
 
 interface DataPreviewProps {
   distributionId: string;
@@ -127,14 +128,13 @@ export function DataPreview({ distributionId, format, filePath, downloadURL }: D
 
   if (!hasFile) {
     return (
-      <a
+      <DownloadLink
         href={downloadURL!}
+        distributionId={distributionId}
         className="text-primary hover:underline text-sm"
-        target="_blank"
-        rel="noopener noreferrer"
       >
         Download file
-      </a>
+      </DownloadLink>
     );
   }
 
@@ -171,9 +171,13 @@ export function DataPreview({ distributionId, format, filePath, downloadURL }: D
       {downloadURL && (
         <>
           {" "}
-          <a href={downloadURL} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
+          <DownloadLink
+            href={downloadURL}
+            distributionId={distributionId}
+            className="text-primary hover:underline"
+          >
             Download instead
-          </a>
+          </DownloadLink>
         </>
       )}
     </p>
