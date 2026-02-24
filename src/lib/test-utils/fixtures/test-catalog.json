@@ -1,0 +1,54 @@
+{
+  "@context": "https://project-open-data.cio.gov/v1.1/schema/catalog.jsonld",
+  "@id": "http://localhost:3001/data.json",
+  "@type": "dcat:Catalog",
+  "conformsTo": "https://project-open-data.cio.gov/v1.1/schema",
+  "describedBy": "https://project-open-data.cio.gov/v1.1/schema/catalog.json",
+  "dataset": [
+    {
+      "@type": "dcat:Dataset",
+      "title": "Test Harvest Dataset 1",
+      "description": "A test dataset for harvest testing",
+      "keyword": ["test", "harvest"],
+      "modified": "2024-06-01",
+      "publisher": {
+        "@type": "org:Organization",
+        "name": "Test Organization"
+      },
+      "contactPoint": {
+        "@type": "vcard:Contact",
+        "fn": "Test Contact",
+        "hasEmail": "mailto:test@example.com"
+      },
+      "identifier": "test-harvest-1",
+      "accessLevel": "public",
+      "distribution": [
+        {
+          "@type": "dcat:Distribution",
+          "title": "CSV Data",
+          "downloadURL": "http://example.com/data1.csv",
+          "mediaType": "text/csv",
+          "format": "CSV"
+        }
+      ]
+    },
+    {
+      "@type": "dcat:Dataset",
+      "title": "Test Harvest Dataset 2",
+      "description": "Another test dataset for harvest testing",
+      "keyword": ["test", "sample"],
+      "modified": "2024-07-15",
+      "publisher": {
+        "@type": "org:Organization",
+        "name": "Test Organization"
+      },
+      "contactPoint": {
+        "@type": "vcard:Contact",
+        "fn": "Test Contact",
+        "hasEmail": "mailto:test@example.com"
+      },
+      "identifier": "test-harvest-2",
+      "accessLevel": "public"
+    }
+  ]
+}

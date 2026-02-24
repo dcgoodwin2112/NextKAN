@@ -10,6 +10,9 @@ import {
 import { generateSlug } from "@/lib/utils/slug";
 import { buildSearchWhere, type SearchParams } from "@/lib/utils/search";
 import { distributionSchema, type DistributionInput } from "@/lib/schemas/distribution";
+import { logActivity, computeDiff } from "@/lib/services/activity";
+import { getEmailService } from "@/lib/services/email";
+import { datasetCreatedEmail } from "@/lib/email-templates/dataset-created";
 
 const datasetIncludes = {
   publisher: { include: { parent: true } },
@@ -22,7 +25,7 @@ export async function createDataset(input: DatasetCreateInput, createdById?: str
   const data = datasetCreateSchema.parse(input);
   const slug = generateSlug(data.title);
 
-  return prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     const dataset = await tx.dataset.create({
       data: {
         title: data.title,
@@ -78,6 +81,30 @@ export async function createDataset(input: DatasetCreateInput, createdById?: str
       include: datasetIncludes,
     });
   });
+
+  // Fire-and-forget: activity log + email notification
+  logActivity({
+    action: "dataset:created",
+    entityType: "dataset",
+    entityId: result.id,
+    entityName: result.title,
+    userId: createdById,
+  }).catch(() => {});
+
+  if (result.status === "published") {
+    const siteUrl = process.env.SITE_URL || "http://localhost:3000";
+    const email = datasetCreatedEmail({
+      title: result.title,
+      datasetUrl: `${siteUrl}/datasets/${result.slug}`,
+      publisherName: result.publisher.name,
+    });
+    getEmailService().send({
+      to: result.contactEmail || "admin@example.com",
+      ...email,
+    }).catch(() => {});
+  }
+
+  return result;
 }
 
 export async function updateDataset(id: string, input: DatasetUpdateInput) {
@@ -111,7 +138,10 @@ export async function updateDataset(id: string, input: DatasetUpdateInput) {
   if (data.references !== undefined) updateData.references = data.references ? JSON.stringify(data.references) : null;
   if (data.identifier !== undefined) updateData.identifier = data.identifier;
 
-  return prisma.$transaction(async (tx) => {
+  // Fetch before-state for diff
+  const before = await prisma.dataset.findUnique({ where: { id } });
+
+  const result = await prisma.$transaction(async (tx) => {
     await tx.dataset.update({
       where: { id },
       data: updateData,
@@ -146,10 +176,37 @@ export async function updateDataset(id: string, input: DatasetUpdateInput) {
       include: datasetIncludes,
     });
   });
+
+  // Fire-and-forget: activity log
+  if (before) {
+    const diff = computeDiff(
+      before as unknown as Record<string, unknown>,
+      result as unknown as Record<string, unknown>
+    );
+    logActivity({
+      action: "dataset:updated",
+      entityType: "dataset",
+      entityId: id,
+      entityName: result.title,
+      details: diff,
+    }).catch(() => {});
+  }
+
+  return result;
 }
 
 export async function deleteDataset(id: string) {
+  const dataset = await prisma.dataset.findUnique({ where: { id } });
   await prisma.dataset.delete({ where: { id } });
+
+  if (dataset) {
+    logActivity({
+      action: "dataset:deleted",
+      entityType: "dataset",
+      entityId: id,
+      entityName: dataset.title,
+    }).catch(() => {});
+  }
 }
 
 export async function getDataset(id: string) {
@@ -213,7 +270,7 @@ export async function listDatasets(params?: {
 
 export async function addDistribution(datasetId: string, input: DistributionInput) {
   const data = distributionSchema.parse(input);
-  return prisma.distribution.create({
+  const distribution = await prisma.distribution.create({
     data: {
       datasetId,
       title: data.title || null,
@@ -224,8 +281,19 @@ export async function addDistribution(datasetId: string, input: DistributionInpu
       format: data.format || null,
       conformsTo: data.conformsTo || null,
       describedBy: data.describedBy || null,
+      fileName: data.fileName || null,
+      filePath: data.filePath || null,
+      fileSize: data.fileSize || null,
     },
   });
+
+  const storageProvider = process.env.STORAGE_PROVIDER || "local";
+  if (data.mediaType === "text/csv" && data.filePath && storageProvider === "local") {
+    const { importCsvToDatastore } = await import("@/lib/services/datastore");
+    await importCsvToDatastore(distribution);
+  }
+
+  return distribution;
 }
 
 export async function updateDistribution(id: string, input: Partial<DistributionInput>) {
@@ -236,5 +304,14 @@ export async function updateDistribution(id: string, input: Partial<Distribution
 }
 
 export async function removeDistribution(id: string) {
+  const datastoreTable = await prisma.datastoreTable.findUnique({
+    where: { distributionId: id },
+  });
+
+  if (datastoreTable) {
+    const { deleteDatastoreTable } = await import("@/lib/services/datastore");
+    await deleteDatastoreTable(datastoreTable.tableName);
+  }
+
   await prisma.distribution.delete({ where: { id } });
 }

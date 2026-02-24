@@ -22,7 +22,7 @@ export type DatasetWithRelations = Dataset & {
   themes: DatasetThemeWithTheme[];
 };
 
-interface DCATUSCatalog {
+export interface DCATUSCatalog {
   "@context": string;
   "@id": string;
   "@type": string;
@@ -31,7 +31,7 @@ interface DCATUSCatalog {
   dataset: DCATUSDataset[];
 }
 
-interface DCATUSDataset {
+export interface DCATUSDataset {
   "@type": string;
   title: string;
   description: string;
@@ -72,7 +72,7 @@ interface DCATUSDataset {
   theme?: string[];
 }
 
-interface DCATUSDistribution {
+export interface DCATUSDistribution {
   "@type": string;
   title?: string;
   description?: string;
@@ -180,5 +180,61 @@ export function buildCatalog(
     describedBy:
       "https://project-open-data.cio.gov/v1.1/schema/catalog.json",
     dataset: datasets.map(transformDatasetToDCATUS),
+  };
+}
+
+/** Reverse-map a DCAT-US dataset to a DatasetCreateInput-like object. */
+export function reverseDCATUSToDatasetInput(
+  dcatDataset: DCATUSDataset,
+  publisherId: string
+) {
+  const contactEmail = dcatDataset.contactPoint?.hasEmail?.replace(
+    /^mailto:/,
+    ""
+  );
+
+  const accessLevel = (
+    ["public", "restricted public", "non-public"].includes(
+      dcatDataset.accessLevel
+    )
+      ? dcatDataset.accessLevel
+      : "public"
+  ) as "public" | "restricted public" | "non-public";
+
+  return {
+    title: dcatDataset.title,
+    description: dcatDataset.description,
+    identifier: dcatDataset.identifier,
+    accessLevel,
+    status: "published" as const,
+    publisherId,
+    contactName: dcatDataset.contactPoint?.fn || undefined,
+    contactEmail: contactEmail || undefined,
+    keywords: dcatDataset.keyword || [],
+    bureauCode: dcatDataset.bureauCode?.[0] || undefined,
+    programCode: dcatDataset.programCode?.[0] || undefined,
+    license: dcatDataset.license || undefined,
+    rights: dcatDataset.rights || undefined,
+    spatial: dcatDataset.spatial || undefined,
+    temporal: dcatDataset.temporal || undefined,
+    issued: dcatDataset.issued || undefined,
+    accrualPeriodicity: dcatDataset.accrualPeriodicity || undefined,
+    conformsTo: dcatDataset.conformsTo || undefined,
+    dataQuality: dcatDataset.dataQuality,
+    describedBy: dcatDataset.describedBy || undefined,
+    isPartOf: dcatDataset.isPartOf || undefined,
+    landingPage: dcatDataset.landingPage || undefined,
+    language: dcatDataset.language?.[0] || "en-us",
+    references: dcatDataset.references || undefined,
+    distributions: dcatDataset.distribution?.map((d) => ({
+      title: d.title || undefined,
+      description: d.description || undefined,
+      downloadURL: d.downloadURL || undefined,
+      accessURL: d.accessURL || undefined,
+      mediaType: d.mediaType || undefined,
+      format: d.format || undefined,
+      conformsTo: d.conformsTo || undefined,
+      describedBy: d.describedBy || undefined,
+    })),
   };
 }

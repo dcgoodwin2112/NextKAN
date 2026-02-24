@@ -15,6 +15,18 @@ vi.mock("@/lib/db", async () => {
   return { prisma: getTestPrisma() };
 });
 
+vi.mock("@/lib/services/email", () => ({
+  getEmailService: () => ({ send: vi.fn().mockResolvedValue(undefined) }),
+}));
+
+vi.mock("@/lib/email-templates/dataset-created", () => ({
+  datasetCreatedEmail: vi.fn().mockReturnValue({
+    subject: "test",
+    html: "<p>test</p>",
+    text: "test",
+  }),
+}));
+
 import {
   createDataset,
   getDataset,
@@ -38,6 +50,7 @@ beforeAll(async () => {
 });
 
 afterEach(async () => {
+  await testPrisma.activityLog.deleteMany();
   await testPrisma.datasetKeyword.deleteMany();
   await testPrisma.distribution.deleteMany();
   await testPrisma.dataset.deleteMany();

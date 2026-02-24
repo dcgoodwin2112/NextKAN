@@ -1,9 +1,14 @@
 import { prisma } from "@/lib/db";
+import { ActivityFeed } from "@/components/admin/ActivityFeed";
 
 export default async function AdminDashboard() {
-  const [datasetCount, orgCount] = await Promise.all([
+  const [datasetCount, orgCount, recentActivity] = await Promise.all([
     prisma.dataset.count(),
     prisma.organization.count(),
+    prisma.activityLog.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    }),
   ]);
 
   return (
@@ -17,6 +22,12 @@ export default async function AdminDashboard() {
         <div className="rounded-lg border p-6">
           <p className="text-sm text-gray-500">Organizations</p>
           <p className="text-3xl font-bold">{orgCount}</p>
+        </div>
+      </div>
+      <div className="mt-8">
+        <h2 className="text-lg font-semibold mb-4">Recent Activity</h2>
+        <div className="rounded-lg border p-6">
+          <ActivityFeed activities={recentActivity as any} />
         </div>
       </div>
     </div>

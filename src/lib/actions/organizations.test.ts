@@ -5,6 +5,10 @@ vi.mock("@/lib/db", () => ({
   prisma: prismaMock,
 }));
 
+vi.mock("@/lib/services/activity", () => ({
+  logActivity: vi.fn().mockResolvedValue(undefined),
+}));
+
 import {
   createOrganization,
   updateOrganization,
@@ -51,6 +55,7 @@ describe("deleteOrganization", () => {
 
   it("deletes when org has no datasets", async () => {
     prismaMock.dataset.count.mockResolvedValue(0);
+    prismaMock.organization.findUnique.mockResolvedValue({ id: "org-1", name: "Test Org" } as any);
     prismaMock.organization.delete.mockResolvedValue({} as any);
     await deleteOrganization("org-1");
     expect(prismaMock.organization.delete).toHaveBeenCalledWith({

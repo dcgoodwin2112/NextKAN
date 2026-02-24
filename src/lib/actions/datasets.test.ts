@@ -5,6 +5,23 @@ vi.mock("@/lib/db", () => ({
   prisma: prismaMock,
 }));
 
+vi.mock("@/lib/services/activity", () => ({
+  logActivity: vi.fn().mockResolvedValue(undefined),
+  computeDiff: vi.fn().mockReturnValue(null),
+}));
+
+vi.mock("@/lib/services/email", () => ({
+  getEmailService: () => ({ send: vi.fn().mockResolvedValue(undefined) }),
+}));
+
+vi.mock("@/lib/email-templates/dataset-created", () => ({
+  datasetCreatedEmail: vi.fn().mockReturnValue({
+    subject: "test",
+    html: "<p>test</p>",
+    text: "test",
+  }),
+}));
+
 import {
   createDataset,
   updateDataset,
@@ -163,6 +180,7 @@ describe("createDataset", () => {
 
 describe("updateDataset", () => {
   it("updates modified timestamp", async () => {
+    prismaMock.dataset.findUnique.mockResolvedValue(mockDataset as any);
     prismaMock.dataset.update.mockResolvedValue(mockDataset as any);
     prismaMock.dataset.findUniqueOrThrow.mockResolvedValue(mockDataset as any);
 
@@ -174,6 +192,7 @@ describe("updateDataset", () => {
   });
 
   it("syncs keywords (deletes old, creates new)", async () => {
+    prismaMock.dataset.findUnique.mockResolvedValue(mockDataset as any);
     prismaMock.dataset.update.mockResolvedValue(mockDataset as any);
     prismaMock.datasetKeyword.deleteMany.mockResolvedValue({ count: 2 });
     prismaMock.datasetKeyword.createMany.mockResolvedValue({ count: 1 });
@@ -191,6 +210,7 @@ describe("updateDataset", () => {
 
 describe("deleteDataset", () => {
   it("calls Prisma delete", async () => {
+    prismaMock.dataset.findUnique.mockResolvedValue(mockDataset as any);
     prismaMock.dataset.delete.mockResolvedValue(mockDataset as any);
     await deleteDataset("ds-1");
     expect(prismaMock.dataset.delete).toHaveBeenCalledWith({

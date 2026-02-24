@@ -9,6 +9,10 @@ import {
 import { listOrganizations } from "@/lib/actions/organizations";
 import { listThemes } from "@/lib/actions/themes";
 import { DatasetForm } from "@/components/datasets/DatasetForm";
+import { DataDictionaryEditor } from "@/components/datasets/DataDictionaryEditor";
+import { ActivityFeed } from "@/components/admin/ActivityFeed";
+import { prisma } from "@/lib/db";
+import { updateDataDictionary } from "@/lib/services/data-dictionary";
 import type { DatasetCreateInput } from "@/lib/schemas/dataset";
 
 interface Props {
@@ -17,13 +21,29 @@ interface Props {
 
 export default async function EditDatasetPage({ params }: Props) {
   const { id } = await params;
-  const [dataset, organizations, themes] = await Promise.all([
+  const [dataset, organizations, themes, activities] = await Promise.all([
     getDataset(id),
     listOrganizations(),
     listThemes(),
+    prisma.activityLog.findMany({
+      where: { entityType: "dataset", entityId: id },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    }),
   ]);
 
   if (!dataset) notFound();
+
+  // Load data dictionaries for each distribution
+  const dictionaries = await Promise.all(
+    dataset.distributions.map(async (dist) => {
+      const dict = await prisma.dataDictionary.findUnique({
+        where: { distributionId: dist.id },
+        include: { fields: { orderBy: { sortOrder: "asc" } } },
+      });
+      return { distributionId: dist.id, title: dist.title, dictionary: dict };
+    })
+  );
 
   async function handleUpdate(
     data: DatasetCreateInput & {
@@ -42,7 +62,6 @@ export default async function EditDatasetPage({ params }: Props) {
     await updateDataset(id, datasetData);
 
     if (distributions !== undefined) {
-      // Remove old distributions not in the new list
       const existingIds = dataset!.distributions.map((d) => d.id);
       const newIds = distributions.filter((d) => d.id).map((d) => d.id!);
       for (const existingId of existingIds) {
@@ -50,7 +69,6 @@ export default async function EditDatasetPage({ params }: Props) {
           await removeDistribution(existingId);
         }
       }
-      // Add new distributions (ones without an id)
       for (const dist of distributions) {
         if (!dist.id) {
           await addDistribution(id, {
@@ -69,6 +87,27 @@ export default async function EditDatasetPage({ params }: Props) {
     "use server";
     await deleteDataset(id);
     redirect("/admin/datasets");
+  }
+
+  async function handleSaveDictionary(
+    distributionId: string,
+    fields: {
+      name: string;
+      title?: string;
+      type: string;
+      description?: string;
+      format?: string;
+      sortOrder: number;
+    }[]
+  ) {
+    "use server";
+    await updateDataDictionary(
+      distributionId,
+      fields.map((f) => ({
+        ...f,
+        type: f.type as "string" | "number" | "integer" | "boolean" | "date" | "datetime",
+      }))
+    );
   }
 
   return (
@@ -90,6 +129,33 @@ export default async function EditDatasetPage({ params }: Props) {
         themes={themes}
         onSubmit={handleUpdate}
       />
+
+      {dictionaries.some((d) => d.dictionary) && (
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold mb-4">Data Dictionaries</h2>
+          {dictionaries
+            .filter((d) => d.dictionary)
+            .map((d) => (
+              <div key={d.distributionId} className="mb-4 rounded-lg border p-4">
+                <h3 className="text-sm font-medium text-gray-700 mb-2">
+                  {d.title || d.distributionId}
+                </h3>
+                <DataDictionaryEditor
+                  distributionId={d.distributionId}
+                  fields={d.dictionary!.fields}
+                  onSave={handleSaveDictionary}
+                />
+              </div>
+            ))}
+        </div>
+      )}
+
+      <div className="mt-8">
+        <h2 className="text-lg font-semibold mb-4">Activity History</h2>
+        <div className="rounded-lg border p-6">
+          <ActivityFeed activities={activities as any} />
+        </div>
+      </div>
     </div>
   );
 }

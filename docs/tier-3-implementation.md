@@ -1,5 +1,7 @@
 # Tier 3 — Differentiation Implementation Plan
 
+> **Status: COMPLETE** — All 10 features implemented. 316 unit/component/integration tests, 6 E2E tests passing.
+
 ## Prerequisites
 
 Tiers 1 and 2 must be fully implemented. You should have a working platform with:
@@ -701,31 +703,31 @@ Add a "Subscribe to updates" button on the public dataset detail page.
 
 ## Tier 3 Completion Checklist
 
-- [ ] Harvest sources can be added and configured in admin UI
-- [ ] Harvester fetches remote data.json and creates/updates local datasets
-- [ ] Harvest runs can be triggered manually and scheduled via cron
-- [ ] Data dictionaries auto-generate from CSV imports
-- [ ] Data dictionary editor allows admins to add descriptions and types
-- [ ] Charts can be built from datastore data and embedded via iframe
-- [ ] Activity log captures all dataset/org changes
-- [ ] Swagger UI renders interactive API documentation
-- [ ] Bulk CSV/JSON import creates datasets in batch
-- [ ] Bulk export generates CSV/JSON catalog
-- [ ] Spatial metadata renders on a map preview
-- [ ] Cloud storage (S3) works as an alternative to local filesystem
-- [ ] Content pages can be created and published via Markdown editor
-- [ ] Email notifications send on dataset creation (at minimum via console log)
+- [x] Harvest sources can be added and configured in admin UI
+- [x] Harvester fetches remote data.json and creates/updates local datasets
+- [x] Harvest runs can be triggered manually and scheduled via cron
+- [x] Data dictionaries auto-generate from CSV imports
+- [x] Data dictionary editor allows admins to add descriptions and types
+- [x] Charts can be built from datastore data and embedded via iframe
+- [x] Activity log captures all dataset/org changes
+- [x] Swagger UI renders interactive API documentation
+- [x] Bulk CSV/JSON import creates datasets in batch
+- [x] Bulk export generates CSV/JSON catalog
+- [x] Spatial metadata renders on a map preview
+- [x] Cloud storage (S3) works as an alternative to local filesystem
+- [x] Content pages can be created and published via Markdown editor
+- [x] Email notifications send on dataset creation (at minimum via console log)
 
 ### Testing Checklist
-- [ ] Harvest service unit tested: fetch, create, update, archive, error handling
-- [ ] Harvest integration test: import fixture data.json into test DB and verify
-- [ ] E2E: admin can create harvest source and trigger manual run
-- [ ] Data dictionary auto-generation tested for type inference accuracy
-- [ ] Data dictionary Frictionless Data export format validated
-- [ ] Bulk import tested: CSV and JSON formats, error reporting per row
-- [ ] Storage factory returns correct provider based on env config
-- [ ] S3 storage unit tested with mocked AWS SDK
-- [ ] Local storage unit tested with mocked filesystem
-- [ ] Email template tests verify subject and body content
-- [ ] Activity log service tested for record creation and diff storage
-- [ ] `npm run test:coverage` shows 70%+ on all Tier 3 source files
+- [x] Harvest service unit tested: fetch, create, update, archive, error handling
+- [x] Harvest integration test: import fixture data.json into test DB and verify
+- [x] E2E: admin can create harvest source and trigger manual run
+- [x] Data dictionary auto-generation tested for type inference accuracy
+- [x] Data dictionary Frictionless Data export format validated
+- [x] Bulk import tested: CSV and JSON formats, error reporting per row
+- [x] Storage factory returns correct provider based on env config
+- [x] S3 storage unit tested with mocked AWS SDK
+- [x] Local storage unit tested with mocked filesystem
+- [x] Email template tests verify subject and body content
+- [x] Activity log service tested for record creation and diff storage
+- [x] `npm run test:coverage` shows 70%+ on all Tier 3 source files

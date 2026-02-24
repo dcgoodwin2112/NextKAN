@@ -3,19 +3,26 @@
 import { useState } from "react";
 import Link from "next/link";
 
-const navLinks = [
+const staticNavLinks = [
   { href: "/datasets", label: "Datasets" },
   { href: "/themes", label: "Themes" },
   { href: "/organizations", label: "Organizations" },
+  { href: "/api-docs", label: "API" },
   { href: "/login", label: "Admin" },
 ];
 
 interface HeaderProps {
   siteName?: string;
+  pages?: { title: string; slug: string }[];
 }
 
-export function Header({ siteName = "NextKAN" }: HeaderProps) {
+export function Header({ siteName = "NextKAN", pages = [] }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const navLinks = [
+    ...staticNavLinks,
+    ...pages.map((p) => ({ href: `/pages/${p.slug}`, label: p.title })),
+  ];
 
   return (
     <header className="border-b bg-white">

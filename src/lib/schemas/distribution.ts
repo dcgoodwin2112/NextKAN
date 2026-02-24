@@ -10,6 +10,9 @@ export const distributionSchema = z
     format: z.string().optional(),
     conformsTo: z.string().url().optional().or(z.literal("")),
     describedBy: z.string().url().optional().or(z.literal("")),
+    fileName: z.string().optional(),
+    filePath: z.string().optional(),
+    fileSize: z.number().int().positive().optional(),
   })
   .refine((data) => data.downloadURL || data.accessURL, {
     message: "Either downloadURL or accessURL is required",

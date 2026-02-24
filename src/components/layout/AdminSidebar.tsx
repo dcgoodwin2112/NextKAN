@@ -8,6 +8,9 @@ const navItems = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/datasets", label: "Datasets" },
   { href: "/admin/organizations", label: "Organizations" },
+  { href: "/admin/harvest", label: "Harvest", requiredRole: "admin" },
+  { href: "/admin/import", label: "Import" },
+  { href: "/admin/pages", label: "Pages", requiredRole: "admin" },
   { href: "/admin/users", label: "Users", requiredRole: "admin" },
 ];
 
