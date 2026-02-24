@@ -1,0 +1,45 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {"name": "Washington Park", "acreage": 145, "amenities": "playground,shelter,trails,lake", "yearEstablished": 1900},
+      "geometry": {"type": "Polygon", "coordinates": [[[-89.665,39.775],[-89.655,39.775],[-89.655,39.785],[-89.665,39.785],[-89.665,39.775]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"name": "Lincoln Park", "acreage": 82, "amenities": "playground,ballfields,pool,shelter", "yearEstablished": 1925},
+      "geometry": {"type": "Polygon", "coordinates": [[[-89.650,39.790],[-89.642,39.790],[-89.642,39.797],[-89.650,39.797],[-89.650,39.790]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"name": "Centennial Park", "acreage": 35, "amenities": "fountain,garden,benches", "yearEstablished": 1976},
+      "geometry": {"type": "Polygon", "coordinates": [[[-89.648,39.780],[-89.643,39.780],[-89.643,39.784],[-89.648,39.784],[-89.648,39.780]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"name": "Riverside Park", "acreage": 68, "amenities": "trails,boat_launch,fishing,picnic", "yearEstablished": 1952},
+      "geometry": {"type": "Polygon", "coordinates": [[[-89.670,39.760],[-89.658,39.760],[-89.658,39.770],[-89.670,39.770],[-89.670,39.760]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"name": "Oak Ridge Nature Preserve", "acreage": 210, "amenities": "trails,birdwatching,education_center", "yearEstablished": 1988},
+      "geometry": {"type": "Polygon", "coordinates": [[[-89.630,39.800],[-89.615,39.800],[-89.615,39.815],[-89.630,39.815],[-89.630,39.800]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"name": "Veterans Memorial Park", "acreage": 22, "amenities": "memorial,garden,benches,flags", "yearEstablished": 1965},
+      "geometry": {"type": "Polygon", "coordinates": [[[-89.645,39.798],[-89.640,39.798],[-89.640,39.802],[-89.645,39.802],[-89.645,39.798]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"name": "Southwind Park", "acreage": 95, "amenities": "playground,splash_pad,trails,sports_courts", "yearEstablished": 2005},
+      "geometry": {"type": "Polygon", "coordinates": [[[-89.640,39.745],[-89.628,39.745],[-89.628,39.755],[-89.640,39.755],[-89.640,39.745]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"name": "Northfield Community Park", "acreage": 48, "amenities": "playground,shelter,basketball,dog_park", "yearEstablished": 1998},
+      "geometry": {"type": "Polygon", "coordinates": [[[-89.655,39.810],[-89.647,39.810],[-89.647,39.817],[-89.655,39.817],[-89.655,39.810]]]}
+    }
+  ]
+}

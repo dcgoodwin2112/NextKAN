@@ -1,0 +1,16 @@
+Hospital,Condition,Rate,Expected,Denominator,Year
+Springfield General,Heart Failure,18.2,17.5,1243,2024
+Springfield General,Pneumonia,15.8,16.1,876,2024
+Springfield General,Hip/Knee Replacement,4.2,4.8,534,2024
+Memorial Medical Center,Heart Failure,16.9,17.5,1567,2024
+Memorial Medical Center,Pneumonia,14.3,16.1,1023,2024
+Memorial Medical Center,Hip/Knee Replacement,3.8,4.8,678,2024
+St. John's Hospital,Heart Failure,19.1,17.5,934,2024
+St. John's Hospital,Pneumonia,17.2,16.1,712,2024
+St. John's Hospital,Hip/Knee Replacement,5.1,4.8,423,2024
+Regional Health Center,Heart Failure,17.8,17.5,1102,2024
+Regional Health Center,Pneumonia,15.5,16.1,845,2024
+Regional Health Center,Hip/Knee Replacement,4.5,4.8,312,2024
+County Community Hospital,Heart Failure,20.3,17.5,567,2024
+County Community Hospital,Pneumonia,18.1,16.1,423,2024
+County Community Hospital,Hip/Knee Replacement,5.7,4.8,198,2024

@@ -1,0 +1,16 @@
+Region,Sector,Employment,MedianWage,GrowthRate,Year
+Central,Healthcare,45200,52400,3.2,2023
+Central,Manufacturing,23800,48900,−1.5,2023
+Central,Technology,18900,72300,6.8,2023
+Central,Education,31200,45600,1.2,2023
+Central,Retail,28400,32100,0.8,2023
+North,Healthcare,38700,54200,2.9,2023
+North,Manufacturing,31200,51200,−0.8,2023
+North,Technology,22100,75800,7.5,2023
+North,Education,26800,47100,1.0,2023
+North,Retail,24500,31800,0.5,2023
+South,Healthcare,41300,50800,3.5,2023
+South,Manufacturing,27600,47200,−2.1,2023
+South,Technology,15400,69500,5.9,2023
+South,Education,29100,44200,1.4,2023
+South,Retail,26200,30900,0.3,2023

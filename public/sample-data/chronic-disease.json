@@ -1,0 +1,22 @@
+[
+  {"State":"Illinois","Condition":"Diabetes","Prevalence":10.8,"Mortality":22.1,"Year":2024,"AgeGroup":"All Ages"},
+  {"State":"Illinois","Condition":"Heart Disease","Prevalence":6.2,"Mortality":165.2,"Year":2024,"AgeGroup":"All Ages"},
+  {"State":"Illinois","Condition":"COPD","Prevalence":5.9,"Mortality":40.8,"Year":2024,"AgeGroup":"All Ages"},
+  {"State":"Illinois","Condition":"Cancer","Prevalence":0,"Mortality":152.4,"Year":2024,"AgeGroup":"All Ages"},
+  {"State":"Illinois","Condition":"Diabetes","Prevalence":4.2,"Mortality":3.1,"Year":2024,"AgeGroup":"18-44"},
+  {"State":"Illinois","Condition":"Heart Disease","Prevalence":1.8,"Mortality":15.2,"Year":2024,"AgeGroup":"18-44"},
+  {"State":"Illinois","Condition":"Diabetes","Prevalence":14.5,"Mortality":28.7,"Year":2024,"AgeGroup":"45-64"},
+  {"State":"Illinois","Condition":"Heart Disease","Prevalence":8.1,"Mortality":98.6,"Year":2024,"AgeGroup":"45-64"},
+  {"State":"Illinois","Condition":"Diabetes","Prevalence":22.1,"Mortality":65.3,"Year":2024,"AgeGroup":"65+"},
+  {"State":"Illinois","Condition":"Heart Disease","Prevalence":15.4,"Mortality":452.1,"Year":2024,"AgeGroup":"65+"},
+  {"State":"California","Condition":"Diabetes","Prevalence":9.5,"Mortality":18.9,"Year":2024,"AgeGroup":"All Ages"},
+  {"State":"California","Condition":"Heart Disease","Prevalence":5.8,"Mortality":148.7,"Year":2024,"AgeGroup":"All Ages"},
+  {"State":"California","Condition":"COPD","Prevalence":4.7,"Mortality":32.5,"Year":2024,"AgeGroup":"All Ages"},
+  {"State":"Texas","Condition":"Diabetes","Prevalence":12.1,"Mortality":24.3,"Year":2024,"AgeGroup":"All Ages"},
+  {"State":"Texas","Condition":"Heart Disease","Prevalence":7.0,"Mortality":178.9,"Year":2024,"AgeGroup":"All Ages"},
+  {"State":"Texas","Condition":"COPD","Prevalence":6.3,"Mortality":44.2,"Year":2024,"AgeGroup":"All Ages"},
+  {"State":"New York","Condition":"Diabetes","Prevalence":10.2,"Mortality":19.8,"Year":2024,"AgeGroup":"All Ages"},
+  {"State":"New York","Condition":"Heart Disease","Prevalence":6.5,"Mortality":158.3,"Year":2024,"AgeGroup":"All Ages"},
+  {"State":"New York","Condition":"COPD","Prevalence":5.1,"Mortality":35.7,"Year":2024,"AgeGroup":"All Ages"},
+  {"State":"Florida","Condition":"Diabetes","Prevalence":11.4,"Mortality":21.5,"Year":2024,"AgeGroup":"All Ages"}
+]

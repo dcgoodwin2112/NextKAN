@@ -1,0 +1,23 @@
+[
+  {"Department":"Public Safety","Category":"Personnel","FY2022":12500000,"FY2023":13100000,"FY2024":13750000},
+  {"Department":"Public Safety","Category":"Operations","FY2022":3200000,"FY2023":3350000,"FY2024":3500000},
+  {"Department":"Public Safety","Category":"Capital","FY2022":1800000,"FY2023":2100000,"FY2024":1500000},
+  {"Department":"Public Works","Category":"Personnel","FY2022":8700000,"FY2023":9100000,"FY2024":9500000},
+  {"Department":"Public Works","Category":"Operations","FY2022":4500000,"FY2023":4700000,"FY2024":4900000},
+  {"Department":"Public Works","Category":"Capital","FY2022":6200000,"FY2023":5800000,"FY2024":7100000},
+  {"Department":"Parks & Recreation","Category":"Personnel","FY2022":3100000,"FY2023":3250000,"FY2024":3400000},
+  {"Department":"Parks & Recreation","Category":"Operations","FY2022":1200000,"FY2023":1300000,"FY2024":1350000},
+  {"Department":"Parks & Recreation","Category":"Capital","FY2022":800000,"FY2023":1500000,"FY2024":900000},
+  {"Department":"Education","Category":"Personnel","FY2022":22000000,"FY2023":23100000,"FY2024":24200000},
+  {"Department":"Education","Category":"Operations","FY2022":5500000,"FY2023":5700000,"FY2024":5900000},
+  {"Department":"Education","Category":"Capital","FY2022":3000000,"FY2023":4200000,"FY2024":2800000},
+  {"Department":"Health Services","Category":"Personnel","FY2022":6800000,"FY2023":7100000,"FY2024":7400000},
+  {"Department":"Health Services","Category":"Operations","FY2022":2100000,"FY2023":2200000,"FY2024":2350000},
+  {"Department":"Health Services","Category":"Capital","FY2022":500000,"FY2023":750000,"FY2024":1200000},
+  {"Department":"Administration","Category":"Personnel","FY2022":4200000,"FY2023":4400000,"FY2024":4600000},
+  {"Department":"Administration","Category":"Operations","FY2022":1800000,"FY2023":1900000,"FY2024":1950000},
+  {"Department":"Administration","Category":"Capital","FY2022":300000,"FY2023":250000,"FY2024":400000},
+  {"Department":"Transportation","Category":"Personnel","FY2022":5600000,"FY2023":5900000,"FY2024":6150000},
+  {"Department":"Transportation","Category":"Operations","FY2022":3100000,"FY2023":3300000,"FY2024":3450000},
+  {"Department":"Transportation","Category":"Capital","FY2022":8500000,"FY2023":9200000,"FY2024":10100000}
+]

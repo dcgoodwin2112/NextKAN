@@ -1,3 +1,5 @@
+import { DownloadLink } from "@/components/analytics/DownloadLink";
+
 interface Distribution {
   id?: string;
   title?: string | null;
@@ -42,14 +44,13 @@ export function DistributionList({
               )}
             </div>
             {dist.downloadURL && (
-              <a
+              <DownloadLink
                 href={dist.downloadURL}
+                distributionId={dist.id}
                 className="text-xs text-primary hover:underline truncate block"
-                target="_blank"
-                rel="noopener noreferrer"
               >
                 {dist.downloadURL}
-              </a>
+              </DownloadLink>
             )}
           </div>
           {editable && onRemove && (

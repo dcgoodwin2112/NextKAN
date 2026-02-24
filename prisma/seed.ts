@@ -185,6 +185,9 @@ async function main() {
       mediaType: string;
       format: string;
       description?: string;
+      filePath?: string;
+      fileName?: string;
+      fileSize?: number;
     }[];
   }
 
@@ -211,13 +214,16 @@ async function main() {
       distributions: [
         {
           title: "Budget Data (CSV)",
-          downloadURL: "https://example.com/data/annual-budget.csv",
+          downloadURL: "/sample-data/annual-budget.csv",
           mediaType: "text/csv",
           format: "CSV",
+          filePath: "public/sample-data/annual-budget.csv",
+          fileName: "annual-budget.csv",
+          fileSize: 1054,
         },
         {
           title: "Budget Data (JSON)",
-          downloadURL: "https://example.com/data/annual-budget.json",
+          downloadURL: "/sample-data/annual-budget.json",
           mediaType: "application/json",
           format: "JSON",
         },
@@ -251,11 +257,14 @@ async function main() {
       distributions: [
         {
           title: "Accident Reports (CSV)",
-          downloadURL: "https://example.com/data/traffic-accidents.csv",
+          downloadURL: "/sample-data/traffic-accidents.csv",
           mediaType: "text/csv",
           format: "CSV",
           description:
             "All reported traffic accidents with location coordinates and severity ratings.",
+          filePath: "public/sample-data/traffic-accidents.csv",
+          fileName: "traffic-accidents.csv",
+          fileSize: 1748,
         },
       ],
     },
@@ -287,13 +296,16 @@ async function main() {
       distributions: [
         {
           title: "Air Quality Data (CSV)",
-          downloadURL: "https://example.com/data/air-quality.csv",
+          downloadURL: "/sample-data/air-quality.csv",
           mediaType: "text/csv",
           format: "CSV",
+          filePath: "public/sample-data/air-quality.csv",
+          fileName: "air-quality.csv",
+          fileSize: 1277,
         },
         {
           title: "Air Quality Data (JSON API)",
-          downloadURL: "https://example.com/api/air-quality.json",
+          downloadURL: "/sample-data/air-quality.csv",
           mediaType: "application/json",
           format: "JSON",
         },
@@ -326,11 +338,15 @@ async function main() {
       distributions: [
         {
           title: "School Performance (CSV)",
-          downloadURL: "https://example.com/data/school-performance.csv",
+          downloadURL: "/sample-data/school-performance.csv",
           mediaType: "text/csv",
           format: "CSV",
+          filePath: "public/sample-data/school-performance.csv",
+          fileName: "school-performance.csv",
+          fileSize: 874,
         },
         {
+          // PDF placeholder — no real file generated
           title: "School Report Cards (PDF)",
           downloadURL: "https://example.com/data/school-report-cards.pdf",
           mediaType: "application/pdf",
@@ -366,9 +382,12 @@ async function main() {
       distributions: [
         {
           title: "Readmission Rates (CSV)",
-          downloadURL: "https://example.com/data/readmission-rates.csv",
+          downloadURL: "/sample-data/readmission-rates.csv",
           mediaType: "text/csv",
           format: "CSV",
+          filePath: "public/sample-data/readmission-rates.csv",
+          fileName: "readmission-rates.csv",
+          fileSize: 893,
         },
       ],
     },
@@ -400,9 +419,12 @@ async function main() {
       distributions: [
         {
           title: "Water Quality Data (CSV)",
-          downloadURL: "https://example.com/data/water-quality.csv",
+          downloadURL: "/sample-data/water-quality.csv",
           mediaType: "text/csv",
           format: "CSV",
+          filePath: "public/sample-data/water-quality.csv",
+          fileName: "water-quality.csv",
+          fileSize: 1299,
         },
       ],
     },
@@ -433,11 +455,12 @@ async function main() {
       distributions: [
         {
           title: "Parks Inventory (GeoJSON)",
-          downloadURL: "https://example.com/data/parks.geojson",
+          downloadURL: "/sample-data/parks.geojson",
           mediaType: "application/geo+json",
           format: "GeoJSON",
         },
         {
+          // PDF placeholder — no real file generated
           title: "Parks Guide (PDF)",
           downloadURL: "https://example.com/data/parks-guide.pdf",
           mediaType: "application/pdf",
@@ -471,9 +494,12 @@ async function main() {
       distributions: [
         {
           title: "Infrastructure Data (CSV)",
-          downloadURL: "https://example.com/data/road-infrastructure.csv",
+          downloadURL: "/sample-data/road-infrastructure.csv",
           mediaType: "text/csv",
           format: "CSV",
+          filePath: "public/sample-data/road-infrastructure.csv",
+          fileName: "road-infrastructure.csv",
+          fileSize: 1128,
         },
       ],
     },
@@ -505,13 +531,16 @@ async function main() {
       distributions: [
         {
           title: "Disease Statistics (CSV)",
-          downloadURL: "https://example.com/data/chronic-disease.csv",
+          downloadURL: "/sample-data/chronic-disease.csv",
           mediaType: "text/csv",
           format: "CSV",
+          filePath: "public/sample-data/chronic-disease.csv",
+          fileName: "chronic-disease.csv",
+          fileSize: 872,
         },
         {
           title: "Disease Statistics (JSON)",
-          downloadURL: "https://example.com/data/chronic-disease.json",
+          downloadURL: "/sample-data/chronic-disease.json",
           mediaType: "application/json",
           format: "JSON",
         },
@@ -544,9 +573,12 @@ async function main() {
       distributions: [
         {
           title: "Energy Consumption (CSV)",
-          downloadURL: "https://example.com/data/energy-consumption.csv",
+          downloadURL: "/sample-data/energy-consumption.csv",
           mediaType: "text/csv",
           format: "CSV",
+          filePath: "public/sample-data/energy-consumption.csv",
+          fileName: "energy-consumption.csv",
+          fileSize: 721,
         },
       ],
     },
@@ -576,9 +608,12 @@ async function main() {
       distributions: [
         {
           title: "Crime Statistics (CSV)",
-          downloadURL: "https://example.com/data/crime-statistics.csv",
+          downloadURL: "/sample-data/crime-statistics.csv",
           mediaType: "text/csv",
           format: "CSV",
+          filePath: "public/sample-data/crime-statistics.csv",
+          fileName: "crime-statistics.csv",
+          fileSize: 621,
         },
       ],
     },
@@ -610,11 +645,15 @@ async function main() {
       distributions: [
         {
           title: "Survey Results (CSV)",
-          downloadURL: "https://example.com/data/workforce-survey.csv",
+          downloadURL: "/sample-data/workforce-survey.csv",
           mediaType: "text/csv",
           format: "CSV",
+          filePath: "public/sample-data/workforce-survey.csv",
+          fileName: "workforce-survey.csv",
+          fileSize: 635,
         },
         {
+          // PDF placeholder — no real file generated
           title: "Survey Report (PDF)",
           downloadURL: "https://example.com/data/workforce-report.pdf",
           mediaType: "application/pdf",
@@ -658,6 +697,9 @@ async function main() {
             mediaType: d.mediaType,
             format: d.format,
             description: d.description,
+            filePath: d.filePath,
+            fileName: d.fileName,
+            fileSize: d.fileSize,
           })),
         },
       },

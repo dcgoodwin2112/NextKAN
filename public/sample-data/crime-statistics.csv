@@ -1,0 +1,21 @@
+District,Category,Count,Year,ClearanceRate
+Central,Theft,342,2024,28.4
+Central,Assault,187,2024,45.2
+Central,Burglary,98,2024,22.1
+Central,Vehicle Theft,156,2024,18.7
+North,Theft,278,2024,31.2
+North,Assault,134,2024,48.9
+North,Burglary,67,2024,25.4
+North,Vehicle Theft,112,2024,20.5
+South,Theft,312,2024,26.8
+South,Assault,201,2024,42.1
+South,Burglary,89,2024,19.8
+South,Vehicle Theft,145,2024,16.3
+East,Theft,234,2024,33.5
+East,Assault,112,2024,51.2
+East,Burglary,54,2024,28.9
+East,Vehicle Theft,87,2024,22.1
+West,Theft,256,2024,30.1
+West,Assault,148,2024,46.7
+West,Burglary,72,2024,24.3
+West,Vehicle Theft,98,2024,19.4
