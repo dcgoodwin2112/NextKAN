@@ -27,14 +27,14 @@ export function Header({ siteName = "NextKAN", pages = [] }: HeaderProps) {
   return (
     <header className="border-b bg-white">
       <div className="mx-auto max-w-7xl px-4 py-4 flex items-center justify-between">
-        <Link href="/" className="text-xl font-bold">
+        <Link href="/" className="text-xl font-bold text-gray-900">
           {siteName}
         </Link>
 
         {/* Desktop nav */}
         <nav className="hidden md:flex gap-4" aria-label="Main navigation">
           {navLinks.map((link) => (
-            <Link key={link.href} href={link.href} className="hover:underline">
+            <Link key={link.href} href={link.href} className="text-gray-700 hover:underline">
               {link.label}
             </Link>
           ))}
@@ -65,7 +65,7 @@ export function Header({ siteName = "NextKAN", pages = [] }: HeaderProps) {
             <Link
               key={link.href}
               href={link.href}
-              className="block py-2 hover:bg-gray-50 rounded px-2"
+              className="block py-2 text-gray-700 hover:bg-gray-50 rounded px-2"
               onClick={() => setMenuOpen(false)}
             >
               {link.label}

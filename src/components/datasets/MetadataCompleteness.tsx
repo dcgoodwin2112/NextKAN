@@ -63,7 +63,7 @@ export function MetadataCompleteness({ values }: MetadataCompletenessProps) {
           <ul className="text-xs text-gray-600 space-y-0.5">
             {missing.map((f) => (
               <li key={f.key} className="flex items-center gap-1">
-                <span className={f.required ? "text-red-500" : "text-gray-400"}>
+                <span className={f.required ? "text-red-500" : "text-gray-500"}>
                   {f.required ? "*" : "-"}
                 </span>
                 {f.label}

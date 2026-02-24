@@ -80,7 +80,7 @@ export function FacetSidebar({ facets }: FacetSidebarProps) {
             className="flex items-center justify-between w-full text-sm font-semibold mb-1"
           >
             <span>{facet.name}</span>
-            <span className="text-gray-400">{collapsed[facet.key] ? "+" : "-"}</span>
+            <span className="text-gray-500">{collapsed[facet.key] ? "+" : "-"}</span>
           </button>
           {!collapsed[facet.key] && (
             <ul className="space-y-0.5">
@@ -95,7 +95,7 @@ export function FacetSidebar({ facets }: FacetSidebarProps) {
                       }`}
                     >
                       <span>{v.label}</span>
-                      <span className="text-gray-400 text-xs">{v.count}</span>
+                      <span className="text-gray-500 text-xs">{v.count}</span>
                     </button>
                   </li>
                 );
