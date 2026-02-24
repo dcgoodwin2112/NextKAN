@@ -43,7 +43,7 @@ export function ChartRenderer({
   yColumns,
 }: ChartRendererProps) {
   if (data.length === 0) {
-    return <p className="text-sm text-gray-500">No data to display.</p>;
+    return <p className="text-sm text-text-muted">No data to display.</p>;
   }
 
   return (

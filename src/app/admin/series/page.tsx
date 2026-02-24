@@ -10,14 +10,14 @@ export default async function SeriesListPage() {
         <h1 className="text-2xl font-bold">Dataset Series</h1>
         <Link
           href="/admin/series/new"
-          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          className="rounded bg-primary px-4 py-2 text-white hover:bg-primary-hover"
         >
           New Series
         </Link>
       </div>
 
       {series.length === 0 ? (
-        <p className="text-gray-500">No series created yet.</p>
+        <p className="text-text-muted">No series created yet.</p>
       ) : (
         <table className="w-full text-sm">
           <thead>
@@ -32,12 +32,12 @@ export default async function SeriesListPage() {
             {series.map((s) => (
               <tr key={s.id} className="border-b">
                 <td className="py-2">{s.title}</td>
-                <td className="py-2 text-gray-500">{s.identifier}</td>
+                <td className="py-2 text-text-muted">{s.identifier}</td>
                 <td className="py-2">{(s as any)._count?.datasets ?? 0}</td>
                 <td className="py-2">
                   <Link
                     href={`/admin/series/${s.id}`}
-                    className="text-blue-600 hover:underline"
+                    className="text-primary hover:underline"
                   >
                     Edit
                   </Link>

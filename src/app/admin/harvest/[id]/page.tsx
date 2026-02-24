@@ -46,7 +46,7 @@ export default async function HarvestSourceDetailPage({ params }: Props) {
           <form action={handleRunNow}>
             <button
               type="submit"
-              className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+              className="rounded bg-primary px-4 py-2 text-sm text-white hover:bg-primary-hover"
             >
               Run Now
             </button>
@@ -56,8 +56,8 @@ export default async function HarvestSourceDetailPage({ params }: Props) {
               type="submit"
               className={`rounded border px-4 py-2 text-sm ${
                 source.enabled
-                  ? "border-yellow-300 text-yellow-600 hover:bg-yellow-50"
-                  : "border-green-300 text-green-600 hover:bg-green-50"
+                  ? "border-warning-subtle text-warning-text hover:bg-warning-subtle"
+                  : "border-success text-success hover:bg-success-subtle"
               }`}
             >
               {source.enabled ? "Disable" : "Enable"}
@@ -66,7 +66,7 @@ export default async function HarvestSourceDetailPage({ params }: Props) {
           <form action={handleDelete}>
             <button
               type="submit"
-              className="rounded border border-red-300 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+              className="rounded border border-danger px-4 py-2 text-sm text-danger hover:bg-danger-subtle"
             >
               Delete
             </button>
@@ -76,54 +76,54 @@ export default async function HarvestSourceDetailPage({ params }: Props) {
 
       <div className="grid grid-cols-2 gap-4 text-sm mb-8">
         <div>
-          <dt className="font-medium text-gray-500">URL</dt>
+          <dt className="font-medium text-text-muted">URL</dt>
           <dd className="mt-1 break-all">{source.url}</dd>
         </div>
         <div>
-          <dt className="font-medium text-gray-500">Type</dt>
+          <dt className="font-medium text-text-muted">Type</dt>
           <dd className="mt-1">{source.type}</dd>
         </div>
         <div>
-          <dt className="font-medium text-gray-500">Organization</dt>
+          <dt className="font-medium text-text-muted">Organization</dt>
           <dd className="mt-1">{source.organization.name}</dd>
         </div>
         <div>
-          <dt className="font-medium text-gray-500">Schedule</dt>
+          <dt className="font-medium text-text-muted">Schedule</dt>
           <dd className="mt-1">{source.schedule || "Manual only"}</dd>
         </div>
         <div>
-          <dt className="font-medium text-gray-500">Last Status</dt>
+          <dt className="font-medium text-text-muted">Last Status</dt>
           <dd className="mt-1">{source.lastStatus || "Never run"}</dd>
         </div>
         <div>
-          <dt className="font-medium text-gray-500">Datasets</dt>
+          <dt className="font-medium text-text-muted">Datasets</dt>
           <dd className="mt-1">{source.datasetCount}</dd>
         </div>
       </div>
 
       {source.lastErrorMsg && (
-        <div className="mb-6 rounded bg-red-50 p-3 text-sm text-red-600">
+        <div className="mb-6 rounded bg-danger-subtle p-3 text-sm text-danger-text">
           Last error: {source.lastErrorMsg}
         </div>
       )}
 
       <h2 className="text-lg font-semibold mb-4">Harvest History</h2>
       {jobs.length === 0 ? (
-        <p className="text-gray-500">No harvest jobs yet.</p>
+        <p className="text-text-muted">No harvest jobs yet.</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-border text-sm">
+            <thead className="bg-surface">
               <tr>
-                <th className="px-4 py-2 text-left font-medium text-gray-500">Started</th>
-                <th className="px-4 py-2 text-left font-medium text-gray-500">Status</th>
-                <th className="px-4 py-2 text-left font-medium text-gray-500">Created</th>
-                <th className="px-4 py-2 text-left font-medium text-gray-500">Updated</th>
-                <th className="px-4 py-2 text-left font-medium text-gray-500">Archived</th>
-                <th className="px-4 py-2 text-left font-medium text-gray-500">Errors</th>
+                <th className="px-4 py-2 text-left font-medium text-text-muted">Started</th>
+                <th className="px-4 py-2 text-left font-medium text-text-muted">Status</th>
+                <th className="px-4 py-2 text-left font-medium text-text-muted">Created</th>
+                <th className="px-4 py-2 text-left font-medium text-text-muted">Updated</th>
+                <th className="px-4 py-2 text-left font-medium text-text-muted">Archived</th>
+                <th className="px-4 py-2 text-left font-medium text-text-muted">Errors</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {jobs.map((job) => (
                 <tr key={job.id}>
                   <td className="px-4 py-2">
@@ -133,10 +133,10 @@ export default async function HarvestSourceDetailPage({ params }: Props) {
                     <span
                       className={`rounded px-2 py-0.5 text-xs ${
                         job.status === "success"
-                          ? "bg-green-100 text-green-700"
+                          ? "bg-success-subtle text-success-text"
                           : job.status === "running"
-                            ? "bg-blue-100 text-blue-700"
-                            : "bg-red-100 text-red-700"
+                            ? "bg-primary-subtle text-primary-subtle-text"
+                            : "bg-danger-subtle text-danger-text"
                       }`}
                     >
                       {job.status}

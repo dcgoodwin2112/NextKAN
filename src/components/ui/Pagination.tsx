@@ -39,7 +39,7 @@ export function Pagination({
       <button
         onClick={() => navigateToPage(currentPage - 1)}
         disabled={currentPage <= 1}
-        className="rounded border px-3 py-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+        className="rounded border border-border px-3 py-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface"
       >
         Previous
       </button>
@@ -49,8 +49,8 @@ export function Pagination({
           onClick={() => navigateToPage(page)}
           className={`rounded px-3 py-1 text-sm ${
             page === currentPage
-              ? "bg-blue-600 text-white"
-              : "border hover:bg-gray-50"
+              ? "bg-primary text-white"
+              : "border border-border hover:bg-surface"
           }`}
           aria-current={page === currentPage ? "page" : undefined}
         >
@@ -60,7 +60,7 @@ export function Pagination({
       <button
         onClick={() => navigateToPage(currentPage + 1)}
         disabled={currentPage >= totalPages}
-        className="rounded border px-3 py-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+        className="rounded border border-border px-3 py-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface"
       >
         Next
       </button>

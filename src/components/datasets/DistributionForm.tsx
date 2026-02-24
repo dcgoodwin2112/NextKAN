@@ -81,9 +81,9 @@ export function DistributionForm({ onAdd, onCancel }: DistributionFormProps) {
   }
 
   return (
-    <div className="rounded border bg-gray-50 p-4 space-y-3" data-testid="distribution-form">
+    <div className="rounded border border-border bg-surface p-4 space-y-3" data-testid="distribution-form">
       {error && (
-        <div className="rounded bg-red-50 p-2 text-sm text-red-600">{error}</div>
+        <div className="rounded bg-danger-subtle p-2 text-sm text-danger-text">{error}</div>
       )}
       <div>
         <label htmlFor="dist-title" className="block text-sm font-medium mb-1">
@@ -120,7 +120,7 @@ export function DistributionForm({ onAdd, onCancel }: DistributionFormProps) {
           disabled={uploading}
           className="text-sm"
         />
-        {uploading && <span className="text-sm text-gray-500 ml-2">Uploading...</span>}
+        {uploading && <span className="text-sm text-text-muted ml-2">Uploading...</span>}
       </div>
       <div>
         <label htmlFor="dist-downloadURL" className="block text-sm font-medium mb-1">
@@ -180,14 +180,14 @@ export function DistributionForm({ onAdd, onCancel }: DistributionFormProps) {
         <button
           type="button"
           onClick={handleSubmit}
-          className="rounded bg-green-600 px-3 py-1.5 text-sm text-white hover:bg-green-700"
+          className="rounded bg-success px-3 py-1.5 text-sm text-white hover:opacity-90"
         >
           Add Distribution
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="rounded border px-3 py-1.5 text-sm hover:bg-gray-100"
+          className="rounded border border-border px-3 py-1.5 text-sm hover:bg-surface-alt"
         >
           Cancel
         </button>

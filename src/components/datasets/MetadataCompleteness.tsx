@@ -40,15 +40,15 @@ export function MetadataCompleteness({ values }: MetadataCompletenessProps) {
   const missing = DCAT_FIELDS.filter((f) => !isFieldFilled(values[f.key]));
 
   return (
-    <div className="rounded border p-4 bg-gray-50">
+    <div className="rounded border border-border p-4 bg-surface">
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-sm font-semibold">Metadata Completeness</h3>
         <span className="text-sm font-medium">{percentage}%</span>
       </div>
-      <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
+      <div className="w-full bg-surface-inset rounded-full h-2 mb-3">
         <div
           className={`h-2 rounded-full transition-all ${
-            percentage === 100 ? "bg-green-500" : percentage >= 60 ? "bg-blue-500" : "bg-yellow-500"
+            percentage === 100 ? "bg-success" : percentage >= 60 ? "bg-primary" : "bg-warning"
           }`}
           style={{ width: `${percentage}%` }}
           role="progressbar"
@@ -59,11 +59,11 @@ export function MetadataCompleteness({ values }: MetadataCompletenessProps) {
       </div>
       {missing.length > 0 && (
         <div>
-          <p className="text-xs text-gray-500 mb-1">Missing fields:</p>
-          <ul className="text-xs text-gray-600 space-y-0.5">
+          <p className="text-xs text-text-muted mb-1">Missing fields:</p>
+          <ul className="text-xs text-text-tertiary space-y-0.5">
             {missing.map((f) => (
               <li key={f.key} className="flex items-center gap-1">
-                <span className={f.required ? "text-red-500" : "text-gray-500"}>
+                <span className={f.required ? "text-danger" : "text-text-muted"}>
                   {f.required ? "*" : "-"}
                 </span>
                 {f.label}

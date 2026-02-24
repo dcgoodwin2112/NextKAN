@@ -41,11 +41,11 @@ export function CommentSection({ datasetId }: CommentSectionProps) {
   return (
     <div className="space-y-6">
       {loading ? (
-        <p className="text-sm text-gray-500">Loading comments...</p>
+        <p className="text-sm text-text-muted">Loading comments...</p>
       ) : (
         <CommentList comments={comments} />
       )}
-      <div className="border-t pt-4">
+      <div className="border-t border-border pt-4">
         <h3 className="text-sm font-semibold mb-3">Leave a Comment</h3>
         <CommentForm datasetId={datasetId} onSubmitted={fetchComments} />
       </div>

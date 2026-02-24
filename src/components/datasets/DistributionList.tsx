@@ -20,7 +20,7 @@ export function DistributionList({
   editable = false,
 }: DistributionListProps) {
   if (distributions.length === 0) {
-    return <p className="text-sm text-gray-500">No distributions</p>;
+    return <p className="text-sm text-text-muted">No distributions</p>;
   }
 
   return (
@@ -28,7 +28,7 @@ export function DistributionList({
       {distributions.map((dist, index) => (
         <li
           key={dist.id || index}
-          className="flex items-center justify-between rounded border p-3"
+          className="flex items-center justify-between rounded border border-border p-3"
         >
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
@@ -36,7 +36,7 @@ export function DistributionList({
                 {dist.title || `Distribution ${index + 1}`}
               </span>
               {dist.format && (
-                <span className="rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-700">
+                <span className="rounded bg-primary-subtle px-2 py-0.5 text-xs text-primary-subtle-text">
                   {dist.format}
                 </span>
               )}
@@ -44,7 +44,7 @@ export function DistributionList({
             {dist.downloadURL && (
               <a
                 href={dist.downloadURL}
-                className="text-xs text-blue-600 hover:underline truncate block"
+                className="text-xs text-primary hover:underline truncate block"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -56,7 +56,7 @@ export function DistributionList({
             <button
               type="button"
               onClick={() => onRemove(index)}
-              className="ml-2 text-red-500 hover:text-red-700 text-sm"
+              className="ml-2 text-danger hover:opacity-80 text-sm"
               aria-label={`Remove distribution ${index + 1}`}
             >
               Remove

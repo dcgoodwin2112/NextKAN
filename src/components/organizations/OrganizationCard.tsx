@@ -20,16 +20,16 @@ export function OrganizationCard({
     : `/organizations/${organization.slug}`;
 
   return (
-    <div className="rounded-lg border p-4 hover:shadow-sm transition-shadow">
+    <div className="rounded-lg border border-border p-4 hover:shadow-sm transition-shadow">
       <Link href={href} className="block">
         <h3 className="font-semibold text-lg">{organization.name}</h3>
         {organization.description && (
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-sm text-text-tertiary mt-1">
             {organization.description}
           </p>
         )}
         {organization._count && (
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-text-muted mt-2">
             {organization._count.datasets} dataset
             {organization._count.datasets !== 1 ? "s" : ""}
           </p>

@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 const statusStyles: Record<string, string> = {
-  draft: "bg-yellow-100 text-yellow-800",
-  published: "bg-green-100 text-green-800",
-  archived: "bg-gray-100 text-gray-600",
+  draft: "bg-warning-subtle text-warning-text",
+  published: "bg-success-subtle text-success-text",
+  archived: "bg-surface-alt text-text-tertiary",
 };
 
 interface DatasetCardProps {
@@ -40,26 +40,26 @@ export function DatasetCard({ dataset, adminView = false }: DatasetCardProps) {
   ];
 
   return (
-    <div className="rounded-lg border p-4 hover:shadow-sm transition-shadow">
+    <div className="rounded-lg border border-border p-4 hover:shadow-sm transition-shadow">
       <Link href={href} className="block">
         <div className="flex items-center gap-2">
           <h3 className="font-semibold text-lg">{dataset.title}</h3>
           {adminView && (
             <span
-              className={`rounded px-2 py-0.5 text-xs font-medium ${statusStyles[dataset.status] || "bg-gray-100 text-gray-600"}`}
+              className={`rounded px-2 py-0.5 text-xs font-medium ${statusStyles[dataset.status] || "bg-surface-alt text-text-tertiary"}`}
             >
               {dataset.status}
             </span>
           )}
         </div>
-        <p className="text-sm text-gray-600 mt-1">{truncated}</p>
-        <p className="text-xs text-gray-500 mt-1">{dataset.publisher.name}</p>
+        <p className="text-sm text-text-tertiary mt-1">{truncated}</p>
+        <p className="text-xs text-text-muted mt-1">{dataset.publisher.name}</p>
         {dataset.keywords.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">
             {dataset.keywords.map((k) => (
               <span
                 key={k.keyword}
-                className="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600"
+                className="rounded bg-surface-alt px-2 py-0.5 text-xs text-text-tertiary"
               >
                 {k.keyword}
               </span>
@@ -71,14 +71,14 @@ export function DatasetCard({ dataset, adminView = false }: DatasetCardProps) {
             {formats.map((f) => (
               <span
                 key={f}
-                className="rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-700"
+                className="rounded bg-primary-subtle px-2 py-0.5 text-xs text-primary-subtle-text"
               >
                 {f}
               </span>
             ))}
           </div>
         )}
-        <p className="text-xs text-gray-500 mt-2">
+        <p className="text-xs text-text-muted mt-2">
           Modified: {new Date(dataset.modified).toLocaleDateString()}
         </p>
       </Link>

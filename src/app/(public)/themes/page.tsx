@@ -12,14 +12,14 @@ export default async function ThemesPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Themes</h1>
-      <p className="text-gray-600 mb-8">Browse datasets organized by topic.</p>
+      <p className="text-text-tertiary mb-8">Browse datasets organized by topic.</p>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {themes.map((theme) => (
           <Link
             key={theme.id}
             href={`/datasets?theme=${theme.slug}`}
-            className="block rounded-lg border p-4 hover:border-blue-300 hover:shadow-sm transition-colors"
+            className="block rounded-lg border p-4 hover:border-primary hover:shadow-sm transition-colors"
           >
             <div className="flex items-center gap-3 mb-2">
               {theme.color && (
@@ -31,9 +31,9 @@ export default async function ThemesPage() {
               <h2 className="font-semibold">{theme.name}</h2>
             </div>
             {theme.description && (
-              <p className="text-sm text-gray-500 mb-2">{theme.description}</p>
+              <p className="text-sm text-text-muted mb-2">{theme.description}</p>
             )}
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-text-muted">
               {theme._count.datasets} dataset{theme._count.datasets !== 1 ? "s" : ""}
             </p>
           </Link>
@@ -41,7 +41,7 @@ export default async function ThemesPage() {
       </div>
 
       {themes.length === 0 && (
-        <p className="text-gray-500">No themes defined yet.</p>
+        <p className="text-text-muted">No themes defined yet.</p>
       )}
     </div>
   );

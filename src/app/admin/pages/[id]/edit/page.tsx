@@ -79,19 +79,19 @@ export default function EditPagePage() {
         <button
           type="button"
           onClick={handleDelete}
-          className="rounded border border-red-300 px-4 py-2 text-red-600 hover:bg-red-50"
+          className="rounded border border-danger px-4 py-2 text-danger hover:bg-danger-subtle"
         >
           Delete
         </button>
       </div>
       {error && (
-        <div className="mb-4 rounded bg-red-50 p-3 text-sm text-red-600">
+        <div className="mb-4 rounded bg-danger-subtle p-3 text-sm text-danger-text">
           {error}
         </div>
       )}
       <form onSubmit={handleSubmit} className="space-y-4 max-w-3xl">
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-text-secondary">
             Title
           </label>
           <input
@@ -102,7 +102,7 @@ export default function EditPagePage() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-text-secondary">
             Slug
           </label>
           <input
@@ -113,7 +113,7 @@ export default function EditPagePage() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-text-secondary mb-1">
             Content (Markdown)
           </label>
           <MarkdownEditor value={content} onChange={setContent} />
@@ -128,7 +128,7 @@ export default function EditPagePage() {
             Published
           </label>
           <div>
-            <label className="text-sm font-medium text-gray-700 mr-2">
+            <label className="text-sm font-medium text-text-secondary mr-2">
               Sort Order
             </label>
             <input
@@ -142,7 +142,7 @@ export default function EditPagePage() {
         <button
           type="submit"
           disabled={isPending}
-          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+          className="rounded bg-primary px-4 py-2 text-white hover:bg-primary-hover disabled:opacity-50"
         >
           {isPending ? "Saving..." : "Save Page"}
         </button>

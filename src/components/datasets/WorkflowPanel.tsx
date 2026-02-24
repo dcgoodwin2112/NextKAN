@@ -21,21 +21,21 @@ interface WorkflowPanelProps {
 }
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  draft: { label: "Draft", color: "bg-gray-100 text-gray-700" },
-  pending_review: { label: "Pending Review", color: "bg-yellow-100 text-yellow-700" },
-  approved: { label: "Approved", color: "bg-green-100 text-green-700" },
-  published: { label: "Published", color: "bg-blue-100 text-blue-700" },
-  rejected: { label: "Rejected", color: "bg-red-100 text-red-700" },
-  archived: { label: "Archived", color: "bg-gray-200 text-gray-600" },
+  draft: { label: "Draft", color: "bg-surface-alt text-text-secondary" },
+  pending_review: { label: "Pending Review", color: "bg-warning-subtle text-warning-text" },
+  approved: { label: "Approved", color: "bg-success-subtle text-success-text" },
+  published: { label: "Published", color: "bg-primary-subtle text-primary-subtle-text" },
+  rejected: { label: "Rejected", color: "bg-danger-subtle text-danger-text" },
+  archived: { label: "Archived", color: "bg-surface-inset text-text-tertiary" },
 };
 
 const TRANSITION_LABELS: Record<string, { label: string; style: string }> = {
-  pending_review: { label: "Submit for Review", style: "bg-yellow-600 hover:bg-yellow-700 text-white" },
-  approved: { label: "Approve", style: "bg-green-600 hover:bg-green-700 text-white" },
-  rejected: { label: "Reject", style: "bg-red-600 hover:bg-red-700 text-white" },
-  published: { label: "Publish", style: "bg-blue-600 hover:bg-blue-700 text-white" },
-  draft: { label: "Return to Draft", style: "bg-gray-600 hover:bg-gray-700 text-white" },
-  archived: { label: "Archive", style: "border border-gray-300 text-gray-700 hover:bg-gray-50" },
+  pending_review: { label: "Submit for Review", style: "bg-warning hover:opacity-90 text-white" },
+  approved: { label: "Approve", style: "bg-success hover:opacity-90 text-white" },
+  rejected: { label: "Reject", style: "bg-danger hover:opacity-90 text-white" },
+  published: { label: "Publish", style: "bg-primary hover:bg-primary-hover text-white" },
+  draft: { label: "Return to Draft", style: "bg-secondary hover:opacity-90 text-white" },
+  archived: { label: "Archive", style: "border border-border text-text-secondary hover:bg-surface" },
 };
 
 export function WorkflowPanel({
@@ -47,7 +47,7 @@ export function WorkflowPanel({
   const [note, setNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const statusInfo = STATUS_LABELS[currentStatus] || { label: currentStatus, color: "bg-gray-100" };
+  const statusInfo = STATUS_LABELS[currentStatus] || { label: currentStatus, color: "bg-surface-alt" };
 
   const handleTransition = async (toStatus: string) => {
     setIsSubmitting(true);
@@ -60,11 +60,11 @@ export function WorkflowPanel({
   };
 
   return (
-    <div className="rounded-lg border p-4 bg-white">
+    <div className="rounded-lg border border-border p-4 bg-background">
       <h3 className="text-sm font-semibold mb-3">Editorial Workflow</h3>
 
       <div className="mb-4">
-        <span className="text-xs text-gray-500">Current Status</span>
+        <span className="text-xs text-text-muted">Current Status</span>
         <div className="mt-1">
           <span className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${statusInfo.color}`}>
             {statusInfo.label}
@@ -76,7 +76,7 @@ export function WorkflowPanel({
         <>
           {(currentStatus === "pending_review" || availableTransitions.includes("rejected")) && (
             <div className="mb-3">
-              <label htmlFor="workflow-note" className="block text-xs text-gray-500 mb-1">
+              <label htmlFor="workflow-note" className="block text-xs text-text-muted mb-1">
                 Note (optional)
               </label>
               <textarea
@@ -92,7 +92,7 @@ export function WorkflowPanel({
 
           <div className="flex flex-wrap gap-2">
             {availableTransitions.map((status) => {
-              const info = TRANSITION_LABELS[status] || { label: status, style: "bg-gray-200" };
+              const info = TRANSITION_LABELS[status] || { label: status, style: "bg-surface-alt" };
               return (
                 <button
                   key={status}
@@ -110,18 +110,18 @@ export function WorkflowPanel({
       )}
 
       {transitions.length > 0 && (
-        <div className="mt-4 border-t pt-3">
-          <h4 className="text-xs font-medium text-gray-500 mb-2">Workflow History</h4>
+        <div className="mt-4 border-t border-border pt-3">
+          <h4 className="text-xs font-medium text-text-muted mb-2">Workflow History</h4>
           <div className="space-y-2">
             {transitions.map((t) => {
               const fromLabel = STATUS_LABELS[t.fromStatus]?.label || t.fromStatus;
               const toLabel = STATUS_LABELS[t.toStatus]?.label || t.toStatus;
               return (
-                <div key={t.id} className="text-xs text-gray-600">
+                <div key={t.id} className="text-xs text-text-tertiary">
                   <span className="font-medium">{t.userName || "System"}</span>{" "}
                   changed status from {fromLabel} to {toLabel}
-                  {t.note && <span className="block text-gray-500 ml-2">&ldquo;{t.note}&rdquo;</span>}
-                  <span className="block text-gray-500">
+                  {t.note && <span className="block text-text-muted ml-2">&ldquo;{t.note}&rdquo;</span>}
+                  <span className="block text-text-muted">
                     {new Date(t.createdAt).toLocaleDateString()}
                   </span>
                 </div>

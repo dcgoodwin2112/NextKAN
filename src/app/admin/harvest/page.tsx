@@ -10,45 +10,45 @@ export default async function AdminHarvestPage() {
         <h1 className="text-2xl font-bold">Harvest Sources</h1>
         <Link
           href="/admin/harvest/new"
-          className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+          className="rounded bg-primary px-4 py-2 text-sm text-white hover:bg-primary-hover"
         >
           New Source
         </Link>
       </div>
 
       {sources.length === 0 ? (
-        <p className="text-gray-500">
+        <p className="text-text-muted">
           No harvest sources configured. Create one to start harvesting datasets
           from external catalogs.
         </p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-border text-sm">
+            <thead className="bg-surface">
               <tr>
-                <th className="px-4 py-2 text-left font-medium text-gray-500">Name</th>
-                <th className="px-4 py-2 text-left font-medium text-gray-500">Type</th>
-                <th className="px-4 py-2 text-left font-medium text-gray-500">Status</th>
-                <th className="px-4 py-2 text-left font-medium text-gray-500">Datasets</th>
-                <th className="px-4 py-2 text-left font-medium text-gray-500">Last Run</th>
-                <th className="px-4 py-2 text-left font-medium text-gray-500">Enabled</th>
+                <th className="px-4 py-2 text-left font-medium text-text-muted">Name</th>
+                <th className="px-4 py-2 text-left font-medium text-text-muted">Type</th>
+                <th className="px-4 py-2 text-left font-medium text-text-muted">Status</th>
+                <th className="px-4 py-2 text-left font-medium text-text-muted">Datasets</th>
+                <th className="px-4 py-2 text-left font-medium text-text-muted">Last Run</th>
+                <th className="px-4 py-2 text-left font-medium text-text-muted">Enabled</th>
                 <th className="px-4 py-2"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {sources.map((source) => (
                 <tr key={source.id}>
                   <td className="px-4 py-2 font-medium">{source.name}</td>
-                  <td className="px-4 py-2 text-gray-500">{source.type}</td>
+                  <td className="px-4 py-2 text-text-muted">{source.type}</td>
                   <td className="px-4 py-2">
                     {source.lastStatus && (
                       <span
                         className={`rounded px-2 py-0.5 text-xs ${
                           source.lastStatus === "success"
-                            ? "bg-green-100 text-green-700"
+                            ? "bg-success-subtle text-success-text"
                             : source.lastStatus === "partial"
-                              ? "bg-yellow-100 text-yellow-700"
-                              : "bg-red-100 text-red-700"
+                              ? "bg-warning-subtle text-warning-text"
+                              : "bg-danger-subtle text-danger-text"
                         }`}
                       >
                         {source.lastStatus}
@@ -56,7 +56,7 @@ export default async function AdminHarvestPage() {
                     )}
                   </td>
                   <td className="px-4 py-2">{source.datasetCount}</td>
-                  <td className="px-4 py-2 text-gray-500">
+                  <td className="px-4 py-2 text-text-muted">
                     {source.lastHarvestAt
                       ? new Date(source.lastHarvestAt).toLocaleString()
                       : "Never"}
@@ -65,8 +65,8 @@ export default async function AdminHarvestPage() {
                     <span
                       className={`rounded px-2 py-0.5 text-xs ${
                         source.enabled
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-500"
+                          ? "bg-success-subtle text-success-text"
+                          : "bg-surface-alt text-text-muted"
                       }`}
                     >
                       {source.enabled ? "Yes" : "No"}
@@ -75,7 +75,7 @@ export default async function AdminHarvestPage() {
                   <td className="px-4 py-2">
                     <Link
                       href={`/admin/harvest/${source.id}`}
-                      className="text-blue-600 hover:underline"
+                      className="text-primary hover:underline"
                     >
                       Manage
                     </Link>

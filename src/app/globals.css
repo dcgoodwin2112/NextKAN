@@ -4,37 +4,117 @@
   --background: #ffffff;
   --foreground: #171717;
   --primary: #1e40af;
+  --primary-hover: #1e3a8a;
   --primary-light: #3b82f6;
+  --primary-subtle: #dbeafe;
+  --primary-subtle-text: #1e40af;
   --secondary: #475569;
   --accent: #0891b2;
   --surface: #f8fafc;
+  --surface-alt: #f1f5f9;
+  --surface-inset: #e2e8f0;
   --text-muted: #6b7280;
+  --text-secondary: #374151;
+  --text-tertiary: #4b5563;
   --border: #e5e7eb;
+  --input-bg: #ffffff;
+  --input-border: #d1d5db;
+  --success: #16a34a;
+  --success-subtle: #dcfce7;
+  --success-text: #166534;
+  --warning: #d97706;
+  --warning-subtle: #fef9c3;
+  --warning-text: #854d0e;
+  --danger: #dc2626;
+  --danger-subtle: #fee2e2;
+  --danger-text: #991b1b;
+  --diff-add-bg: #dcfce7;
+  --diff-add-text: #166534;
+  --diff-remove-bg: #fee2e2;
+  --diff-remove-text: #991b1b;
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --primary: #2563eb;
+  --primary-hover: #3b82f6;
+  --primary-light: #60a5fa;
+  --primary-subtle: #172554;
+  --primary-subtle-text: #93c5fd;
+  --secondary: #94a3b8;
+  --accent: #22d3ee;
+  --surface: #18181b;
+  --surface-alt: #1e1e22;
+  --surface-inset: #27272a;
+  --text-muted: #9ca3af;
+  --text-secondary: #d1d5db;
+  --text-tertiary: #a1a1aa;
+  --border: #27272a;
+  --input-bg: #1e1e22;
+  --input-border: #3f3f46;
+  --success: #22c55e;
+  --success-subtle: #14532d;
+  --success-text: #86efac;
+  --warning: #f59e0b;
+  --warning-subtle: #422006;
+  --warning-text: #fde68a;
+  --danger: #ef4444;
+  --danger-subtle: #450a0a;
+  --danger-text: #fca5a5;
+  --diff-add-bg: #14532d;
+  --diff-add-text: #86efac;
+  --diff-remove-bg: #450a0a;
+  --diff-remove-text: #fca5a5;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
   --color-primary-light: var(--primary-light);
+  --color-primary-subtle: var(--primary-subtle);
+  --color-primary-subtle-text: var(--primary-subtle-text);
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
   --color-surface: var(--surface);
+  --color-surface-alt: var(--surface-alt);
+  --color-surface-inset: var(--surface-inset);
   --color-text-muted: var(--text-muted);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
   --color-border: var(--border);
+  --color-input-bg: var(--input-bg);
+  --color-input-border: var(--input-border);
+  --color-success: var(--success);
+  --color-success-subtle: var(--success-subtle);
+  --color-success-text: var(--success-text);
+  --color-warning: var(--warning);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-warning-text: var(--warning-text);
+  --color-danger: var(--danger);
+  --color-danger-subtle: var(--danger-subtle);
+  --color-danger-text: var(--danger-text);
+  --color-diff-add-bg: var(--diff-add-bg);
+  --color-diff-add-text: var(--diff-add-text);
+  --color-diff-remove-bg: var(--diff-remove-bg);
+  --color-diff-remove-text: var(--diff-remove-text);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Global form input styles for dark mode adaptation */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+textarea,
+select {
+  background-color: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--foreground);
 }

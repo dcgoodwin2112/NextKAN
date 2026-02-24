@@ -52,7 +52,7 @@ export default function NewSeriesPage() {
         </div>
         <button
           type="submit"
-          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          className="rounded bg-primary px-4 py-2 text-white hover:bg-primary-hover"
         >
           Create Series
         </button>

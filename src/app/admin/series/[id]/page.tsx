@@ -34,7 +34,7 @@ export default async function EditSeriesPage({ params }: Props) {
         <form action={handleDelete}>
           <button
             type="submit"
-            className="rounded border border-red-300 px-4 py-2 text-red-600 hover:bg-red-50"
+            className="rounded border border-danger px-4 py-2 text-danger hover:bg-danger-subtle"
           >
             Delete
           </button>
@@ -80,7 +80,7 @@ export default async function EditSeriesPage({ params }: Props) {
         </div>
         <button
           type="submit"
-          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          className="rounded bg-primary px-4 py-2 text-white hover:bg-primary-hover"
         >
           Update Series
         </button>
@@ -94,13 +94,13 @@ export default async function EditSeriesPage({ params }: Props) {
               <li key={d.id} className="flex items-center justify-between rounded border p-3">
                 <div>
                   <span className="font-medium">{d.title}</span>
-                  <span className="ml-2 text-sm text-gray-500">
+                  <span className="ml-2 text-sm text-text-muted">
                     {d.publisher.name}
                   </span>
                 </div>
                 <Link
                   href={`/admin/datasets/${d.id}/edit`}
-                  className="text-blue-600 text-sm hover:underline"
+                  className="text-primary text-sm hover:underline"
                 >
                   Edit
                 </Link>

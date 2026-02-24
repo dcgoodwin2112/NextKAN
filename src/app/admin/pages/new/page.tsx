@@ -38,13 +38,13 @@ export default function NewPagePage() {
     <div>
       <h1 className="text-2xl font-bold mb-6">New Page</h1>
       {error && (
-        <div className="mb-4 rounded bg-red-50 p-3 text-sm text-red-600">
+        <div className="mb-4 rounded bg-danger-subtle p-3 text-sm text-danger-text">
           {error}
         </div>
       )}
       <form onSubmit={handleSubmit} className="space-y-4 max-w-3xl">
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="title" className="block text-sm font-medium text-text-secondary">
             Title
           </label>
           <input
@@ -56,7 +56,7 @@ export default function NewPagePage() {
           />
         </div>
         <div>
-          <label htmlFor="slug" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="slug" className="block text-sm font-medium text-text-secondary">
             Slug (auto-generated if empty)
           </label>
           <input
@@ -69,7 +69,7 @@ export default function NewPagePage() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-text-secondary mb-1">
             Content (Markdown)
           </label>
           <MarkdownEditor value={content} onChange={setContent} />
@@ -84,7 +84,7 @@ export default function NewPagePage() {
             Published
           </label>
           <div>
-            <label htmlFor="sortOrder" className="text-sm font-medium text-gray-700 mr-2">
+            <label htmlFor="sortOrder" className="text-sm font-medium text-text-secondary mr-2">
               Sort Order
             </label>
             <input
@@ -99,7 +99,7 @@ export default function NewPagePage() {
         <button
           type="submit"
           disabled={isPending}
-          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+          className="rounded bg-primary px-4 py-2 text-white hover:bg-primary-hover disabled:opacity-50"
         >
           {isPending ? "Creating..." : "Create Page"}
         </button>

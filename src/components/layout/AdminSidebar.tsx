@@ -35,7 +35,7 @@ export function AdminSidebar({ userRole }: AdminSidebarProps) {
       {/* Mobile toggle */}
       <button
         type="button"
-        className="md:hidden fixed top-4 left-4 z-50 rounded bg-gray-100 p-2"
+        className="md:hidden fixed top-4 left-4 z-50 rounded bg-surface-alt p-2"
         onClick={() => setCollapsed(!collapsed)}
         aria-label="Toggle admin sidebar"
       >
@@ -47,7 +47,7 @@ export function AdminSidebar({ userRole }: AdminSidebarProps) {
       <aside
         className={`${
           collapsed ? "hidden" : "block"
-        } md:block w-64 border-r bg-gray-50 p-4 shrink-0`}
+        } md:block w-64 border-r border-border bg-surface p-4 shrink-0`}
       >
         <Link href="/" className="block text-lg font-bold mb-6">
           NextKAN
@@ -64,8 +64,8 @@ export function AdminSidebar({ userRole }: AdminSidebarProps) {
                 href={item.href}
                 className={`block rounded px-3 py-2 text-sm ${
                   isActive
-                    ? "bg-blue-50 text-blue-700 font-medium"
-                    : "text-gray-700 hover:bg-gray-100"
+                    ? "bg-primary-subtle text-primary-subtle-text font-medium"
+                    : "text-text-secondary hover:bg-surface-alt"
                 }`}
               >
                 {item.label}

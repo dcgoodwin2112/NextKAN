@@ -19,9 +19,9 @@ export default async function SeriesDetailPage({ params }: Props) {
     <div className="mx-auto max-w-4xl px-4 py-8">
       <h1 className="text-3xl font-bold mb-2">{series.title}</h1>
       {series.description && (
-        <p className="text-gray-700 mb-6">{series.description}</p>
+        <p className="text-text-secondary mb-6">{series.description}</p>
       )}
-      <p className="text-sm text-gray-500 mb-6">
+      <p className="text-sm text-text-muted mb-6">
         Identifier: {series.identifier}
       </p>
 
@@ -29,18 +29,18 @@ export default async function SeriesDetailPage({ params }: Props) {
         Datasets ({publishedDatasets.length})
       </h2>
       {publishedDatasets.length === 0 ? (
-        <p className="text-gray-500">No published datasets in this series.</p>
+        <p className="text-text-muted">No published datasets in this series.</p>
       ) : (
         <ul className="space-y-3">
           {publishedDatasets.map((d) => (
             <li key={d.id} className="rounded border p-4">
               <Link
                 href={`/datasets/${d.slug}`}
-                className="text-lg font-medium text-blue-600 hover:underline"
+                className="text-lg font-medium text-primary hover:underline"
               >
                 {d.title}
               </Link>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-text-muted mt-1">
                 {d.publisher.name} &middot; Modified{" "}
                 {new Date(d.modified).toLocaleDateString()}
                 {d.version && <> &middot; v{d.version}</>}

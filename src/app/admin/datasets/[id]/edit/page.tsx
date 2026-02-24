@@ -175,7 +175,7 @@ export default async function EditDatasetPage({ params }: Props) {
         <form action={handleDelete}>
           <button
             type="submit"
-            className="rounded border border-red-300 px-4 py-2 text-red-600 hover:bg-red-50"
+            className="rounded border border-danger px-4 py-2 text-danger hover:bg-danger-subtle"
           >
             Delete
           </button>
@@ -209,7 +209,7 @@ export default async function EditDatasetPage({ params }: Props) {
             .filter((d) => d.dictionary)
             .map((d) => (
               <div key={d.distributionId} className="mb-4 rounded-lg border p-4">
-                <h3 className="text-sm font-medium text-gray-700 mb-2">
+                <h3 className="text-sm font-medium text-text-secondary mb-2">
                   {d.title || d.distributionId}
                 </h3>
                 <DataDictionaryEditor

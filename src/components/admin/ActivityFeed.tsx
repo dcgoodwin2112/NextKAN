@@ -40,7 +40,7 @@ function formatRelativeTime(date: string | Date): string {
 
 export function ActivityFeed({ activities }: ActivityFeedProps) {
   if (activities.length === 0) {
-    return <p className="text-sm text-gray-500">No recent activity</p>;
+    return <p className="text-sm text-text-muted">No recent activity</p>;
   }
 
   return (
@@ -49,12 +49,12 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
         <li key={activity.id} className="flex items-start gap-3 text-sm">
           <div className="flex-1">
             <span className="font-medium">{activity.userName || "System"}</span>{" "}
-            <span className="text-gray-600">
+            <span className="text-text-tertiary">
               {ACTION_LABELS[activity.action] || activity.action}
             </span>{" "}
             <span className="font-medium">{activity.entityName}</span>
           </div>
-          <span className="text-gray-500 whitespace-nowrap text-xs">
+          <span className="text-text-muted whitespace-nowrap text-xs">
             {formatRelativeTime(activity.createdAt)}
           </span>
         </li>

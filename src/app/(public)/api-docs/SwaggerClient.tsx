@@ -10,5 +10,9 @@ interface SwaggerClientProps {
 }
 
 export function SwaggerClient({ url }: SwaggerClientProps) {
-  return <SwaggerUI url={url} />;
+  return (
+    <div className="bg-white rounded">
+      <SwaggerUI url={url} />
+    </div>
+  );
 }

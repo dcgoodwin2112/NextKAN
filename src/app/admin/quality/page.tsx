@@ -48,16 +48,16 @@ export default async function QualityReportPage() {
       <h1 className="text-2xl font-bold mb-6">Data Quality Report</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <div className="rounded border p-4 bg-white">
-          <p className="text-sm text-gray-500">Total Datasets</p>
+        <div className="rounded border p-4 bg-background">
+          <p className="text-sm text-text-muted">Total Datasets</p>
           <p className="text-2xl font-bold">{scored.length}</p>
         </div>
-        <div className="rounded border p-4 bg-white">
-          <p className="text-sm text-gray-500">Average Quality Score</p>
+        <div className="rounded border p-4 bg-background">
+          <p className="text-sm text-text-muted">Average Quality Score</p>
           <p className="text-2xl font-bold">{avgScore}/100</p>
         </div>
-        <div className="rounded border p-4 bg-white">
-          <p className="text-sm text-gray-500">Most Common Gap</p>
+        <div className="rounded border p-4 bg-background">
+          <p className="text-sm text-text-muted">Most Common Gap</p>
           <p className="text-2xl font-bold">{topMissing[0]?.[0] || "None"}</p>
         </div>
       </div>
@@ -69,18 +69,18 @@ export default async function QualityReportPage() {
             {topMissing.map(([field, count]) => (
               <span
                 key={field}
-                className="inline-flex items-center gap-1 rounded bg-gray-100 px-3 py-1 text-sm"
+                className="inline-flex items-center gap-1 rounded bg-surface-alt px-3 py-1 text-sm"
               >
-                {field} <span className="text-gray-500">({count})</span>
+                {field} <span className="text-text-muted">({count})</span>
               </span>
             ))}
           </div>
         </div>
       )}
 
-      <div className="rounded border bg-white overflow-hidden">
+      <div className="rounded border bg-background overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b">
+          <thead className="bg-surface border-b">
             <tr>
               <th className="text-left px-4 py-3 font-medium">Dataset</th>
               <th className="text-left px-4 py-3 font-medium">Publisher</th>
@@ -93,16 +93,16 @@ export default async function QualityReportPage() {
             {scored.map(({ dataset, quality }) => (
               <tr key={dataset.id} className="border-b last:border-0">
                 <td className="px-4 py-3">
-                  <Link href={`/admin/datasets/${dataset.id}/edit`} className="text-blue-600 hover:underline">
+                  <Link href={`/admin/datasets/${dataset.id}/edit`} className="text-primary hover:underline">
                     {dataset.title}
                   </Link>
                 </td>
-                <td className="px-4 py-3 text-gray-600">{dataset.publisher.name}</td>
+                <td className="px-4 py-3 text-text-tertiary">{dataset.publisher.name}</td>
                 <td className="px-4 py-3 font-mono">{quality.overall}/100</td>
                 <td className="px-4 py-3">
                   <QualityBadge score={quality.overall} showScore={false} />
                 </td>
-                <td className="px-4 py-3 text-gray-500 text-xs">
+                <td className="px-4 py-3 text-text-muted text-xs">
                   {quality.suggestions[0] || "Complete"}
                 </td>
               </tr>
