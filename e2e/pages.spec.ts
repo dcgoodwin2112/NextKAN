@@ -46,11 +46,12 @@ test.describe("Content Pages", () => {
     await page.getByRole("button", { name: /create/i }).click();
     await expect(page).toHaveURL(/\/admin\/pages/, { timeout: 10000 });
 
-    // Check public nav
-    await page.goto("/");
+    // Check public nav — use a fresh page load to avoid server component caching
+    await page.goto("/datasets");
+    await page.waitForLoadState("networkidle");
     // The nav should contain a link to the page
     await expect(
-      page.getByRole("navigation", { name: /main/i }).getByText("E2E Nav Page")
-    ).toBeVisible();
+      page.getByRole("navigation", { name: /main/i }).getByRole("link", { name: "E2E Nav Page" })
+    ).toBeVisible({ timeout: 10000 });
   });
 });

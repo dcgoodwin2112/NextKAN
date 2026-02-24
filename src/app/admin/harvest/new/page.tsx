@@ -78,10 +78,11 @@ export default function NewHarvestSourcePage() {
       )}
       <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl">
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
             Name
           </label>
           <input
+            id="name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -90,10 +91,11 @@ export default function NewHarvestSourcePage() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label htmlFor="url" className="block text-sm font-medium text-gray-700">
             URL
           </label>
           <input
+            id="url"
             type="text"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
@@ -103,10 +105,11 @@ export default function NewHarvestSourcePage() {
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label htmlFor="type" className="block text-sm font-medium text-gray-700">
               Type
             </label>
             <select
+              id="type"
               value={type}
               onChange={(e) => setType(e.target.value)}
               className="mt-1 w-full rounded border px-3 py-2"
@@ -116,10 +119,11 @@ export default function NewHarvestSourcePage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label htmlFor="organizationId" className="block text-sm font-medium text-gray-700">
               Organization
             </label>
             <select
+              id="organizationId"
               value={organizationId}
               onChange={(e) => setOrganizationId(e.target.value)}
               className="mt-1 w-full rounded border px-3 py-2"
@@ -133,10 +137,11 @@ export default function NewHarvestSourcePage() {
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label htmlFor="schedule" className="block text-sm font-medium text-gray-700">
             Schedule (cron expression, optional)
           </label>
           <input
+            id="schedule"
             type="text"
             value={schedule}
             onChange={(e) => setSchedule(e.target.value)}

@@ -27,6 +27,9 @@ vi.mock("@/lib/email-templates/dataset-created", () => ({
   }),
 }));
 
+vi.mock("@/lib/plugins/hooks", () => ({ hooks: { run: vi.fn().mockResolvedValue([]) } }));
+vi.mock("@/lib/plugins/loader", () => ({ isPluginsEnabled: vi.fn().mockReturnValue(false) }));
+
 import {
   createDataset,
   getDataset,

@@ -45,6 +45,7 @@ test.describe("Dataset admin workflow", () => {
 
     // Navigate to admin datasets and edit the created dataset
     await page.goto("/admin/datasets");
+    await page.waitForLoadState("networkidle");
     await page.getByText("E2E Edit Target").first().click();
     await expect(page).toHaveURL(/\/admin\/datasets\/.*\/edit/, {
       timeout: 10000,
@@ -75,6 +76,7 @@ test.describe("Dataset admin workflow", () => {
 
     // Navigate to datasets list and click into the dataset to edit
     await page.goto("/admin/datasets");
+    await page.waitForLoadState("networkidle");
     await page.getByText("E2E Delete Target").first().click();
     await expect(page).toHaveURL(/\/admin\/datasets\/.*\/edit/, {
       timeout: 10000,

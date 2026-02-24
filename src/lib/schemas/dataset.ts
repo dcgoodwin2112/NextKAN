@@ -41,6 +41,12 @@ export const datasetCreateSchema = z.object({
   language: z.string().optional().default("en-us"),
   themeIds: z.array(z.string().uuid()).optional(),
   references: z.array(z.string().url()).optional(),
+
+  // DCAT-US v3.0
+  version: z.string().max(50).optional(),
+  versionNotes: z.string().max(1000).optional(),
+  seriesId: z.string().uuid().optional().or(z.literal("")),
+  previousVersion: z.string().max(255).optional(),
 });
 
 export const datasetUpdateSchema = datasetCreateSchema.partial();

@@ -25,6 +25,7 @@ export default defineConfig({
     timeout: 120000,
     env: {
       DATABASE_URL: "file:./prisma/e2e-test.db",
+      ENABLE_WORKFLOW: "true",
     },
   },
 });

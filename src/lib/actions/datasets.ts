@@ -13,17 +13,24 @@ import { distributionSchema, type DistributionInput } from "@/lib/schemas/distri
 import { logActivity, computeDiff } from "@/lib/services/activity";
 import { getEmailService } from "@/lib/services/email";
 import { datasetCreatedEmail } from "@/lib/email-templates/dataset-created";
+import { hooks } from "@/lib/plugins/hooks";
+import { isPluginsEnabled } from "@/lib/plugins/loader";
 
 const datasetIncludes = {
   publisher: { include: { parent: true } },
   distributions: true,
   keywords: true,
   themes: { include: { theme: true } },
+  series: true,
 } as const;
 
 export async function createDataset(input: DatasetCreateInput, createdById?: string) {
   const data = datasetCreateSchema.parse(input);
   const slug = generateSlug(data.title);
+
+  if (isPluginsEnabled()) {
+    hooks.run("dataset:beforeCreate", data).catch(() => {});
+  }
 
   const result = await prisma.$transaction(async (tx) => {
     const dataset = await tx.dataset.create({
@@ -53,6 +60,10 @@ export async function createDataset(input: DatasetCreateInput, createdById?: str
         landingPage: data.landingPage || null,
         language: data.language || null,
         references: data.references ? JSON.stringify(data.references) : null,
+        version: data.version || null,
+        versionNotes: data.versionNotes || null,
+        seriesId: data.seriesId || null,
+        previousVersion: data.previousVersion || null,
         modified: new Date(),
       },
       include: datasetIncludes,
@@ -90,6 +101,10 @@ export async function createDataset(input: DatasetCreateInput, createdById?: str
     entityName: result.title,
     userId: createdById,
   }).catch(() => {});
+
+  if (isPluginsEnabled()) {
+    hooks.run("dataset:afterCreate", result).catch(() => {});
+  }
 
   if (result.status === "published") {
     const siteUrl = process.env.SITE_URL || "http://localhost:3000";
@@ -137,6 +152,14 @@ export async function updateDataset(id: string, input: DatasetUpdateInput) {
   if (data.language !== undefined) updateData.language = data.language || null;
   if (data.references !== undefined) updateData.references = data.references ? JSON.stringify(data.references) : null;
   if (data.identifier !== undefined) updateData.identifier = data.identifier;
+  if (data.version !== undefined) updateData.version = data.version || null;
+  if (data.versionNotes !== undefined) updateData.versionNotes = data.versionNotes || null;
+  if (data.seriesId !== undefined) updateData.seriesId = data.seriesId || null;
+  if (data.previousVersion !== undefined) updateData.previousVersion = data.previousVersion || null;
+
+  if (isPluginsEnabled()) {
+    hooks.run("dataset:beforeUpdate", id, data).catch(() => {});
+  }
 
   // Fetch before-state for diff
   const before = await prisma.dataset.findUnique({ where: { id } });
@@ -177,6 +200,10 @@ export async function updateDataset(id: string, input: DatasetUpdateInput) {
     });
   });
 
+  if (isPluginsEnabled()) {
+    hooks.run("dataset:afterUpdate", result).catch(() => {});
+  }
+
   // Fire-and-forget: activity log
   if (before) {
     const diff = computeDiff(
@@ -196,6 +223,10 @@ export async function updateDataset(id: string, input: DatasetUpdateInput) {
 }
 
 export async function deleteDataset(id: string) {
+  if (isPluginsEnabled()) {
+    hooks.run("dataset:beforeDelete", id).catch(() => {});
+  }
+
   const dataset = await prisma.dataset.findUnique({ where: { id } });
   await prisma.dataset.delete({ where: { id } });
 
@@ -206,6 +237,10 @@ export async function deleteDataset(id: string) {
       entityId: id,
       entityName: dataset.title,
     }).catch(() => {});
+
+    if (isPluginsEnabled()) {
+      hooks.run("dataset:afterDelete", id, dataset.title).catch(() => {});
+    }
   }
 }
 

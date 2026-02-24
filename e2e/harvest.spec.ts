@@ -11,22 +11,25 @@ test.describe("Harvest", () => {
 
   test("admin can create a harvest source", async ({ page }) => {
     await page.goto("/admin/harvest/new");
+    // Wait for organizations to load before filling form
+    await expect(page.locator("#organizationId option")).not.toHaveCount(0, { timeout: 10000 });
 
     await page.getByLabel(/name/i).fill("E2E Test Source");
     await page.getByLabel(/url/i).fill("http://localhost:3001/api/test/fixture-catalog");
     await page.getByRole("button", { name: /create/i }).click();
 
-    await expect(page).toHaveURL(/\/admin\/harvest/, { timeout: 10000 });
+    await expect(page).toHaveURL(/\/admin\/harvest$/, { timeout: 10000 });
     await expect(page.getByText("E2E Test Source")).toBeVisible();
   });
 
   test("admin can view harvest source details", async ({ page }) => {
     // Create source first
     await page.goto("/admin/harvest/new");
+    await expect(page.locator("#organizationId option")).not.toHaveCount(0, { timeout: 10000 });
     await page.getByLabel(/name/i).fill("E2E Detail Source");
     await page.getByLabel(/url/i).fill("http://localhost:3001/api/test/fixture-catalog");
     await page.getByRole("button", { name: /create/i }).click();
-    await expect(page).toHaveURL(/\/admin\/harvest/, { timeout: 10000 });
+    await expect(page).toHaveURL(/\/admin\/harvest$/, { timeout: 10000 });
 
     // Click to view details
     await page.getByText("Manage").first().click();
@@ -36,6 +39,8 @@ test.describe("Harvest", () => {
 
   test("harvest source list shows on admin page", async ({ page }) => {
     await page.goto("/admin/harvest");
-    await expect(page.getByText("Harvest Sources")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Harvest Sources" })
+    ).toBeVisible();
   });
 });

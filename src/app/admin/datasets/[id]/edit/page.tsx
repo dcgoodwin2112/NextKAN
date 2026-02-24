@@ -8,12 +8,22 @@ import {
 } from "@/lib/actions/datasets";
 import { listOrganizations } from "@/lib/actions/organizations";
 import { listThemes } from "@/lib/actions/themes";
+import { listSeries } from "@/lib/actions/series";
 import { DatasetForm } from "@/components/datasets/DatasetForm";
 import { DataDictionaryEditor } from "@/components/datasets/DataDictionaryEditor";
 import { ActivityFeed } from "@/components/admin/ActivityFeed";
+import { WorkflowPanel } from "@/components/datasets/WorkflowPanel";
+import { QualityBadge } from "@/components/datasets/QualityBadge";
+import { VersionHistory } from "@/components/datasets/VersionHistory";
+import { CreateVersionForm } from "@/components/datasets/CreateVersionForm";
 import { prisma } from "@/lib/db";
 import { updateDataDictionary } from "@/lib/services/data-dictionary";
+import { isWorkflowEnabled, getAvailableTransitions, getWorkflowHistory, transitionWorkflow } from "@/lib/services/workflow";
+import { calculateQualityScore } from "@/lib/services/data-quality";
+import { createVersion, getVersionHistory } from "@/lib/services/versioning";
+import { auth } from "@/lib/auth";
 import type { DatasetCreateInput } from "@/lib/schemas/dataset";
+import type { DatasetWithRelations } from "@/lib/schemas/dcat-us";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -21,18 +31,37 @@ interface Props {
 
 export default async function EditDatasetPage({ params }: Props) {
   const { id } = await params;
-  const [dataset, organizations, themes, activities] = await Promise.all([
+  const [dataset, organizations, themes, allSeries, activities, session, versions] = await Promise.all([
     getDataset(id),
     listOrganizations(),
     listThemes(),
+    listSeries(),
     prisma.activityLog.findMany({
       where: { entityType: "dataset", entityId: id },
       orderBy: { createdAt: "desc" },
       take: 10,
     }),
+    auth(),
+    getVersionHistory(id),
   ]);
 
   if (!dataset) notFound();
+
+  const qualityScore = calculateQualityScore(dataset as unknown as DatasetWithRelations);
+  const workflowEnabled = isWorkflowEnabled();
+  const userRole = (session?.user as any)?.role as string || "viewer";
+
+  let workflowTransitions: string[] = [];
+  let workflowHistory: { id: string; fromStatus: string; toStatus: string; userName: string | null; note: string | null; createdAt: string }[] = [];
+
+  if (workflowEnabled) {
+    workflowTransitions = getAvailableTransitions(dataset.workflowStatus, userRole);
+    const history = await getWorkflowHistory(id);
+    workflowHistory = history.map((t) => ({
+      ...t,
+      createdAt: t.createdAt.toISOString(),
+    }));
+  }
 
   // Load data dictionaries for each distribution
   const dictionaries = await Promise.all(
@@ -89,6 +118,19 @@ export default async function EditDatasetPage({ params }: Props) {
     redirect("/admin/datasets");
   }
 
+  async function handleWorkflowTransition(toStatus: string, note?: string) {
+    "use server";
+    await transitionWorkflow(
+      id,
+      toStatus,
+      session?.user?.id || "",
+      (session?.user as any)?.role || "viewer",
+      session?.user?.name || undefined,
+      note
+    );
+    redirect(`/admin/datasets/${id}/edit`);
+  }
+
   async function handleSaveDictionary(
     distributionId: string,
     fields: {
@@ -110,10 +152,26 @@ export default async function EditDatasetPage({ params }: Props) {
     );
   }
 
+  async function handleCreateVersion(version: string, changelog?: string) {
+    "use server";
+    await createVersion(id, version, changelog, session?.user?.id || undefined);
+    redirect(`/admin/datasets/${id}/edit`);
+  }
+
+  const serializedVersions = versions.map((v) => ({
+    id: v.id,
+    version: v.version,
+    changelog: v.changelog,
+    createdAt: v.createdAt.toISOString(),
+  }));
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Edit Dataset</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold">Edit Dataset</h1>
+          <QualityBadge score={qualityScore.overall} />
+        </div>
         <form action={handleDelete}>
           <button
             type="submit"
@@ -123,10 +181,24 @@ export default async function EditDatasetPage({ params }: Props) {
           </button>
         </form>
       </div>
+
+      {workflowEnabled && (
+        <div className="mb-6">
+          <WorkflowPanel
+            datasetId={dataset.id}
+            currentStatus={dataset.workflowStatus}
+            availableTransitions={workflowTransitions}
+            transitions={workflowHistory}
+            onTransition={handleWorkflowTransition}
+          />
+        </div>
+      )}
+
       <DatasetForm
         initialData={dataset}
         organizations={organizations}
         themes={themes}
+        series={allSeries.map((s) => ({ id: s.id, title: s.title }))}
         onSubmit={handleUpdate}
       />
 
@@ -149,6 +221,14 @@ export default async function EditDatasetPage({ params }: Props) {
             ))}
         </div>
       )}
+
+      <div className="mt-8">
+        <h2 className="text-lg font-semibold mb-4">Version History</h2>
+        <div className="rounded-lg border p-6 space-y-4">
+          <CreateVersionForm onSubmit={handleCreateVersion} />
+          <VersionHistory versions={serializedVersions} />
+        </div>
+      </div>
 
       <div className="mt-8">
         <h2 className="text-lg font-semibold mb-4">Activity History</h2>

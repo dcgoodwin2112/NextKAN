@@ -5,6 +5,9 @@ vi.mock("@/lib/db", () => ({
   prisma: prismaMock,
 }));
 
+vi.mock("@/lib/plugins/hooks", () => ({ hooks: { run: vi.fn().mockResolvedValue([]) } }));
+vi.mock("@/lib/plugins/loader", () => ({ isPluginsEnabled: vi.fn().mockReturnValue(false) }));
+
 import { GET } from "./route";
 
 describe("GET /data.json", () => {

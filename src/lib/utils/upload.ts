@@ -1,6 +1,8 @@
 import path from "path";
 import { randomUUID } from "crypto";
 import { getStorageProvider } from "@/lib/storage/factory";
+import { hooks } from "@/lib/plugins/hooks";
+import { isPluginsEnabled } from "@/lib/plugins/loader";
 
 export const ALLOWED_TYPES = [
   "text/csv",
@@ -39,14 +41,24 @@ export async function saveUploadedFile(file: File): Promise<UploadResult> {
   const key = `${randomUUID()}${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
 
+  if (isPluginsEnabled()) {
+    hooks.run("upload:beforeSave", { fileName: file.name, key, fileType: file.type }).catch(() => {});
+  }
+
   const storage = getStorageProvider();
   const publicUrl = await storage.upload(key, buffer, file.type);
 
-  return {
+  const result: UploadResult = {
     fileName: file.name,
     filePath: key,
     publicUrl,
     fileSize: file.size,
     mediaType: file.type,
   };
+
+  if (isPluginsEnabled()) {
+    hooks.run("upload:afterSave", result).catch(() => {});
+  }
+
+  return result;
 }

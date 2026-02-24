@@ -5,6 +5,7 @@ import {
   DatasetKeyword,
   DatasetTheme,
   Theme,
+  DatasetSeries,
 } from "@/generated/prisma/client";
 
 type OrganizationWithParent = Organization & {
@@ -20,6 +21,7 @@ export type DatasetWithRelations = Dataset & {
   distributions: Distribution[];
   keywords: DatasetKeyword[];
   themes: DatasetThemeWithTheme[];
+  series?: DatasetSeries | null;
 };
 
 export interface DCATUSCatalog {
@@ -70,6 +72,11 @@ export interface DCATUSDataset {
   references?: string[];
   systemOfRecords?: string;
   theme?: string[];
+  // DCAT-US v3.0
+  "dcat:version"?: string;
+  "dcat:versionNotes"?: string;
+  "dcat:inSeries"?: string;
+  "dcat:previousVersion"?: string;
 }
 
 export interface DCATUSDistribution {
@@ -82,6 +89,10 @@ export interface DCATUSDistribution {
   format?: string;
   conformsTo?: string;
   describedBy?: string;
+}
+
+export function getDCATUSVersion(): string {
+  return process.env.DCAT_US_VERSION || "v1.1";
 }
 
 export function transformDatasetToDCATUS(
@@ -151,6 +162,14 @@ export function transformDatasetToDCATUS(
     result.theme = dataset.themes.map((t) => t.theme.name);
   }
 
+  // DCAT-US v3.0 fields
+  if (getDCATUSVersion() === "v3.0") {
+    if (dataset.version) result["dcat:version"] = dataset.version;
+    if (dataset.versionNotes) result["dcat:versionNotes"] = dataset.versionNotes;
+    if (dataset.series) result["dcat:inSeries"] = dataset.series.identifier;
+    if (dataset.previousVersion) result["dcat:previousVersion"] = dataset.previousVersion;
+  }
+
   return result;
 }
 
@@ -171,14 +190,20 @@ export function buildCatalog(
   datasets: DatasetWithRelations[],
   siteUrl: string
 ): DCATUSCatalog {
+  const isV3 = getDCATUSVersion() === "v3.0";
+
   return {
-    "@context":
-      "https://project-open-data.cio.gov/v1.1/schema/catalog.jsonld",
+    "@context": isV3
+      ? "https://doi-do.github.io/dcat-us/v3.0/schema/catalog.jsonld"
+      : "https://project-open-data.cio.gov/v1.1/schema/catalog.jsonld",
     "@id": `${siteUrl}/data.json`,
     "@type": "dcat:Catalog",
-    conformsTo: "https://project-open-data.cio.gov/v1.1/schema",
-    describedBy:
-      "https://project-open-data.cio.gov/v1.1/schema/catalog.json",
+    conformsTo: isV3
+      ? "https://doi-do.github.io/dcat-us/v3.0/schema"
+      : "https://project-open-data.cio.gov/v1.1/schema",
+    describedBy: isV3
+      ? "https://doi-do.github.io/dcat-us/v3.0/schema/catalog.json"
+      : "https://project-open-data.cio.gov/v1.1/schema/catalog.json",
     dataset: datasets.map(transformDatasetToDCATUS),
   };
 }

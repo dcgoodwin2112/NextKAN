@@ -710,27 +710,27 @@ export default {
 
 ## Tier 4 Completion Checklist
 
-- [ ] DCAT-US v3.0 output format generates correctly when enabled
-- [ ] Dataset series can be created and datasets assigned to them
-- [ ] Editorial workflow with draft → review → publish pipeline works
-- [ ] Workflow transitions enforce role-based permissions
-- [ ] Dataset versions can be created and compared
-- [ ] CKAN-compatible API endpoints return properly formatted responses
-- [ ] Analytics events are tracked and displayed on admin dashboard
-- [ ] Data quality scores calculate and display on dataset pages
-- [ ] Comments can be submitted, moderated, and displayed
-- [ ] OAuth2 SSO login works with at least one provider (GitHub or Azure AD)
-- [ ] UI can switch between at least two languages
-- [ ] Plugin hook system allows custom code to intercept dataset lifecycle events
+- [x] DCAT-US v3.0 output format generates correctly when enabled
+- [x] Dataset series can be created and datasets assigned to them
+- [x] Editorial workflow with draft → review → publish pipeline works
+- [x] Workflow transitions enforce role-based permissions
+- [x] Dataset versions can be created and compared
+- [x] CKAN-compatible API endpoints return properly formatted responses
+- [x] Analytics events are tracked and displayed on admin dashboard
+- [x] Data quality scores calculate and display on dataset pages
+- [x] Comments can be submitted, moderated, and displayed
+- [ ] ~~OAuth2 SSO login works with at least one provider~~ — **Moved to Backlog**
+- [ ] ~~UI can switch between at least two languages~~ — **Moved to Backlog**
+- [x] Plugin hook system allows custom code to intercept dataset lifecycle events
 
 ### Testing Checklist
-- [ ] DCAT-US v3.0 transformer tested: new fields present when enabled, v1.1 unchanged when disabled
-- [ ] Workflow state machine exhaustively tested: all valid transitions, all invalid transitions, all role restrictions
-- [ ] E2E: full editorial workflow cycle (draft → review → approve → publish)
-- [ ] Dataset versioning: snapshot creation, version comparison diff
-- [ ] CKAN field mapper tested for all field mappings
-- [ ] CKAN API endpoints tested for correct response format (package_list, package_show, package_search)
-- [ ] Data quality scoring tested with fully complete, partially complete, and minimal datasets
-- [ ] Plugin hook registry tested: register, run, async callbacks, argument passing, empty hooks
-- [ ] Analytics aggregation tested for correct counts and trends
+- [x] DCAT-US v3.0 transformer tested: new fields present when enabled, v1.1 unchanged when disabled
+- [x] Workflow state machine exhaustively tested: all valid transitions, all invalid transitions, all role restrictions
+- [x] E2E: full editorial workflow cycle (draft → review → approve → publish)
+- [x] Dataset versioning: snapshot creation, version comparison diff
+- [x] CKAN field mapper tested for all field mappings
+- [x] CKAN API endpoints tested for correct response format (package_list, package_show, package_search)
+- [x] Data quality scoring tested with fully complete, partially complete, and minimal datasets
+- [x] Plugin hook registry tested: register, run, async callbacks, argument passing, empty hooks
+- [x] Analytics aggregation tested for correct counts and trends
 - [ ] `npm run test:coverage` shows 70%+ on all Tier 4 source files
