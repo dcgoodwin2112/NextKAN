@@ -6,6 +6,8 @@ Tasks deferred from Tier 2 for separate implementation.
 
 ## Feature 14: Datastore (Queryable Tabular Data)
 
+**Status: COMPLETE** — Implemented as standalone effort. 226 tests passing (68 new datastore tests). See `src/lib/services/datastore.ts` and `src/app/api/datastore/`.
+
 **Deferred from:** Tier 2
 **Reason:** Complex enough for a standalone implementation cycle — dynamic table creation, CSV import with type inference, query API with SQL injection surface.
 
@@ -54,7 +56,7 @@ Also add `datastoreTable DatastoreTable?` relation on Distribution model.
 ## Full WCAG 2.1 AA Audit
 
 **Deferred from:** Tier 2
-**Planned for:** Tier 3
+**Planned for:** Tier 4
 
 ### Done in Tier 2
 
@@ -64,7 +66,7 @@ Also add `datastoreTable DatastoreTable?` relation on Distribution model.
 - Form inputs with associated labels
 - Responsive layout at all breakpoints
 
-### Remaining for Tier 3
+### Remaining for Tier 4
 
 - Thorough color contrast audit (4.5:1 for normal text, 3:1 for large text)
 - Screen reader testing (NVDA/VoiceOver)

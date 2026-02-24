@@ -60,6 +60,7 @@ Data.gov harvesters consume this endpoint. If it's wrong, the catalog is useless
 5. Run `npm run test:run` after each feature — all tests must pass before moving on
 6. Run `npm run test:e2e` after completing all features in a tier
 7. Verify the completion checklist at the bottom of each tier document
+8. Update docs to reflect completed work — tier implementation docs (checklists, test counts, status headers), `docs/deferred-tasks.md`, and `MEMORY.md`
 
 ## Key Conventions
 

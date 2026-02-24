@@ -3,12 +3,13 @@
 import { prisma } from "@/lib/db";
 import { organizationSchema, type OrganizationInput } from "@/lib/schemas/organization";
 import { generateSlug } from "@/lib/utils/slug";
+import { logActivity } from "@/lib/services/activity";
 
 export async function createOrganization(input: OrganizationInput) {
   const data = organizationSchema.parse(input);
   const slug = generateSlug(data.name);
 
-  return prisma.organization.create({
+  const result = await prisma.organization.create({
     data: {
       name: data.name,
       slug,
@@ -17,6 +18,15 @@ export async function createOrganization(input: OrganizationInput) {
       parentId: data.parentId || null,
     },
   });
+
+  logActivity({
+    action: "organization:created",
+    entityType: "organization",
+    entityId: result.id,
+    entityName: result.name,
+  }).catch(() => {});
+
+  return result;
 }
 
 export async function updateOrganization(
@@ -35,10 +45,19 @@ export async function updateOrganization(
   if (data.imageUrl !== undefined) updateData.imageUrl = data.imageUrl || null;
   if (data.parentId !== undefined) updateData.parentId = data.parentId || null;
 
-  return prisma.organization.update({
+  const result = await prisma.organization.update({
     where: { id },
     data: updateData,
   });
+
+  logActivity({
+    action: "organization:updated",
+    entityType: "organization",
+    entityId: id,
+    entityName: result.name,
+  }).catch(() => {});
+
+  return result;
 }
 
 export async function deleteOrganization(id: string) {
@@ -52,7 +71,17 @@ export async function deleteOrganization(id: string) {
     );
   }
 
+  const org = await prisma.organization.findUnique({ where: { id } });
   await prisma.organization.delete({ where: { id } });
+
+  if (org) {
+    logActivity({
+      action: "organization:deleted",
+      entityType: "organization",
+      entityId: id,
+      entityName: org.name,
+    }).catch(() => {});
+  }
 }
 
 export async function getOrganization(id: string) {

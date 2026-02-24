@@ -3,8 +3,12 @@ import type { Metadata } from "next";
 import { getDatasetBySlug } from "@/lib/actions/datasets";
 import { DistributionList } from "@/components/datasets/DistributionList";
 import { DataPreview } from "@/components/datasets/DataPreview";
+import { DataDictionaryView } from "@/components/datasets/DataDictionaryView";
 import { DatasetJsonLd } from "@/components/seo/DatasetJsonLd";
+import { ChartBuilder } from "@/components/visualizations/ChartBuilder";
+import { SpatialPreview } from "@/components/visualizations/SpatialPreview";
 import { siteConfig } from "@/lib/config";
+import { prisma } from "@/lib/db";
 
 interface DatasetDetailProps {
   params: Promise<{ slug: string }>;
@@ -49,6 +53,22 @@ export default async function DatasetDetailPage({
   if (!dataset || dataset.status !== "published") {
     notFound();
   }
+
+  // Load data dictionaries and datastore tables for each distribution
+  const distributionExtras = await Promise.all(
+    dataset.distributions.map(async (dist) => {
+      const [dictionary, datastoreTable] = await Promise.all([
+        prisma.dataDictionary.findUnique({
+          where: { distributionId: dist.id },
+          include: { fields: { orderBy: { sortOrder: "asc" } } },
+        }),
+        prisma.datastoreTable.findUnique({
+          where: { distributionId: dist.id },
+        }),
+      ]);
+      return { distributionId: dist.id, dictionary, datastoreTable };
+    })
+  );
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
@@ -101,22 +121,48 @@ export default async function DatasetDetailPage({
         <h2 className="text-lg font-semibold mb-2">Distributions</h2>
         <DistributionList distributions={dataset.distributions} />
 
-        {dataset.distributions.some((d) => d.filePath || d.downloadURL) && (
-          <div className="mt-6 space-y-6">
-            <h3 className="text-md font-semibold">Data Preview</h3>
-            {dataset.distributions.map((dist) => (
-              <div key={dist.id}>
-                <DataPreview
-                  distributionId={dist.id}
-                  format={dist.format}
-                  filePath={dist.filePath}
-                  downloadURL={dist.downloadURL}
-                />
-              </div>
-            ))}
-          </div>
-        )}
+        {dataset.distributions.map((dist) => {
+          const extras = distributionExtras.find(
+            (e) => e.distributionId === dist.id
+          );
+          return (
+            <div key={dist.id} className="mt-6 space-y-4">
+              {(dist.filePath || dist.downloadURL) && (
+                <div>
+                  <h3 className="text-md font-semibold mb-2">Data Preview</h3>
+                  <DataPreview
+                    distributionId={dist.id}
+                    format={dist.format}
+                    filePath={dist.filePath}
+                    downloadURL={dist.downloadURL}
+                  />
+                </div>
+              )}
+
+              {extras?.dictionary && extras.dictionary.fields.length > 0 && (
+                <div>
+                  <h3 className="text-md font-semibold mb-2">
+                    Data Dictionary
+                    {dist.title ? ` — ${dist.title}` : ""}
+                  </h3>
+                  <DataDictionaryView fields={extras.dictionary.fields} />
+                </div>
+              )}
+
+              {extras?.datastoreTable?.status === "ready" && (
+                <ChartBuilder distributionId={dist.id} />
+              )}
+            </div>
+          );
+        })}
       </section>
+
+      {dataset.spatial && (
+        <section className="mb-6">
+          <h2 className="text-lg font-semibold mb-2">Spatial Coverage</h2>
+          <SpatialPreview spatial={dataset.spatial} />
+        </section>
+      )}
 
       <section className="border-t pt-6">
         <h2 className="text-lg font-semibold mb-4">Metadata</h2>

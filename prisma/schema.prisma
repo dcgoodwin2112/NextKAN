@@ -34,10 +34,11 @@ model Organization {
   parent   Organization?  @relation("OrgHierarchy", fields: [parentId], references: [id])
   children Organization[] @relation("OrgHierarchy")
 
-  users    User[]
-  datasets  Dataset[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  users          User[]
+  datasets       Dataset[]
+  harvestSources HarvestSource[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model Theme {
@@ -113,6 +114,10 @@ model Dataset {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Harvesting
+  harvestSourceId  String?
+  harvestIdentifier String?
+
   // Relations
   distributions Distribution[]
   keywords      DatasetKeyword[]
@@ -120,6 +125,7 @@ model Dataset {
 
   @@index([status])
   @@index([publisherId])
+  @@index([harvestSourceId, harvestIdentifier])
 }
 
 model Distribution {
@@ -143,10 +149,89 @@ model Distribution {
   datasetId String
   dataset   Dataset @relation(fields: [datasetId], references: [id], onDelete: Cascade)
 
+  datastoreTable DatastoreTable?
+  dataDictionary DataDictionary?
+  savedCharts    SavedChart[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([datasetId])
+}
+
+model DatastoreTable {
+  id             String  @id @default(uuid())
+  distributionId String  @unique
+  distribution   Distribution @relation(fields: [distributionId], references: [id], onDelete: Cascade)
+  tableName      String  @unique
+  columns        String  // JSON array of {name, type}
+  rowCount       Int     @default(0)
+  status         String  @default("pending") // "pending" | "importing" | "ready" | "error"
+  errorMessage   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ActivityLog {
+  id         String   @id @default(uuid())
+  action     String
+  entityType String
+  entityId   String
+  entityName String
+  userId     String?
+  userName   String?
+  details    String?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+model DataDictionary {
+  id             String   @id @default(uuid())
+  distributionId String   @unique
+  distribution   Distribution @relation(fields: [distributionId], references: [id], onDelete: Cascade)
+  fields         DataDictionaryField[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model DataDictionaryField {
+  id           String @id @default(uuid())
+  dictionaryId String
+  dictionary   DataDictionary @relation(fields: [dictionaryId], references: [id], onDelete: Cascade)
+  name         String
+  title        String?
+  type         String   // "string" | "number" | "integer" | "boolean" | "date" | "datetime"
+  description  String?
+  format       String?
+  constraints  String?  // JSON
+  sortOrder    Int      @default(0)
+  @@index([dictionaryId])
+}
+
+model SavedChart {
+  id             String   @id @default(uuid())
+  distributionId String
+  distribution   Distribution @relation(fields: [distributionId], references: [id], onDelete: Cascade)
+  title          String?
+  chartType      String   // "bar" | "line" | "pie" | "scatter"
+  config         String   // JSON: { xColumn, yColumns, groupBy, options }
+  createdById    String?
+  createdAt      DateTime @default(now())
+}
+
+model Page {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  content     String   // Markdown
+  published   Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model DatasetKeyword {
@@ -157,4 +242,35 @@ model DatasetKeyword {
 
   @@unique([datasetId, keyword])
   @@index([keyword])
+}
+
+model HarvestSource {
+  id             String   @id @default(uuid())
+  name           String
+  url            String
+  type           String   @default("dcat-us") // "dcat-us" | "ckan"
+  schedule       String?  // cron expression
+  enabled        Boolean  @default(true)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  lastHarvestAt  DateTime?
+  lastStatus     String?  // "success" | "partial" | "error"
+  lastErrorMsg   String?
+  datasetCount   Int      @default(0)
+  jobs           HarvestJob[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model HarvestJob {
+  id              String   @id @default(uuid())
+  sourceId        String
+  source          HarvestSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  status          String   @default("running") // "running" | "success" | "error"
+  datasetsCreated Int      @default(0)
+  datasetsUpdated Int      @default(0)
+  datasetsDeleted Int      @default(0)
+  errors          String?  // JSON array
+  startedAt       DateTime @default(now())
+  completedAt     DateTime?
 }

@@ -1,8 +1,6 @@
-import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
-
-const UPLOAD_DIR = process.env.UPLOAD_DIR || "./public/uploads";
+import { getStorageProvider } from "@/lib/storage/factory";
 
 export const ALLOWED_TYPES = [
   "text/csv",
@@ -38,19 +36,16 @@ export async function saveUploadedFile(file: File): Promise<UploadResult> {
   }
 
   const ext = path.extname(file.name);
-  const uniqueName = `${randomUUID()}${ext}`;
-  const uploadPath = path.resolve(UPLOAD_DIR);
-
-  await mkdir(uploadPath, { recursive: true });
-
+  const key = `${randomUUID()}${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
-  const fullPath = path.join(uploadPath, uniqueName);
-  await writeFile(fullPath, buffer);
+
+  const storage = getStorageProvider();
+  const publicUrl = await storage.upload(key, buffer, file.type);
 
   return {
     fileName: file.name,
-    filePath: fullPath,
-    publicUrl: `/uploads/${uniqueName}`,
+    filePath: key,
+    publicUrl,
     fileSize: file.size,
     mediaType: file.type,
   };

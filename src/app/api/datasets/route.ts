@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { listDatasets, createDataset } from "@/lib/actions/datasets";
 import { handleApiError, unauthorized } from "@/lib/utils/api";
+import { parseSpatial, extractBbox, bboxIntersects } from "@/lib/schemas/spatial";
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,6 +12,7 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("search") || undefined;
     const organizationId = searchParams.get("organizationId") || undefined;
     const status = searchParams.get("status") || undefined;
+    const bbox = searchParams.get("bbox") || undefined;
 
     const result = await listDatasets({
       page,
@@ -20,9 +22,26 @@ export async function GET(request: NextRequest) {
       status,
     });
 
+    let datasets = result.datasets;
+
+    // In-memory bbox filter
+    if (bbox) {
+      const parts = bbox.split(",").map(Number);
+      if (parts.length === 4 && parts.every((n) => !isNaN(n))) {
+        const queryBbox = parts as [number, number, number, number];
+        datasets = datasets.filter((d) => {
+          if (!d.spatial) return false;
+          const spatial = parseSpatial(d.spatial);
+          const datasetBbox = extractBbox(spatial);
+          if (!datasetBbox) return false;
+          return bboxIntersects(queryBbox, datasetBbox);
+        });
+      }
+    }
+
     return NextResponse.json({
-      datasets: result.datasets,
-      total: result.total,
+      datasets,
+      total: bbox ? datasets.length : result.total,
       page,
       limit,
     });

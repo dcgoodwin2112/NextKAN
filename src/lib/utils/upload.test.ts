@@ -1,12 +1,15 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-vi.mock(import("fs/promises"), async (importOriginal) => {
-  const actual = await importOriginal();
+const mockUpload = vi.fn().mockResolvedValue("/uploads/mock-file.csv");
+
+vi.mock(import("@/lib/storage/factory"), async () => {
   return {
-    ...actual,
-    writeFile: vi.fn().mockResolvedValue(undefined),
-    mkdir: vi.fn().mockResolvedValue(undefined),
+    getStorageProvider: () => ({
+      upload: mockUpload,
+      delete: vi.fn(),
+      getSignedUrl: vi.fn(),
+    }),
   };
 });
 
@@ -42,14 +45,18 @@ describe("saveUploadedFile", () => {
     const file = createMockFile("data.csv", "text/csv", 100);
     const result = await saveUploadedFile(file);
     expect(result.fileName).toBe("data.csv");
-    expect(result.publicUrl).toMatch(/\/uploads\/.*\.csv$/);
+    expect(result.publicUrl).toBe("/uploads/mock-file.csv");
   });
 
-  it("returns correct publicUrl path", async () => {
+  it("delegates to storage provider", async () => {
     const file = createMockFile("report.json", "application/json", 200);
     const result = await saveUploadedFile(file);
-    expect(result.publicUrl).toMatch(/^\/uploads\//);
-    expect(result.publicUrl).toMatch(/\.json$/);
+
+    expect(mockUpload).toHaveBeenCalledWith(
+      expect.stringMatching(/\.json$/),
+      expect.any(Buffer),
+      "application/json"
+    );
     expect(result.mediaType).toBe("application/json");
     expect(result.fileSize).toBe(200);
   });

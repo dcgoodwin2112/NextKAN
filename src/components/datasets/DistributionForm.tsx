@@ -10,6 +10,9 @@ interface DistributionFormProps {
     accessURL?: string;
     mediaType?: string;
     format?: string;
+    fileName?: string;
+    filePath?: string;
+    fileSize?: number;
   }) => void;
   onCancel: () => void;
 }
@@ -21,6 +24,9 @@ export function DistributionForm({ onAdd, onCancel }: DistributionFormProps) {
   const [accessURL, setAccessURL] = useState("");
   const [mediaType, setMediaType] = useState("");
   const [format, setFormat] = useState("");
+  const [filePath, setFilePath] = useState("");
+  const [fileName, setFileName] = useState("");
+  const [fileSize, setFileSize] = useState<number | undefined>();
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
 
@@ -44,6 +50,9 @@ export function DistributionForm({ onAdd, onCancel }: DistributionFormProps) {
 
       setDownloadURL(data.publicUrl);
       setMediaType(data.mediaType);
+      setFilePath(data.filePath);
+      setFileName(data.fileName);
+      setFileSize(data.fileSize);
       if (!title) setTitle(file.name);
     } catch {
       setError("Upload failed");
@@ -65,6 +74,9 @@ export function DistributionForm({ onAdd, onCancel }: DistributionFormProps) {
       accessURL: accessURL || undefined,
       mediaType: mediaType || undefined,
       format: format || undefined,
+      fileName: fileName || undefined,
+      filePath: filePath || undefined,
+      fileSize: fileSize || undefined,
     });
   }
 

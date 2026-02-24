@@ -1,9 +1,9 @@
 # Tier 2 — Core Experience Implementation Plan
 
-> **Status: COMPLETE** — All planned features implemented and tested. 158 unit/component/integration tests passing, 24 E2E tests passing.
+> **Status: COMPLETE** — All features implemented and tested. 226 unit/component/integration tests passing, 24 E2E tests passing.
 >
 > **Adjustments from original spec:**
-> - Feature 14 (Datastore) — deferred to standalone effort (see `docs/deferred-tasks.md`)
+> - Feature 14 (Datastore) — initially deferred, then completed as standalone effort (see `docs/deferred-tasks.md`)
 > - Feature 15 (Contact Point model) — skipped; existing `contactName`/`contactEmail` fields + DCAT-US transformer already output proper `vcard:Contact` with `mailto:` prefix
 > - Full WCAG audit — deferred to Tier 3 (basic semantic HTML + focus indicators done)
 > - CSS theming adapted for Tailwind 4 (`@theme inline` block, not `:root` vars)
@@ -252,10 +252,10 @@ Update `src/app/(public)/datasets/[slug]/page.tsx`:
 
 ---
 
-## Feature 14: Datastore (Queryable Tabular Data) — DEFERRED
+## Feature 14: Datastore (Queryable Tabular Data) — COMPLETE
 
-> **Deferred to standalone effort.** See `docs/deferred-tasks.md` for full details.
-> The Datastore feature (dynamic table creation, CSV import, query API, SQL endpoint) is complex enough for its own implementation cycle.
+> **Implemented as standalone effort.** See `docs/deferred-tasks.md` for original deferral context.
+> See `src/lib/services/datastore.ts` and `src/app/api/datastore/` for implementation.
 
 ---
 
@@ -620,7 +620,7 @@ Create `src/app/admin/users/page.tsx`:
 - [x] Multi-role auth restricts actions appropriately
 - [x] Admin can manage users and assign roles
 - [x] Theme browse page at `/themes` with dataset counts
-- [ ] ~~Datastore imports CSVs and exposes query API~~ — deferred
+- [x] Datastore imports CSVs and exposes query API
 
 ### Testing Checklist
 - [x] Faceted search query builder tested with all filter combinations
@@ -629,6 +629,6 @@ Create `src/app/admin/users/page.tsx`:
 - [x] JSON-LD output tested against Schema.org Dataset spec
 - [x] DataPreview component tested for CSV table and download link rendering
 - [x] License registry data validated (no duplicates, valid URLs)
-- [x] 158 unit/component/integration tests passing
+- [x] 226 unit/component/integration tests passing
 - [x] 24 E2E tests passing
-- [ ] ~~Datastore import/query API tests~~ — deferred
+- [x] Datastore import/query API tests

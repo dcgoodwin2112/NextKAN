@@ -1,8 +1,33 @@
 import { describe, it, expect, vi } from "vitest";
 import { prismaMock } from "@/__mocks__/prisma";
 
+const mockImportCsv = vi.fn();
+const mockDeleteTable = vi.fn();
+
 vi.mock("@/lib/db", () => ({
   prisma: prismaMock,
+}));
+
+vi.mock("@/lib/services/datastore", () => ({
+  importCsvToDatastore: mockImportCsv,
+  deleteDatastoreTable: mockDeleteTable,
+}));
+
+vi.mock("@/lib/services/activity", () => ({
+  logActivity: vi.fn().mockResolvedValue(undefined),
+  computeDiff: vi.fn().mockReturnValue(null),
+}));
+
+vi.mock("@/lib/services/email", () => ({
+  getEmailService: () => ({ send: vi.fn().mockResolvedValue(undefined) }),
+}));
+
+vi.mock("@/lib/email-templates/dataset-created", () => ({
+  datasetCreatedEmail: vi.fn().mockReturnValue({
+    subject: "test",
+    html: "<p>test</p>",
+    text: "test",
+  }),
 }));
 
 import { addDistribution, removeDistribution } from "./datasets";
@@ -43,12 +68,101 @@ describe("addDistribution", () => {
       addDistribution("ds-1", { title: "Bad dist" })
     ).rejects.toThrow();
   });
+
+  it("triggers datastore import for CSV with filePath", async () => {
+    const dist = {
+      id: "dist-csv",
+      title: "CSV",
+      description: null,
+      downloadURL: "https://example.com/data.csv",
+      accessURL: null,
+      mediaType: "text/csv",
+      format: "CSV",
+      conformsTo: null,
+      describedBy: null,
+      fileName: "data.csv",
+      filePath: "/uploads/data.csv",
+      fileSize: 1024,
+      datasetId: "ds-1",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    prismaMock.distribution.create.mockResolvedValue(dist);
+
+    await addDistribution("ds-1", {
+      title: "CSV",
+      downloadURL: "https://example.com/data.csv",
+      mediaType: "text/csv",
+      format: "CSV",
+      fileName: "data.csv",
+      filePath: "/uploads/data.csv",
+      fileSize: 1024,
+    });
+
+    expect(mockImportCsv).toHaveBeenCalledWith(dist);
+  });
+
+  it("does not trigger import for non-CSV", async () => {
+    mockImportCsv.mockClear();
+    prismaMock.distribution.create.mockResolvedValue({
+      id: "dist-json",
+      title: "JSON",
+      description: null,
+      downloadURL: "https://example.com/data.json",
+      accessURL: null,
+      mediaType: "application/json",
+      format: "JSON",
+      conformsTo: null,
+      describedBy: null,
+      fileName: "data.json",
+      filePath: "/uploads/data.json",
+      fileSize: 512,
+      datasetId: "ds-1",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    await addDistribution("ds-1", {
+      title: "JSON",
+      downloadURL: "https://example.com/data.json",
+      mediaType: "application/json",
+      format: "JSON",
+      fileName: "data.json",
+      filePath: "/uploads/data.json",
+      fileSize: 512,
+    });
+
+    expect(mockImportCsv).not.toHaveBeenCalled();
+  });
 });
 
 describe("removeDistribution", () => {
   it("calls Prisma delete", async () => {
+    prismaMock.datastoreTable.findUnique.mockResolvedValue(null);
     prismaMock.distribution.delete.mockResolvedValue({} as any);
     await removeDistribution("dist-1");
+    expect(prismaMock.distribution.delete).toHaveBeenCalledWith({
+      where: { id: "dist-1" },
+    });
+  });
+
+  it("deletes datastore table before removing distribution", async () => {
+    prismaMock.datastoreTable.findUnique.mockResolvedValue({
+      id: "dt-1",
+      distributionId: "dist-1",
+      tableName: "ds_abc12345",
+      columns: "[]",
+      rowCount: 10,
+      status: "ready",
+      errorMessage: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    prismaMock.distribution.delete.mockResolvedValue({} as any);
+
+    await removeDistribution("dist-1");
+
+    expect(mockDeleteTable).toHaveBeenCalledWith("ds_abc12345");
     expect(prismaMock.distribution.delete).toHaveBeenCalledWith({
       where: { id: "dist-1" },
     });

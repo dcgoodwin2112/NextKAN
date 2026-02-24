@@ -26,10 +26,18 @@ export async function resetTestDatabase() {
 
 export async function cleanupTestDatabase() {
   const prisma = getTestPrisma();
+  await prisma.dataDictionaryField.deleteMany();
+  await prisma.dataDictionary.deleteMany();
+  await prisma.savedChart.deleteMany();
+  await prisma.harvestJob.deleteMany();
+  await prisma.harvestSource.deleteMany();
+  await prisma.activityLog.deleteMany();
   await prisma.datasetTheme.deleteMany();
   await prisma.datasetKeyword.deleteMany();
+  await prisma.datastoreTable.deleteMany();
   await prisma.distribution.deleteMany();
   await prisma.dataset.deleteMany();
+  await prisma.page.deleteMany();
   await prisma.theme.deleteMany();
   await prisma.organization.deleteMany();
   await prisma.user.deleteMany();
