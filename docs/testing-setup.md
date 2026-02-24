@@ -255,7 +255,7 @@ e2e/
 Create `src/__mocks__/prisma.ts`:
 
 ```typescript
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@/generated/prisma/client";
 import { beforeEach } from "vitest";
 import { mockDeep, mockReset, DeepMockProxy } from "vitest-mock-extended";
 
@@ -296,15 +296,18 @@ DATABASE_URL="file:./test.db"
 Create `src/lib/test-utils/db.ts`:
 
 ```typescript
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@/generated/prisma/client";
+import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { execSync } from "child_process";
 
 let testPrisma: PrismaClient;
 
 export function getTestPrisma(): PrismaClient {
   if (!testPrisma) {
-    process.env.DATABASE_URL = "file:./prisma/test.db";
-    testPrisma = new PrismaClient();
+    const url = "file:./prisma/test.db";
+    process.env.DATABASE_URL = url;
+    const adapter = new PrismaBetterSqlite3({ url });
+    testPrisma = new PrismaClient({ adapter });
   }
   return testPrisma;
 }

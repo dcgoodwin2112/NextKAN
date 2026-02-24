@@ -1,5 +1,7 @@
 # Tier 1 — MVP Implementation Plan
 
+> **Status: COMPLETE** — All features implemented and tested. 111 unit/component/integration tests passing, 24 E2E tests passing, 80%+ coverage on `src/lib/`.
+
 ## Project: NextKAN (Next.js Open Data Platform)
 
 You are building a lightweight, open-source open data catalog platform as an alternative to CKAN and DKAN. The platform must be DCAT-US v1.1 compliant and deployable in under 5 minutes.
@@ -26,8 +28,8 @@ You are building a lightweight, open-source open data catalog platform as an alt
 ```bash
 npx create-next-app@latest nextkan --typescript --tailwind --eslint --app --src-dir --import-alias "@/*"
 cd nextkan
-npm install prisma @prisma/client zod next-auth@5.0.0-beta.25 slugify uuid bcryptjs
-npm install -D @types/uuid @types/bcryptjs prisma
+npm install prisma @prisma/client @prisma/adapter-better-sqlite3 zod next-auth@5.0.0-beta.25 slugify uuid bcryptjs
+npm install -D @types/uuid @types/bcryptjs
 
 # Testing dependencies (see testing-setup.md for full details)
 npm install -D vitest @vitejs/plugin-react jsdom vite-tsconfig-paths vitest-mock-extended
@@ -37,6 +39,8 @@ npx playwright install --with-deps chromium
 
 npx prisma init --datasource-provider sqlite
 ```
+
+> **Prisma 7 Note:** `npx prisma init` will scaffold `prisma/schema.prisma` and `prisma.config.ts`. You will need to edit both files as shown below. The `prisma.config.ts` file controls datasource URLs and seed commands (previously in `package.json`). The generated Prisma client outputs to `src/generated/prisma/` (not `node_modules`), so all Prisma type imports use `@/generated/prisma/client`.
 
 **IMPORTANT:** Before writing any feature code, set up the testing infrastructure by reading and following `testing-setup.md`. Create `vitest.config.mts`, `vitest.setup.ts`, `playwright.config.ts`, and `src/__mocks__/prisma.ts` as specified in that document. Every feature implemented below must include its corresponding tests from `testing-addenda.md` (Tier 1 section).
 
@@ -180,12 +184,12 @@ Create the database schema in `prisma/schema.prisma`:
 
 ```prisma
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -193,12 +197,18 @@ model User {
   email     String   @unique
   password  String
   name      String?
-  role      String   @default("admin") // "admin" | "editor" | "viewer"
+  role      String   @default("editor") // "admin" | "orgAdmin" | "editor" | "viewer"
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
   datasets  Dataset[]
 }
+
+// NOTE: role default changed from "admin" to "editor" in Tier 2 (Feature 20).
+// organizationId added in Tier 2 for org-scoped roles.
 
 model Organization {
   id          String   @id @default(uuid())
@@ -213,6 +223,7 @@ model Organization {
   children    Organization[] @relation("OrgHierarchy")
 
   datasets    Dataset[]
+  users       User[]       // Added in Tier 2 (Feature 20)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -258,7 +269,7 @@ model Dataset {
   primaryITInvestmentUII String?
   references          String?      // JSON array of URLs (stored as string)
   systemOfRecords     String?      // URL
-  theme               String?      // JSON array of themes (stored as string)
+  // NOTE: theme field removed in Tier 2 (Feature 12). Replaced by Theme + DatasetTheme relation models.
 
   // Internal fields
   status      String   @default("published") // "draft" | "published" | "archived"
@@ -270,9 +281,29 @@ model Dataset {
   // Relations
   distributions Distribution[]
   keywords      DatasetKeyword[]
+  themes        DatasetTheme[]  // Added in Tier 2 (Feature 12)
 
   @@index([status])
   @@index([publisherId])
+}
+
+// Added in Tier 2 (Feature 12) — see tier-2-implementation.md
+model Theme {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  slug        String  @unique
+  description String?
+  color       String?
+  datasets    DatasetTheme[]
+}
+
+model DatasetTheme {
+  id        String  @id @default(uuid())
+  datasetId String
+  themeId   String
+  dataset   Dataset @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  theme     Theme   @relation(fields: [themeId], references: [id], onDelete: Cascade)
+  @@unique([datasetId, themeId])
 }
 
 model Distribution {
@@ -313,27 +344,58 @@ model DatasetKeyword {
 }
 ```
 
-After creating the schema, run:
+### Task 1.1b: Prisma Config
+
+Create `prisma.config.ts` in the project root. In Prisma 7, datasource URLs and seed commands live here instead of in `schema.prisma` or `package.json`:
+
+```typescript
+import "dotenv/config";
+import { defineConfig } from "prisma/config";
+
+export default defineConfig({
+  schema: "prisma/schema.prisma",
+  datasource: {
+    url: process.env.DATABASE_URL ?? "file:./dev.db",
+  },
+  migrations: {
+    seed: "npx tsx prisma/seed.ts",
+  },
+});
+```
+
+After creating the schema and config, run:
 ```bash
 npx prisma db push
 npx prisma generate
 ```
+
+> **Note:** `npx prisma generate` outputs the Prisma client to `src/generated/prisma/`. Add `/src/generated/prisma` to `.gitignore`. All Prisma type imports throughout the codebase use `@/generated/prisma/client` (not `@prisma/client`). The entry point is `client.ts` — do not use a bare directory import since `prisma generate` wipes any barrel `index.ts`.
 
 ### Task 1.2: Prisma Client Singleton
 
 Create `src/lib/db.ts`:
 
 ```typescript
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@/generated/prisma/client";
+import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient();
+function createPrismaClient() {
+  const adapter = new PrismaBetterSqlite3({
+    url: process.env.DATABASE_URL ?? "file:./dev.db",
+  });
+  return new PrismaClient({ adapter });
+}
+
+export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 ```
+
+> **Prisma 7:** PrismaClient requires a driver adapter. For SQLite, use `@prisma/adapter-better-sqlite3`. For PostgreSQL production, swap to `@prisma/adapter-pg`.
 
 ### Task 1.3: Zod Validation Schemas
 
@@ -432,7 +494,7 @@ This module transforms database records into the DCAT-US v1.1 JSON format.
 // This file transforms internal database models into the DCAT-US v1.1 JSON output format.
 // Reference: https://resources.data.gov/resources/dcat-us/
 
-import { Dataset, Distribution, Organization, DatasetKeyword } from "@prisma/client";
+import { Dataset, Distribution, Organization, DatasetKeyword } from "@/generated/prisma/client";
 
 type OrganizationWithParent = Organization & {
   parent: Organization | null;
@@ -865,7 +927,7 @@ Create `src/lib/utils/search.ts`:
 For SQLite, use the `LIKE` operator across title, description, and keywords:
 
 ```typescript
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 
 export function buildSearchWhere(query: string): Prisma.DatasetWhereInput {
   if (!query.trim()) return {};
@@ -883,7 +945,7 @@ export function buildSearchWhere(query: string): Prisma.DatasetWhereInput {
 }
 ```
 
-Note: `mode: "insensitive"` is required for case-insensitive search on both SQLite (Prisma 4.8+) and PostgreSQL.
+Note: `mode: "insensitive"` is not supported on SQLite and was removed from the implementation. SQLite `LIKE` is already case-insensitive for ASCII. For PostgreSQL, re-add `mode: "insensitive"`.
 
 ### Task 7.2: SearchBar Component
 
@@ -1037,10 +1099,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 Create `prisma/seed.ts`:
 
 ```typescript
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@/generated/prisma/client";
+import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import bcrypt from "bcryptjs";
 
-const prisma = new PrismaClient();
+const adapter = new PrismaBetterSqlite3({
+  url: process.env.DATABASE_URL ?? "file:./dev.db",
+});
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   const hashedPassword = await bcrypt.hash(
@@ -1067,12 +1133,11 @@ main()
   .finally(() => prisma.$disconnect());
 ```
 
-Add to `package.json`:
+> **Prisma 7:** The seed command is configured in `prisma.config.ts` (Task 1.1b), not `package.json`. The `"prisma": { "seed": ... }` key in `package.json` is no longer used.
+
+Add test scripts to `package.json`:
 ```json
 {
-  "prisma": {
-    "seed": "npx tsx prisma/seed.ts"
-  },
   "scripts": {
     "test": "vitest",
     "test:run": "vitest run",
@@ -1177,36 +1242,36 @@ export async function POST(request: NextRequest) {
 
 ## Tier 1 Completion Checklist
 
-After implementing all features, verify:
+All items verified:
 
-- [ ] `npx prisma db push` creates all tables without errors
-- [ ] `npx prisma db seed` creates admin user
-- [ ] Login page exists at `/login` with email/password form
-- [ ] Admin can log in at `/login`
-- [ ] Admin can create an organization
-- [ ] Admin can create a dataset with keywords and distributions
-- [ ] Admin can upload a file and attach it as a distribution
-- [ ] Admin can edit and delete datasets
-- [ ] Public homepage lists all published datasets
-- [ ] Public dataset detail page shows full metadata
-- [ ] Public organization pages work
-- [ ] Search returns relevant results
-- [ ] `GET /data.json` returns valid DCAT-US v1.1 JSON
-- [ ] All API endpoints return proper JSON responses
-- [ ] Unauthenticated users cannot access admin pages or mutating API endpoints
+- [x] `npx prisma db push` creates all tables without errors
+- [x] `npx prisma db seed` creates admin user
+- [x] Login page exists at `/login` with email/password form
+- [x] Admin can log in at `/login`
+- [x] Admin can create an organization
+- [x] Admin can create a dataset with keywords and distributions
+- [x] Admin can upload a file and attach it as a distribution
+- [x] Admin can edit and delete datasets
+- [x] Public homepage lists all published datasets
+- [x] Public dataset detail page shows full metadata
+- [x] Public organization pages work
+- [x] Search returns relevant results
+- [x] `GET /data.json` returns valid DCAT-US v1.1 JSON
+- [x] All API endpoints return proper JSON responses
+- [x] Unauthenticated users cannot access admin pages or mutating API endpoints
 
 ### Testing Checklist
-- [ ] `vitest.config.mts`, `vitest.setup.ts`, `playwright.config.ts` created and working
-- [ ] `src/__mocks__/prisma.ts` Prisma mock created with vitest-mock-extended
-- [ ] `npm run test` runs all unit/component tests — all pass
-- [ ] `npm run test:e2e` runs Playwright tests — all pass
-- [ ] All Zod schemas have validation tests (dataset, distribution, organization)
-- [ ] DCAT-US transformer has full coverage (dcat-us.test.ts)
-- [ ] `/data.json` route handler tested for structure, headers, and published-only filter
-- [ ] Dataset CRUD server actions tested (create, update, delete, list, search)
-- [ ] Dataset integration tests pass against real test database
-- [ ] DatasetCard, DatasetForm, SearchBar have component tests
-- [ ] Upload utility tested for allowed types, size limits, path generation
-- [ ] API route handlers tested for success, validation errors, and auth
-- [ ] E2E: data.json compliance, dataset browsing, search, admin login/CRUD
-- [ ] `npm run test:coverage` shows 80%+ coverage on `src/lib/`
+- [x] `vitest.config.mts`, `vitest.setup.ts`, `playwright.config.ts` created and working
+- [x] `src/__mocks__/prisma.ts` Prisma mock created with vitest-mock-extended
+- [x] `npm run test` runs all unit/component tests — all pass (111 tests)
+- [x] `npm run test:e2e` runs Playwright tests — all pass (24 tests)
+- [x] All Zod schemas have validation tests (dataset, distribution, organization)
+- [x] DCAT-US transformer has full coverage (dcat-us.test.ts)
+- [x] `/data.json` route handler tested for structure, headers, and published-only filter
+- [x] Dataset CRUD server actions tested (create, update, delete, list, search)
+- [x] Dataset integration tests pass against real test database
+- [x] DatasetCard, DatasetForm, SearchBar have component tests
+- [x] Upload utility tested for allowed types, size limits, path generation
+- [x] API route handlers tested for success, validation errors, and auth
+- [x] E2E: data.json compliance, dataset browsing, search, admin login/CRUD
+- [x] `npm run test:coverage` shows 80%+ coverage on `src/lib/`

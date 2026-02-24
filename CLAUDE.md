@@ -9,10 +9,21 @@ This is **NextKAN** — a lightweight, open-source Next.js data catalog platform
 ## Tech Stack
 
 - Next.js 15 (App Router) + TypeScript (strict)
-- Prisma ORM + SQLite (default) / PostgreSQL (production)
+- Prisma 7 ORM + SQLite (default) / PostgreSQL (production)
 - Zod validation, Tailwind CSS 4, NextAuth.js v5
 - Vitest + React Testing Library (unit/component tests)
 - Playwright (E2E tests)
+
+## Prisma 7 Conventions
+
+Prisma 7 has breaking changes from earlier versions:
+
+- **Generator:** `prisma-client` (not `prisma-client-js`), output to `src/generated/prisma/`
+- **Schema:** `datasource` block has no `url` — datasource URL is in `prisma.config.ts`
+- **Config:** `prisma.config.ts` holds datasource URL and seed command (not `package.json`)
+- **PrismaClient:** Requires a driver adapter (`@prisma/adapter-better-sqlite3` for SQLite)
+- **Imports:** All Prisma types import from `@/generated/prisma/client` (not `@prisma/client`)
+- **Gitignore:** `/src/generated/prisma` is generated code, not committed
 
 ## Planning Documents
 
