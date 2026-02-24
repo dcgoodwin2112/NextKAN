@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      String   @default("editor") // "admin" | "orgAdmin" | "editor" | "viewer"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  datasets Dataset[]
+}
+
+model Organization {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  imageUrl    String?
+
+  // DCAT-US: subOrganizationOf
+  parentId String?
+  parent   Organization?  @relation("OrgHierarchy", fields: [parentId], references: [id])
+  children Organization[] @relation("OrgHierarchy")
+
+  users    User[]
+  datasets  Dataset[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Theme {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  color       String?
+
+  datasets DatasetTheme[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DatasetTheme {
+  id        String @id @default(uuid())
+  datasetId String
+  themeId   String
+
+  dataset Dataset @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  theme   Theme   @relation(fields: [themeId], references: [id], onDelete: Cascade)
+
+  @@unique([datasetId, themeId])
+  @@index([themeId])
+}
+
+model Dataset {
+  id          String @id @default(uuid())
+  slug        String @unique
+
+  // DCAT-US Required fields
+  title       String
+  description String
+  modified    DateTime @default(now())
+  accessLevel String   @default("public") // "public" | "restricted public" | "non-public"
+  identifier  String   @unique @default(uuid())
+
+  // DCAT-US Required — Publisher (relation)
+  publisherId String
+  publisher   Organization @relation(fields: [publisherId], references: [id])
+
+  // DCAT-US Required — Contact Point
+  contactName  String?
+  contactEmail String?
+
+  // DCAT-US Required (Federal only — optional for non-federal)
+  bureauCode  String? // format: "015:11"
+  programCode String? // format: "015:001"
+
+  // DCAT-US Required-if-Applicable
+  license  String? // URL to license
+  rights   String? // access restriction explanation
+  spatial  String? // geographic coverage
+  temporal String? // "start-date/end-date" ISO 8601
+
+  // DCAT-US Expanded fields
+  issued                DateTime? // original release date
+  accrualPeriodicity    String?   // ISO 8601 duration (e.g., "R/P1Y")
+  conformsTo            String?   // URI of data standard
+  dataQuality           Boolean?
+  describedBy           String?   // URL to data dictionary
+  isPartOf              String?   // parent dataset identifier
+  landingPage           String?   // URL
+  language              String?   // e.g., "en"
+  primaryITInvestmentUII String?
+  references            String?   // JSON array of URLs (stored as string)
+  systemOfRecords       String?   // URL
+  // Internal fields
+  status      String   @default("published") // "draft" | "published" | "archived"
+  createdById String?
+  createdBy   User?    @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  distributions Distribution[]
+  keywords      DatasetKeyword[]
+  themes        DatasetTheme[]
+
+  @@index([status])
+  @@index([publisherId])
+}
+
+model Distribution {
+  id          String @id @default(uuid())
+
+  // DCAT-US Distribution fields
+  title       String?
+  description String?
+  downloadURL String? // direct download link
+  accessURL   String? // landing page or API endpoint
+  mediaType   String? // MIME type (e.g., "text/csv")
+  format      String? // human-readable format (e.g., "CSV")
+  conformsTo  String? // URI of data standard
+  describedBy String? // URL to schema
+
+  // Internal fields
+  fileName String? // original uploaded filename
+  filePath String? // server-side path to uploaded file
+  fileSize Int?    // bytes
+
+  datasetId String
+  dataset   Dataset @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([datasetId])
+}
+
+model DatasetKeyword {
+  id        String  @id @default(uuid())
+  keyword   String
+  datasetId String
+  dataset   Dataset @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+
+  @@unique([datasetId, keyword])
+  @@index([keyword])
+}
