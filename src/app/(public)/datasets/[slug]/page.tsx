@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import type { Metadata } from "next";
 import { getDatasetBySlug } from "@/lib/actions/datasets";
 import { DistributionList } from "@/components/datasets/DistributionList";
@@ -7,8 +8,13 @@ import { DataDictionaryView } from "@/components/datasets/DataDictionaryView";
 import { DatasetJsonLd } from "@/components/seo/DatasetJsonLd";
 import { ChartBuilder } from "@/components/visualizations/ChartBuilder";
 import { SpatialPreview } from "@/components/visualizations/SpatialPreview";
+import { VersionHistory } from "@/components/datasets/VersionHistory";
+import { PageViewTracker } from "@/components/analytics/PageViewTracker";
+import { CommentSection } from "@/components/comments/CommentSection";
 import { siteConfig } from "@/lib/config";
 import { prisma } from "@/lib/db";
+import { getVersionHistory } from "@/lib/services/versioning";
+import { isCommentsEnabled } from "@/lib/services/comments";
 
 interface DatasetDetailProps {
   params: Promise<{ slug: string }>;
@@ -54,6 +60,9 @@ export default async function DatasetDetailPage({
     notFound();
   }
 
+  const versions = await getVersionHistory(dataset.id);
+  const commentsEnabled = isCommentsEnabled();
+
   // Load data dictionaries and datastore tables for each distribution
   const distributionExtras = await Promise.all(
     dataset.distributions.map(async (dist) => {
@@ -73,11 +82,23 @@ export default async function DatasetDetailPage({
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
       <DatasetJsonLd dataset={dataset as any} />
+      <PageViewTracker entityType="dataset" entityId={dataset.id} />
 
       <h1 className="text-3xl font-bold mb-2">{dataset.title}</h1>
-      <p className="text-sm text-gray-500 mb-6">
+      <p className="text-sm text-gray-500 mb-2">
         Published by {dataset.publisher.name}
       </p>
+      {(dataset as any).series && (
+        <p className="text-sm mb-6">
+          <Link
+            href={`/series/${(dataset as any).series.slug}`}
+            className="inline-flex items-center rounded bg-purple-50 px-2 py-1 text-purple-700 hover:bg-purple-100"
+          >
+            Part of series: {(dataset as any).series.title}
+          </Link>
+        </p>
+      )}
+      {!(dataset as any).series && <div className="mb-4" />}
 
       <section className="mb-8">
         <p className="text-gray-700 whitespace-pre-wrap">
@@ -220,6 +241,27 @@ export default async function DatasetDetailPage({
           </div>
         </dl>
       </section>
+
+      {versions.length > 0 && (
+        <section className="border-t pt-6 mt-6">
+          <h2 className="text-lg font-semibold mb-4">Version History</h2>
+          <VersionHistory
+            versions={versions.map((v) => ({
+              id: v.id,
+              version: v.version,
+              changelog: v.changelog,
+              createdAt: v.createdAt.toISOString(),
+            }))}
+          />
+        </section>
+      )}
+
+      {commentsEnabled && (
+        <section className="border-t pt-6 mt-6">
+          <h2 className="text-lg font-semibold mb-4">Comments</h2>
+          <CommentSection datasetId={dataset.id} />
+        </section>
+      )}
     </div>
   );
 }

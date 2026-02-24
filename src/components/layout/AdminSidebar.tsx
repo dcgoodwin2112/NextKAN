@@ -7,9 +7,13 @@ import { usePathname } from "next/navigation";
 const navItems = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/datasets", label: "Datasets" },
+  { href: "/admin/series", label: "Series" },
   { href: "/admin/organizations", label: "Organizations" },
   { href: "/admin/harvest", label: "Harvest", requiredRole: "admin" },
   { href: "/admin/import", label: "Import" },
+  { href: "/admin/quality", label: "Quality" },
+  { href: "/admin/comments", label: "Comments", requiredRole: "admin" },
+  { href: "/admin/analytics", label: "Analytics", requiredRole: "admin" },
   { href: "/admin/pages", label: "Pages", requiredRole: "admin" },
   { href: "/admin/users", label: "Users", requiredRole: "admin" },
 ];

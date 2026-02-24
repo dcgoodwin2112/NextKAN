@@ -44,10 +44,11 @@ export default function NewPagePage() {
       )}
       <form onSubmit={handleSubmit} className="space-y-4 max-w-3xl">
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label htmlFor="title" className="block text-sm font-medium text-gray-700">
             Title
           </label>
           <input
+            id="title"
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -55,10 +56,11 @@ export default function NewPagePage() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label htmlFor="slug" className="block text-sm font-medium text-gray-700">
             Slug (auto-generated if empty)
           </label>
           <input
+            id="slug"
             type="text"
             value={slug}
             onChange={(e) => setSlug(e.target.value)}
@@ -82,10 +84,11 @@ export default function NewPagePage() {
             Published
           </label>
           <div>
-            <label className="text-sm font-medium text-gray-700 mr-2">
+            <label htmlFor="sortOrder" className="text-sm font-medium text-gray-700 mr-2">
               Sort Order
             </label>
             <input
+              id="sortOrder"
               type="number"
               value={sortOrder}
               onChange={(e) => setSortOrder(parseInt(e.target.value) || 0)}

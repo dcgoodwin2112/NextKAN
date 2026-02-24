@@ -19,7 +19,8 @@ model User {
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id])
 
-  datasets Dataset[]
+  datasets         Dataset[]
+  reviewedDatasets Dataset[] @relation("DatasetReviewer")
 }
 
 model Organization {
@@ -114,18 +115,38 @@ model Dataset {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Editorial Workflow
+  workflowStatus  String    @default("draft") // "draft" | "pending_review" | "approved" | "published" | "rejected" | "archived"
+  reviewerId      String?
+  reviewer        User?     @relation("DatasetReviewer", fields: [reviewerId], references: [id])
+  reviewNote      String?
+  submittedAt     DateTime?
+  reviewedAt      DateTime?
+  publishedAt     DateTime?
+
+  // DCAT-US v3.0
+  version         String?
+  versionNotes    String?
+  seriesId        String?
+  series          DatasetSeries? @relation(fields: [seriesId], references: [id])
+  previousVersion String?
+
   // Harvesting
   harvestSourceId  String?
   harvestIdentifier String?
 
   // Relations
-  distributions Distribution[]
-  keywords      DatasetKeyword[]
-  themes        DatasetTheme[]
+  distributions       Distribution[]
+  keywords            DatasetKeyword[]
+  themes              DatasetTheme[]
+  workflowTransitions WorkflowTransition[]
+  versions            DatasetVersion[]
+  comments            Comment[]
 
   @@index([status])
   @@index([publisherId])
   @@index([harvestSourceId, harvestIdentifier])
+  @@index([workflowStatus])
 }
 
 model Distribution {
@@ -273,4 +294,74 @@ model HarvestJob {
   errors          String?  // JSON array
   startedAt       DateTime @default(now())
   completedAt     DateTime?
+}
+
+model WorkflowTransition {
+  id         String   @id @default(uuid())
+  datasetId  String
+  dataset    Dataset  @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+
+  fromStatus String
+  toStatus   String
+  userId     String
+  userName   String?
+  note       String?
+  createdAt  DateTime @default(now())
+
+  @@index([datasetId])
+}
+
+model DatasetVersion {
+  id          String   @id @default(uuid())
+  datasetId   String
+  dataset     Dataset  @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  version     String
+  snapshot    String   // JSON snapshot of dataset metadata
+  changelog   String?
+  createdById String?
+  createdAt   DateTime @default(now())
+
+  @@index([datasetId])
+  @@unique([datasetId, version])
+}
+
+model DatasetSeries {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  identifier  String   @unique
+  slug        String   @unique
+  datasets    Dataset[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AnalyticsEvent {
+  id         String   @id @default(uuid())
+  eventType  String   // "page_view" | "download" | "api_call" | "search"
+  entityType String?  // "dataset" | "distribution"
+  entityId   String?
+  metadata   String?  // JSON: { query, userAgent, referer }
+  ipHash     String?
+  createdAt  DateTime @default(now())
+
+  @@index([eventType, createdAt])
+  @@index([entityType, entityId, createdAt])
+}
+
+model Comment {
+  id          String   @id @default(uuid())
+  datasetId   String
+  dataset     Dataset  @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  authorName  String
+  authorEmail String
+  content     String
+  approved    Boolean  @default(false)
+  parentId    String?
+  parent      Comment? @relation("CommentThread", fields: [parentId], references: [id])
+  replies     Comment[] @relation("CommentThread")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([datasetId, approved])
 }

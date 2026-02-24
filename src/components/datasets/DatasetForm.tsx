@@ -28,6 +28,11 @@ interface Distribution {
   format?: string | null;
 }
 
+interface SeriesOption {
+  id: string;
+  title: string;
+}
+
 interface DatasetWithRelations {
   id: string;
   title: string;
@@ -56,12 +61,18 @@ interface DatasetWithRelations {
   keywords: { keyword: string }[];
   distributions: Distribution[];
   themes?: { theme: { id: string; name: string } }[];
+  // DCAT-US v3.0
+  version?: string | null;
+  versionNotes?: string | null;
+  seriesId?: string | null;
+  previousVersion?: string | null;
 }
 
 interface DatasetFormProps {
   initialData?: DatasetWithRelations;
   organizations: Organization[];
   themes?: ThemeOption[];
+  series?: SeriesOption[];
   onSubmit: (data: DatasetCreateInput & { distributions?: Distribution[] }) => Promise<void>;
 }
 
@@ -69,6 +80,7 @@ export function DatasetForm({
   initialData,
   organizations,
   themes: availableThemes = [],
+  series: availableSeries = [],
   onSubmit,
 }: DatasetFormProps) {
   const router = useRouter();
@@ -121,6 +133,13 @@ export function DatasetForm({
   const [describedBy, setDescribedBy] = useState(initialData?.describedBy || "");
   const [isPartOf, setIsPartOf] = useState(initialData?.isPartOf || "");
   const [language, setLanguage] = useState(initialData?.language || "en-us");
+
+  // DCAT-US v3.0
+  const [dcatVersion, setDcatVersion] = useState(initialData?.version || "");
+  const [dcatVersionNotes, setDcatVersionNotes] = useState(initialData?.versionNotes || "");
+  const [seriesId, setSeriesId] = useState(initialData?.seriesId || "");
+  const [previousVersion, setPreviousVersion] = useState(initialData?.previousVersion || "");
+  const [showV3, setShowV3] = useState(false);
 
   // Distributions
   const [distributions, setDistributions] = useState<Distribution[]>(
@@ -211,6 +230,10 @@ export function DatasetForm({
         isPartOf: isPartOf || undefined,
         landingPage: landingPage || undefined,
         language: language || undefined,
+        version: dcatVersion || undefined,
+        versionNotes: dcatVersionNotes || undefined,
+        seriesId: seriesId || undefined,
+        previousVersion: previousVersion || undefined,
         distributions,
       });
       router.push("/admin/datasets");
@@ -670,6 +693,79 @@ export function DatasetForm({
           </div>
         )}
       </fieldset>
+
+      {/* DCAT-US v3.0 */}
+      {availableSeries.length > 0 && (
+        <fieldset className="space-y-4">
+          <button
+            type="button"
+            onClick={() => setShowV3(!showV3)}
+            className="text-lg font-semibold flex items-center gap-2"
+          >
+            <span>{showV3 ? "▼" : "▶"}</span> DCAT-US v3.0
+          </button>
+          {showV3 && (
+            <div className="space-y-4 pl-4">
+              <div>
+                <label htmlFor="seriesId" className="block text-sm font-medium mb-1">
+                  Series
+                </label>
+                <select
+                  id="seriesId"
+                  value={seriesId}
+                  onChange={(e) => setSeriesId(e.target.value)}
+                  className="w-full rounded border px-3 py-2"
+                >
+                  <option value="">No series</option>
+                  {availableSeries.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="dcatVersion" className="block text-sm font-medium mb-1">
+                  Version
+                </label>
+                <input
+                  id="dcatVersion"
+                  type="text"
+                  value={dcatVersion}
+                  onChange={(e) => setDcatVersion(e.target.value)}
+                  className="w-full rounded border px-3 py-2"
+                  placeholder="e.g. 2.1"
+                />
+              </div>
+              <div>
+                <label htmlFor="dcatVersionNotes" className="block text-sm font-medium mb-1">
+                  Version Notes
+                </label>
+                <textarea
+                  id="dcatVersionNotes"
+                  value={dcatVersionNotes}
+                  onChange={(e) => setDcatVersionNotes(e.target.value)}
+                  className="w-full rounded border px-3 py-2"
+                  rows={2}
+                />
+              </div>
+              <div>
+                <label htmlFor="previousVersion" className="block text-sm font-medium mb-1">
+                  Previous Version
+                </label>
+                <input
+                  id="previousVersion"
+                  type="text"
+                  value={previousVersion}
+                  onChange={(e) => setPreviousVersion(e.target.value)}
+                  className="w-full rounded border px-3 py-2"
+                  placeholder="URL or identifier of previous version"
+                />
+              </div>
+            </div>
+          )}
+        </fieldset>
+      )}
 
       {/* Distributions */}
       <fieldset className="space-y-4">

@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { transformDatasetToDCATUS, buildCatalog } from "./dcat-us";
 
 const baseMockOrg = {
@@ -44,6 +44,22 @@ const mockDataset = {
   createdById: null,
   createdAt: new Date(),
   updatedAt: new Date(),
+  // Workflow
+  workflowStatus: "published",
+  reviewerId: null,
+  reviewNote: null,
+  submittedAt: null,
+  reviewedAt: null,
+  publishedAt: null,
+  // DCAT-US v3.0
+  version: null,
+  versionNotes: null,
+  seriesId: null,
+  series: null,
+  previousVersion: null,
+  // Harvesting
+  harvestSourceId: null,
+  harvestIdentifier: null,
   publisher: { ...baseMockOrg, parent: null },
   distributions: [
     {
@@ -186,5 +202,61 @@ describe("buildCatalog", () => {
   it("returns empty dataset array for empty input", () => {
     const catalog = buildCatalog([], "https://example.gov");
     expect(catalog.dataset).toEqual([]);
+  });
+});
+
+describe("DCAT-US v3.0", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("v3.0 output includes dcat:version when present", () => {
+    vi.stubEnv("DCAT_US_VERSION", "v3.0");
+    const withVersion = { ...mockDataset, version: "2.1" };
+    const result = transformDatasetToDCATUS(withVersion as any);
+    expect(result["dcat:version"]).toBe("2.1");
+  });
+
+  it("v3.0 output includes dcat:inSeries reference", () => {
+    vi.stubEnv("DCAT_US_VERSION", "v3.0");
+    const withSeries = {
+      ...mockDataset,
+      series: {
+        id: "series-1",
+        title: "Climate Series",
+        identifier: "climate-series",
+        slug: "climate-series",
+        description: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    };
+    const result = transformDatasetToDCATUS(withSeries as any);
+    expect(result["dcat:inSeries"]).toBe("climate-series");
+  });
+
+  it("v3.0 output includes dcat:previousVersion when present", () => {
+    vi.stubEnv("DCAT_US_VERSION", "v3.0");
+    const withPrev = { ...mockDataset, previousVersion: "https://example.gov/datasets/v1" };
+    const result = transformDatasetToDCATUS(withPrev as any);
+    expect(result["dcat:previousVersion"]).toBe("https://example.gov/datasets/v1");
+  });
+
+  it("v3.0 changes conformsTo to v3.0 schema URI", () => {
+    vi.stubEnv("DCAT_US_VERSION", "v3.0");
+    const catalog = buildCatalog([], "https://example.gov");
+    expect(catalog.conformsTo).toBe("https://doi-do.github.io/dcat-us/v3.0/schema");
+    expect(catalog["@context"]).toBe("https://doi-do.github.io/dcat-us/v3.0/schema/catalog.jsonld");
+    expect(catalog.describedBy).toBe("https://doi-do.github.io/dcat-us/v3.0/schema/catalog.json");
+  });
+
+  it("v1.1 output unchanged when v3.0 not enabled", () => {
+    // Default is v1.1 (no env var set)
+    const withVersion = { ...mockDataset, version: "2.1" };
+    const result = transformDatasetToDCATUS(withVersion as any);
+    expect(result["dcat:version"]).toBeUndefined();
+
+    const catalog = buildCatalog([], "https://example.gov");
+    expect(catalog.conformsTo).toBe("https://project-open-data.cio.gov/v1.1/schema");
   });
 });
