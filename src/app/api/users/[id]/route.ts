@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { updateUserRole, deleteUser } from "@/lib/actions/users";
+import { updateUser, deleteUser } from "@/lib/actions/users";
 import { handleApiError } from "@/lib/utils/api";
 
 export async function PATCH(
@@ -9,7 +9,7 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await request.json();
-    const user = await updateUserRole(id, body);
+    const user = await updateUser(id, body);
     return NextResponse.json(user);
   } catch (error) {
     return handleApiError(error);
