@@ -19,6 +19,7 @@ const navItems = [
   { href: "/admin/analytics", label: "Analytics", requiredRole: "admin" },
   { href: "/admin/pages", label: "Pages", requiredRole: "admin" },
   { href: "/admin/users", label: "Users", requiredRole: "admin" },
+  { href: "/admin/settings", label: "Settings", requiredRole: "admin" },
 ];
 
 interface AdminSidebarProps {

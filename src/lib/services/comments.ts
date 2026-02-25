@@ -1,12 +1,13 @@
 import { prisma } from "@/lib/db";
 import type { Comment } from "@/generated/prisma/client";
+import { getSetting } from "@/lib/services/settings";
 
 export function isCommentsEnabled(): boolean {
-  return process.env.ENABLE_COMMENTS === "true";
+  return getSetting("ENABLE_COMMENTS", "false") === "true";
 }
 
 export function isModerationEnabled(): boolean {
-  return process.env.COMMENT_MODERATION !== "false";
+  return getSetting("COMMENT_MODERATION", "true") !== "false";
 }
 
 export async function getApprovedComments(datasetId: string): Promise<Comment[]> {

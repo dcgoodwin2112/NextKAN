@@ -7,6 +7,7 @@ Features and tasks deferred for future implementation.
 - **Sample Seed Data** — 4 orgs, 4 users (all roles), 12 datasets with full DCAT-US metadata, 14 sample data files, datastore CSV import, mixed workflow states. See `prisma/seed.ts`.
 - **shadcn/ui Migration (Phase 1)** — Foundation layer: `components.json`, `cn()`, 12 shadcn components, Toaster, AdminHeader + AdminSidebar migrated.
 - **User Edit Functionality** — Edit page at `/admin/users/[id]/edit`, password reset, guard rails (self-role, last-admin), AlertDialog for delete, 17 unit tests.
+- **Admin Settings Page** — Setting model (key/value store), settings service with sync cache + 60s TTL, admin page at `/admin/settings` with General/Features/Catalog sections. 12 DB-backed settings, toggle functions use `getSetting()`, `siteConfig` uses getters. 28 new tests (498 total).
 
 ---
 
@@ -18,7 +19,7 @@ Items ordered by recommended implementation sequence. Establish the design syste
 |------|------|----------|--------------|
 | ~~1~~ | ~~shadcn/ui Migration (Phase 1)~~ | ~~High~~ | ~~None~~ |
 | ~~2~~ | ~~User Edit Functionality~~ | ~~High~~ | ~~Phase 1 primitives~~ |
-| 3 | Admin Settings Page | High | Phase 1 primitives |
+| ~~3~~ | ~~Admin Settings Page~~ | ~~High~~ | ~~Phase 1 primitives~~ |
 | 4 | Admin UX Review | High | Phase 1 primitives, Settings |
 | 5 | shadcn/ui Migration (Phases 2–3) | High | UX Review (defines patterns) |
 | 6 | Enhance Admin Dashboard | Medium | UX Review (card/widget patterns) |

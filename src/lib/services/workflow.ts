@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { logActivity } from "@/lib/services/activity";
+import { getSetting } from "@/lib/services/settings";
 
 export const WORKFLOW_STATUSES = [
   "draft",
@@ -45,7 +46,7 @@ export const WORKFLOW_TRANSITIONS: Record<WorkflowStatus, TransitionRule> = {
 };
 
 export function isWorkflowEnabled(): boolean {
-  return process.env.ENABLE_WORKFLOW === "true";
+  return getSetting("ENABLE_WORKFLOW", "false") === "true";
 }
 
 export function canTransition(
