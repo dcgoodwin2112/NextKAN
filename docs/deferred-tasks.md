@@ -13,6 +13,8 @@ Features and tasks deferred for future implementation.
 - **Admin Dashboard Enhancement** — `getDashboardData()` orchestrator in `src/lib/services/dashboard.ts`. 5 dashboard rows: stats (published count/trend, downloads, pending review, avg quality), action items (feature-gated), catalog health (stale datasets, missing fields, dictionary coverage, empty orgs), trends (publishing rate + views/downloads charts, most viewed/downloaded), recent activity. 28 new tests (544 total).
 - **Admin Notification Center** — NotificationBell client component in AdminHeader. Lightweight `getNotificationItems()` service (3 parallel queries: pending reviews, unapproved comments, failed harvests). Feature-gated, localStorage dismiss, 60s polling, badge capped at 9+. API at `/api/admin/notifications`. 22 new tests (566 total).
 - **Admin Activity Log Viewer** — Extended `/api/activity` with userId, action, date range filters + CSV export. ActivityTable client component at `/admin/activity` — filterable/paginated table with URL sync, entity links, CSV download. Per-user Activity link in UserList. 13 new tests (579 total).
+- **Organization Dashboard for OrgAdmins** — `getOrgDashboardData()` service at `src/lib/services/org-dashboard.ts`. Server component at `/admin/organizations/[id]` with stat cards, members table, datasets with quality badges, activity feed. Admin org list links to dashboard; edit form via button. 10 new tests (589 total).
+- **Admin Resource Data Table Preview** — `DistributionPreviewPanel` client component at `src/components/admin/DistributionPreviewPanel.tsx`. Collapsible per-distribution panels on dataset edit page showing title, format badge, datastore status/row count/column count, error messages, reused `DataPreview` component, dictionary and public page links. Parallel `datastoreTable.findMany` query on edit page. 8 new tests (597 total).
 
 ---
 
@@ -30,8 +32,8 @@ Items ordered by recommended implementation sequence. Establish the design syste
 | ~~6~~ | ~~Enhance Admin Dashboard~~ | ~~Medium~~ | ~~UX Review (card/widget patterns)~~ |
 | ~~7~~ | ~~Admin Notification Center~~ | ~~Medium~~ | ~~Dashboard (reuses aggregation queries)~~ |
 | ~~8~~ | ~~Admin Activity Log Viewer~~ | ~~Medium~~ | ~~Phases 2–3 (DataTable)~~ |
-| 9 | Organization Dashboard for OrgAdmins | Medium | Dashboard + Activity patterns |
-| 10 | Admin Resource Data Table Preview | Medium | UX Review (collapsible panel patterns) |
+| ~~9~~ | ~~Organization Dashboard for OrgAdmins~~ | ~~Medium~~ | ~~Dashboard + Activity patterns~~ |
+| ~~10~~ | ~~Admin Resource Data Table Preview~~ | ~~Medium~~ | ~~UX Review (collapsible panel patterns)~~ |
 | 11 | Enhance Dataset Revisions | Medium | Stable UI patterns |
 | 12 | Admin Chart Management | Medium | Phases 2–3 (DataTable, Dialog) |
 | 13 | Enhance Content Pages | Medium | Stable forms + editor patterns |
@@ -239,7 +241,7 @@ Items ordered by recommended implementation sequence. Establish the design syste
 
 ---
 
-### Step 9: Organization Dashboard for OrgAdmins
+### ~~Step 9: Organization Dashboard for OrgAdmins~~ ✓
 
 **Priority:** Medium
 **Reason:** The org edit page has just 4 fields. OrgAdmins have no org-centric view showing members, datasets by status, activity, or quality summary. Reuses patterns from the main dashboard (Step 6) and activity viewer (Step 8).
@@ -260,7 +262,7 @@ Items ordered by recommended implementation sequence. Establish the design syste
 
 ---
 
-### Step 10: Admin Resource Data Table Preview
+### ~~Step 10: Admin Resource Data Table Preview~~ ✓
 
 **Priority:** Medium
 **Reason:** The DataPreview component (CSV table, JSON viewer, PDF embed) only renders on the public dataset detail page. When editing a dataset in the admin, there's no way to preview distribution contents — admins must navigate to the public page to verify data was imported correctly.
