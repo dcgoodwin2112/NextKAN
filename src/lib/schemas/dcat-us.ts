@@ -91,8 +91,10 @@ export interface DCATUSDistribution {
   describedBy?: string;
 }
 
+import { getSetting } from "@/lib/services/settings";
+
 export function getDCATUSVersion(): string {
-  return process.env.DCAT_US_VERSION || "v1.1";
+  return getSetting("DCAT_US_VERSION", "v1.1");
 }
 
 export function transformDatasetToDCATUS(

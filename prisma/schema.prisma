@@ -349,6 +349,12 @@ model AnalyticsEvent {
   @@index([entityType, entityId, createdAt])
 }
 
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
 model Comment {
   id          String   @id @default(uuid())
   datasetId   String

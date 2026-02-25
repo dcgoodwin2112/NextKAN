@@ -1,4 +1,5 @@
 import { type HookRegistry, hooks } from "./hooks";
+import { getSetting } from "@/lib/services/settings";
 
 export interface Plugin {
   name: string;
@@ -7,7 +8,7 @@ export interface Plugin {
 }
 
 export function isPluginsEnabled(): boolean {
-  return process.env.ENABLE_PLUGINS === "true";
+  return getSetting("ENABLE_PLUGINS", "false") === "true";
 }
 
 let loaded = false;
