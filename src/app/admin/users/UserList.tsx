@@ -213,6 +213,9 @@ export function UserList({ users, organizations }: UserListProps) {
                   <Button variant="ghost" size="xs" asChild>
                     <Link href={`/admin/users/${user.id}/edit`}>Edit</Link>
                   </Button>
+                  <Button variant="ghost" size="xs" asChild>
+                    <Link href={`/admin/activity?userId=${user.id}`}>Activity</Link>
+                  </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="ghost" size="xs" className="text-destructive hover:text-destructive">

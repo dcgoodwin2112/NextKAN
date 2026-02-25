@@ -106,4 +106,74 @@ describe("GET /api/activity", () => {
       })
     );
   });
+
+  it("filters by userId", async () => {
+    prismaMock.activityLog.findMany.mockResolvedValue([]);
+    prismaMock.activityLog.count.mockResolvedValue(0);
+
+    const req = new NextRequest(
+      "http://localhost:3000/api/activity?userId=user-42"
+    );
+    await GET(req);
+
+    expect(prismaMock.activityLog.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ userId: "user-42" }),
+      })
+    );
+  });
+
+  it("filters by action", async () => {
+    prismaMock.activityLog.findMany.mockResolvedValue([]);
+    prismaMock.activityLog.count.mockResolvedValue(0);
+
+    const req = new NextRequest(
+      "http://localhost:3000/api/activity?action=created"
+    );
+    await GET(req);
+
+    expect(prismaMock.activityLog.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ action: { contains: "created" } }),
+      })
+    );
+  });
+
+  it("filters by date range", async () => {
+    prismaMock.activityLog.findMany.mockResolvedValue([]);
+    prismaMock.activityLog.count.mockResolvedValue(0);
+
+    const req = new NextRequest(
+      "http://localhost:3000/api/activity?startDate=2025-01-01&endDate=2025-01-31"
+    );
+    await GET(req);
+
+    expect(prismaMock.activityLog.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          createdAt: {
+            gte: new Date("2025-01-01"),
+            lte: expect.any(Date),
+          },
+        }),
+      })
+    );
+  });
+
+  it("returns CSV when format=csv", async () => {
+    prismaMock.activityLog.findMany.mockResolvedValue(mockActivities as any);
+
+    const req = new NextRequest(
+      "http://localhost:3000/api/activity?format=csv"
+    );
+    const res = await GET(req);
+
+    expect(res.headers.get("Content-Type")).toBe("text/csv");
+    expect(res.headers.get("Content-Disposition")).toContain("activity-log.csv");
+
+    const body = await res.text();
+    expect(body).toContain("Time,User,Action,Entity Type,Entity Name,Details");
+    expect(body).toContain("Admin");
+    expect(body).toContain("dataset:created");
+  });
 });
