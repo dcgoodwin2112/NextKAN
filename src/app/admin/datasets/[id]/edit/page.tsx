@@ -252,7 +252,7 @@ export default async function EditDatasetPage({ params }: Props) {
         <h2 className="text-lg font-semibold mb-4">Version History</h2>
         <div className="rounded-lg border p-6 space-y-4">
           <CreateVersionForm onSubmit={handleCreateVersion} />
-          <VersionHistory versions={serializedVersions} />
+          <VersionHistory datasetId={dataset.id} versions={serializedVersions} isAdmin />
         </div>
       </div>
 

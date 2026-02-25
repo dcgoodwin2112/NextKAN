@@ -15,6 +15,7 @@ Features and tasks deferred for future implementation.
 - **Admin Activity Log Viewer** — Extended `/api/activity` with userId, action, date range filters + CSV export. ActivityTable client component at `/admin/activity` — filterable/paginated table with URL sync, entity links, CSV download. Per-user Activity link in UserList. 13 new tests (579 total).
 - **Organization Dashboard for OrgAdmins** — `getOrgDashboardData()` service at `src/lib/services/org-dashboard.ts`. Server component at `/admin/organizations/[id]` with stat cards, members table, datasets with quality badges, activity feed. Admin org list links to dashboard; edit form via button. 10 new tests (589 total).
 - **Admin Resource Data Table Preview** — `DistributionPreviewPanel` client component at `src/components/admin/DistributionPreviewPanel.tsx`. Collapsible per-distribution panels on dataset edit page showing title, format badge, datastore status/row count/column count, error messages, reused `DataPreview` component, dictionary and public page links. Parallel `datastoreTable.findMany` query on edit page. 8 new tests (597 total).
+- **Enhance Dataset Revisions** — `getVersionById()` + `revertToVersion()` in versioning.ts. `VersionDetail` snapshot viewer, `VersionActions` (compare + revert with AlertDialog), `VersionHistory` with admin detail links. Version detail page at `/admin/datasets/[id]/versions/[versionId]` with snapshot viewer, compare-with-current diff, and revert. 15 new tests (612 total).
 
 ---
 
@@ -34,7 +35,7 @@ Items ordered by recommended implementation sequence. Establish the design syste
 | ~~8~~ | ~~Admin Activity Log Viewer~~ | ~~Medium~~ | ~~Phases 2–3 (DataTable)~~ |
 | ~~9~~ | ~~Organization Dashboard for OrgAdmins~~ | ~~Medium~~ | ~~Dashboard + Activity patterns~~ |
 | ~~10~~ | ~~Admin Resource Data Table Preview~~ | ~~Medium~~ | ~~UX Review (collapsible panel patterns)~~ |
-| 11 | Enhance Dataset Revisions | Medium | Stable UI patterns |
+| ~~11~~ | ~~Enhance Dataset Revisions~~ | ~~Medium~~ | ~~Stable UI patterns~~ |
 | 12 | Admin Chart Management | Medium | Phases 2–3 (DataTable, Dialog) |
 | 13 | Enhance Content Pages | Medium | Stable forms + editor patterns |
 | 14 | Dataset Templates | Medium | Stable DatasetForm (after form migration) |
@@ -282,7 +283,7 @@ Items ordered by recommended implementation sequence. Establish the design syste
 
 ---
 
-### Step 11: Enhance Dataset Revisions
+### ~~Step 11: Enhance Dataset Revisions~~ ✓
 
 **Priority:** Medium
 **Reason:** The versioning system creates JSON snapshots and can diff between two versions, but VersionHistory only displays version number and changelog. There's no way to view the full field values of an older revision, and no way to revert a dataset to a previous state.
