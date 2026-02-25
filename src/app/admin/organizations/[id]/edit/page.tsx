@@ -46,7 +46,8 @@ export default async function EditOrganizationPage({ params }: Props) {
         items={[
           { label: "Admin", href: "/admin" },
           { label: "Organizations", href: "/admin/organizations" },
-          { label: "Edit Organization" },
+          { label: organization.name, href: `/admin/organizations/${id}` },
+          { label: "Edit" },
         ]}
       />
       <AdminPageHeader title="Edit Organization">
