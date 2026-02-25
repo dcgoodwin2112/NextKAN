@@ -2,6 +2,20 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface User {
   id: string;
@@ -63,6 +77,7 @@ export function UserList({ users, organizations }: UserListProps) {
       setName("");
       setRole("editor");
       setOrgId("");
+      toast.success("User created successfully");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -71,32 +86,17 @@ export function UserList({ users, organizations }: UserListProps) {
     }
   }
 
-  async function handleRoleChange(userId: string, newRole: string) {
-    try {
-      const res = await fetch(`/api/users/${userId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role: newRole }),
-      });
-      if (!res.ok) throw new Error("Failed to update role");
-      router.refresh();
-    } catch {
-      alert("Failed to update user role");
-    }
-  }
-
   async function handleDelete(userId: string) {
-    if (!confirm("Are you sure you want to delete this user?")) return;
-
     try {
       const res = await fetch(`/api/users/${userId}`, { method: "DELETE" });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || "Failed to delete user");
       }
+      toast.success("User deleted successfully");
       router.refresh();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to delete user");
+      toast.error(err instanceof Error ? err.message : "Failed to delete user");
     }
   }
 
@@ -170,21 +170,18 @@ export function UserList({ users, organizations }: UserListProps) {
               </select>
             </div>
             <div className="flex gap-2">
-              <button type="submit" disabled={loading} className="rounded bg-primary px-4 py-2 text-white text-sm hover:bg-primary-hover disabled:opacity-50">
+              <Button type="submit" disabled={loading}>
                 {loading ? "Creating..." : "Create User"}
-              </button>
-              <button type="button" onClick={() => setShowCreateForm(false)} className="rounded border px-4 py-2 text-sm hover:bg-surface">
+              </Button>
+              <Button type="button" variant="outline" onClick={() => setShowCreateForm(false)}>
                 Cancel
-              </button>
+              </Button>
             </div>
           </form>
         ) : (
-          <button
-            onClick={() => setShowCreateForm(true)}
-            className="rounded bg-primary px-4 py-2 text-white text-sm hover:bg-primary-hover"
-          >
+          <Button onClick={() => setShowCreateForm(true)}>
             Create User
-          </button>
+          </Button>
         )}
       </div>
 
@@ -204,26 +201,38 @@ export function UserList({ users, organizations }: UserListProps) {
               <tr key={user.id}>
                 <td className="border px-3 py-2">{user.email}</td>
                 <td className="border px-3 py-2">{user.name || "-"}</td>
-                <td className="border px-3 py-2">
-                  <select
-                    value={user.role}
-                    onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                    className="rounded border px-2 py-1 text-xs"
-                  >
-                    <option value="admin">Admin</option>
-                    <option value="orgAdmin">Org Admin</option>
-                    <option value="editor">Editor</option>
-                    <option value="viewer">Viewer</option>
-                  </select>
-                </td>
+                <td className="border px-3 py-2">{user.role}</td>
                 <td className="border px-3 py-2">{user.organization?.name || "-"}</td>
                 <td className="border px-3 py-2">
-                  <button
-                    onClick={() => handleDelete(user.id)}
-                    className="text-danger hover:opacity-80 text-xs"
-                  >
-                    Delete
-                  </button>
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="xs" asChild>
+                      <Link href={`/admin/users/${user.id}/edit`}>Edit</Link>
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="xs" className="text-destructive hover:text-destructive">
+                          Delete
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete User</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete {user.email}? This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            variant="destructive"
+                            onClick={() => handleDelete(user.id)}
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </td>
               </tr>
             ))}

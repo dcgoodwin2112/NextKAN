@@ -5,6 +5,8 @@ Features and tasks deferred for future implementation.
 ## Completed
 
 - **Sample Seed Data** — 4 orgs, 4 users (all roles), 12 datasets with full DCAT-US metadata, 14 sample data files, datastore CSV import, mixed workflow states. See `prisma/seed.ts`.
+- **shadcn/ui Migration (Phase 1)** — Foundation layer: `components.json`, `cn()`, 12 shadcn components, Toaster, AdminHeader + AdminSidebar migrated.
+- **User Edit Functionality** — Edit page at `/admin/users/[id]/edit`, password reset, guard rails (self-role, last-admin), AlertDialog for delete, 17 unit tests.
 
 ---
 
@@ -14,8 +16,8 @@ Items ordered by recommended implementation sequence. Establish the design syste
 
 | Step | Item | Priority | Dependencies |
 |------|------|----------|--------------|
-| 1 | shadcn/ui Migration (Phase 1) | High | None |
-| 2 | User Edit Functionality | High | Phase 1 primitives |
+| ~~1~~ | ~~shadcn/ui Migration (Phase 1)~~ | ~~High~~ | ~~None~~ |
+| ~~2~~ | ~~User Edit Functionality~~ | ~~High~~ | ~~Phase 1 primitives~~ |
 | 3 | Admin Settings Page | High | Phase 1 primitives |
 | 4 | Admin UX Review | High | Phase 1 primitives, Settings |
 | 5 | shadcn/ui Migration (Phases 2–3) | High | UX Review (defines patterns) |
