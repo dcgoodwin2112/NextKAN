@@ -11,6 +11,8 @@ Features and tasks deferred for future implementation.
 - **Admin UX Review** — Reusable components: `AdminPageHeader`, `Breadcrumbs`, `EmptyState`, `ConfirmDeleteButton`. Loading skeletons for admin, datasets, quality, analytics. Applied to all ~22 admin pages. 18 new tests (516 total).
 - **shadcn/ui Migration (Phases 2–3)** — NativeSelect component (styled native `<select>` for test compatibility). All admin forms migrated to shadcn Input/Label/Textarea/Button/NativeSelect. All 10 admin tables migrated to shadcn Table. Stat cards migrated to shadcn Card. ~25 files modified, 0 test changes.
 - **Admin Dashboard Enhancement** — `getDashboardData()` orchestrator in `src/lib/services/dashboard.ts`. 5 dashboard rows: stats (published count/trend, downloads, pending review, avg quality), action items (feature-gated), catalog health (stale datasets, missing fields, dictionary coverage, empty orgs), trends (publishing rate + views/downloads charts, most viewed/downloaded), recent activity. 28 new tests (544 total).
+- **Admin Notification Center** — NotificationBell client component in AdminHeader. Lightweight `getNotificationItems()` service (3 parallel queries: pending reviews, unapproved comments, failed harvests). Feature-gated, localStorage dismiss, 60s polling, badge capped at 9+. API at `/api/admin/notifications`. 22 new tests (566 total).
+- **Admin Activity Log Viewer** — Extended `/api/activity` with userId, action, date range filters + CSV export. ActivityTable client component at `/admin/activity` — filterable/paginated table with URL sync, entity links, CSV download. Per-user Activity link in UserList. 13 new tests (579 total).
 
 ---
 
@@ -26,8 +28,8 @@ Items ordered by recommended implementation sequence. Establish the design syste
 | ~~4~~ | ~~Admin UX Review~~ | ~~High~~ | ~~Phase 1 primitives, Settings~~ |
 | ~~5~~ | ~~shadcn/ui Migration (Phases 2–3)~~ | ~~High~~ | ~~UX Review (defines patterns)~~ |
 | ~~6~~ | ~~Enhance Admin Dashboard~~ | ~~Medium~~ | ~~UX Review (card/widget patterns)~~ |
-| 7 | Admin Notification Center | Medium | Dashboard (reuses aggregation queries) |
-| 8 | Admin Activity Log Viewer | Medium | Phases 2–3 (DataTable) |
+| ~~7~~ | ~~Admin Notification Center~~ | ~~Medium~~ | ~~Dashboard (reuses aggregation queries)~~ |
+| ~~8~~ | ~~Admin Activity Log Viewer~~ | ~~Medium~~ | ~~Phases 2–3 (DataTable)~~ |
 | 9 | Organization Dashboard for OrgAdmins | Medium | Dashboard + Activity patterns |
 | 10 | Admin Resource Data Table Preview | Medium | UX Review (collapsible panel patterns) |
 | 11 | Enhance Dataset Revisions | Medium | Stable UI patterns |
@@ -195,7 +197,7 @@ Items ordered by recommended implementation sequence. Establish the design syste
 
 ---
 
-### Step 7: Admin Notification Center
+### ~~Step 7: Admin Notification Center~~ ✓
 
 **Priority:** Medium
 **Reason:** No persistent notification system exists. Admins must manually check individual pages to discover actionable items. Natural complement to the dashboard — surfaces the same action-required items in a persistent bell icon. Can reuse dashboard aggregation queries.
@@ -216,7 +218,7 @@ Items ordered by recommended implementation sequence. Establish the design syste
 
 ---
 
-### Step 8: Admin Activity Log Viewer
+### ~~Step 8: Admin Activity Log Viewer~~ ✓
 
 **Priority:** Medium
 **Reason:** ActivityLog captures all CRUD operations but the only view is a 10-item feed on the dashboard. No way to search/filter by user, entity type, or date range. Straightforward with DataTable in place from Step 5.
