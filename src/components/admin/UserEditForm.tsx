@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { NativeSelect } from "@/components/ui/native-select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface User {
@@ -126,18 +127,17 @@ export function UserEditForm({ user, organizations, isCurrentUser }: UserEditFor
 
         <div className="space-y-2">
           <Label htmlFor="edit-role">Role</Label>
-          <select
+          <NativeSelect
             id="edit-role"
             value={role}
             onChange={(e) => setRole(e.target.value)}
             disabled={isCurrentUser}
-            className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs disabled:opacity-50"
           >
             <option value="admin">Admin</option>
             <option value="orgAdmin">Org Admin</option>
             <option value="editor">Editor</option>
             <option value="viewer">Viewer</option>
-          </select>
+          </NativeSelect>
           {isCurrentUser && (
             <p className="text-xs text-muted-foreground">You cannot change your own role.</p>
           )}
@@ -145,17 +145,16 @@ export function UserEditForm({ user, organizations, isCurrentUser }: UserEditFor
 
         <div className="space-y-2">
           <Label htmlFor="edit-org">Organization</Label>
-          <select
+          <NativeSelect
             id="edit-org"
             value={orgId}
             onChange={(e) => setOrgId(e.target.value)}
-            className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
           >
             <option value="">None</option>
             {organizations.map((org) => (
               <option key={org.id} value={org.id}>{org.name}</option>
             ))}
-          </select>
+          </NativeSelect>
         </div>
 
         <div className="flex gap-2">

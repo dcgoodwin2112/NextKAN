@@ -6,6 +6,11 @@ import { DistributionForm } from "./DistributionForm";
 import { DistributionList } from "./DistributionList";
 import { LICENSES, getLicenseByUrl } from "@/lib/data/licenses";
 import { MetadataCompleteness } from "./MetadataCompleteness";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { NativeSelect } from "@/components/ui/native-select";
 import type { DatasetCreateInput } from "@/lib/schemas/dataset";
 
 interface Organization {
@@ -276,54 +281,42 @@ export function DatasetForm({
       {/* Basic Info */}
       <fieldset className="space-y-4">
         <legend className="text-lg font-semibold">Basic Info</legend>
-        <div>
-          <label htmlFor="title" className="block text-sm font-medium mb-1">
-            Title *
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="title">Title *</Label>
+          <Input
             id="title"
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full rounded border px-3 py-2"
           />
         </div>
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium mb-1">
-            Description *
-          </label>
-          <textarea
+        <div className="space-y-2">
+          <Label htmlFor="description">Description *</Label>
+          <Textarea
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full rounded border px-3 py-2"
             rows={4}
           />
         </div>
-        <div>
-          <label htmlFor="identifier" className="block text-sm font-medium mb-1">
-            Identifier
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="identifier">Identifier</Label>
+          <Input
             id="identifier"
             type="text"
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
-            className="w-full rounded border px-3 py-2"
             placeholder="Auto-generated if blank"
           />
         </div>
-        <div>
-          <label htmlFor="keywords" className="block text-sm font-medium mb-1">
-            Keywords * (press Enter to add)
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="keywords">Keywords * (press Enter to add)</Label>
+          <Input
             id="keywords"
             type="text"
             value={keywordInput}
             onChange={(e) => setKeywordInput(e.target.value)}
             onKeyDown={addKeyword}
-            className="w-full rounded border px-3 py-2"
             placeholder="Type keyword and press Enter"
           />
           {keywords.length > 0 && (
@@ -349,7 +342,7 @@ export function DatasetForm({
         </div>
         {availableThemes.length > 0 && (
           <div>
-            <label className="block text-sm font-medium mb-1">Themes</label>
+            <Label className="mb-1">Themes</Label>
             <div className="grid grid-cols-2 gap-1 max-h-48 overflow-y-auto border rounded p-2">
               {availableThemes.map((theme) => (
                 <label key={theme.id} className="flex items-center gap-2 text-sm py-0.5">
@@ -370,50 +363,41 @@ export function DatasetForm({
             </div>
           </div>
         )}
-        <div>
-          <label htmlFor="accessLevel" className="block text-sm font-medium mb-1">
-            Access Level
-          </label>
-          <select
+        <div className="space-y-2">
+          <Label htmlFor="accessLevel">Access Level</Label>
+          <NativeSelect
             id="accessLevel"
             value={accessLevel}
             onChange={(e) => setAccessLevel(e.target.value)}
-            className="w-full rounded border px-3 py-2"
           >
             <option value="public">Public</option>
             <option value="restricted public">Restricted Public</option>
             <option value="non-public">Non-Public</option>
-          </select>
+          </NativeSelect>
         </div>
-        <div>
-          <label htmlFor="status" className="block text-sm font-medium mb-1">
-            Status
-          </label>
-          <select
+        <div className="space-y-2">
+          <Label htmlFor="status">Status</Label>
+          <NativeSelect
             id="status"
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="w-full rounded border px-3 py-2"
           >
             <option value="draft">Draft</option>
             <option value="published">Published</option>
             <option value="archived">Archived</option>
-          </select>
+          </NativeSelect>
         </div>
       </fieldset>
 
       {/* Publisher & Contact */}
       <fieldset className="space-y-4">
         <legend className="text-lg font-semibold">Publisher & Contact</legend>
-        <div>
-          <label htmlFor="publisherId" className="block text-sm font-medium mb-1">
-            Publisher *
-          </label>
-          <select
+        <div className="space-y-2">
+          <Label htmlFor="publisherId">Publisher *</Label>
+          <NativeSelect
             id="publisherId"
             value={publisherId}
             onChange={(e) => setPublisherId(e.target.value)}
-            className="w-full rounded border px-3 py-2"
           >
             <option value="">Select publisher...</option>
             {organizations.map((org) => (
@@ -421,30 +405,24 @@ export function DatasetForm({
                 {org.name}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </div>
-        <div>
-          <label htmlFor="contactName" className="block text-sm font-medium mb-1">
-            Contact Name
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="contactName">Contact Name</Label>
+          <Input
             id="contactName"
             type="text"
             value={contactName}
             onChange={(e) => setContactName(e.target.value)}
-            className="w-full rounded border px-3 py-2"
           />
         </div>
-        <div>
-          <label htmlFor="contactEmail" className="block text-sm font-medium mb-1">
-            Contact Email
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="contactEmail">Contact Email</Label>
+          <Input
             id="contactEmail"
             type="email"
             value={contactEmail}
             onChange={(e) => setContactEmail(e.target.value)}
-            className="w-full rounded border px-3 py-2"
           />
         </div>
       </fieldset>
@@ -460,29 +438,23 @@ export function DatasetForm({
         </button>
         {showFederal && (
           <div className="space-y-4 pl-4">
-            <div>
-              <label htmlFor="bureauCode" className="block text-sm font-medium mb-1">
-                Bureau Code
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="bureauCode">Bureau Code</Label>
+              <Input
                 id="bureauCode"
                 type="text"
                 value={bureauCode}
                 onChange={(e) => setBureauCode(e.target.value)}
-                className="w-full rounded border px-3 py-2"
                 placeholder="015:11"
               />
             </div>
-            <div>
-              <label htmlFor="programCode" className="block text-sm font-medium mb-1">
-                Program Code
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="programCode">Program Code</Label>
+              <Input
                 id="programCode"
                 type="text"
                 value={programCode}
                 onChange={(e) => setProgramCode(e.target.value)}
-                className="w-full rounded border px-3 py-2"
                 placeholder="015:001"
               />
             </div>
@@ -501,54 +473,45 @@ export function DatasetForm({
         </button>
         {showAccess && (
           <div className="space-y-4 pl-4">
-            <div>
-              <label htmlFor="license" className="block text-sm font-medium mb-1">
-                License
-              </label>
-              <select
+            <div className="space-y-2">
+              <Label htmlFor="license">License</Label>
+              <NativeSelect
                 id="license"
                 value={licenseId}
                 onChange={(e) => setLicenseId(e.target.value)}
-                className="w-full rounded border px-3 py-2"
               >
                 <option value="">No license selected</option>
                 {LICENSES.map((l) => (
                   <option key={l.id} value={l.id}>{l.name}</option>
                 ))}
-              </select>
+              </NativeSelect>
               {licenseId === "other" && (
-                <input
+                <Input
                   id="customLicenseUrl"
                   type="url"
                   value={customLicenseUrl}
                   onChange={(e) => setCustomLicenseUrl(e.target.value)}
-                  className="w-full rounded border px-3 py-2 mt-2"
+                  className="mt-2"
                   placeholder="Enter license URL"
                 />
               )}
             </div>
-            <div>
-              <label htmlFor="rights" className="block text-sm font-medium mb-1">
-                Rights
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="rights">Rights</Label>
+              <Input
                 id="rights"
                 type="text"
                 value={rights}
                 onChange={(e) => setRights(e.target.value)}
-                className="w-full rounded border px-3 py-2"
               />
             </div>
-            <div>
-              <label htmlFor="landingPage" className="block text-sm font-medium mb-1">
-                Landing Page
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="landingPage">Landing Page</Label>
+              <Input
                 id="landingPage"
                 type="url"
                 value={landingPage}
                 onChange={(e) => setLandingPage(e.target.value)}
-                className="w-full rounded border px-3 py-2"
               />
             </div>
           </div>
@@ -566,28 +529,22 @@ export function DatasetForm({
         </button>
         {showCoverage && (
           <div className="space-y-4 pl-4">
-            <div>
-              <label htmlFor="spatial" className="block text-sm font-medium mb-1">
-                Spatial
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="spatial">Spatial</Label>
+              <Input
                 id="spatial"
                 type="text"
                 value={spatial}
                 onChange={(e) => setSpatial(e.target.value)}
-                className="w-full rounded border px-3 py-2"
               />
             </div>
-            <div>
-              <label htmlFor="temporal" className="block text-sm font-medium mb-1">
-                Temporal
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="temporal">Temporal</Label>
+              <Input
                 id="temporal"
                 type="text"
                 value={temporal}
                 onChange={(e) => setTemporal(e.target.value)}
-                className="w-full rounded border px-3 py-2"
                 placeholder="2020-01-01/2024-12-31"
               />
             </div>
@@ -606,41 +563,32 @@ export function DatasetForm({
         </button>
         {showAdditional && (
           <div className="space-y-4 pl-4">
-            <div>
-              <label htmlFor="issued" className="block text-sm font-medium mb-1">
-                Issued Date
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="issued">Issued Date</Label>
+              <Input
                 id="issued"
                 type="date"
                 value={issued}
                 onChange={(e) => setIssued(e.target.value)}
-                className="w-full rounded border px-3 py-2"
               />
             </div>
-            <div>
-              <label htmlFor="accrualPeriodicity" className="block text-sm font-medium mb-1">
-                Accrual Periodicity
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="accrualPeriodicity">Accrual Periodicity</Label>
+              <Input
                 id="accrualPeriodicity"
                 type="text"
                 value={accrualPeriodicity}
                 onChange={(e) => setAccrualPeriodicity(e.target.value)}
-                className="w-full rounded border px-3 py-2"
                 placeholder="R/P1Y"
               />
             </div>
-            <div>
-              <label htmlFor="conformsTo" className="block text-sm font-medium mb-1">
-                Conforms To
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="conformsTo">Conforms To</Label>
+              <Input
                 id="conformsTo"
                 type="url"
                 value={conformsTo}
                 onChange={(e) => setConformsTo(e.target.value)}
-                className="w-full rounded border px-3 py-2"
               />
             </div>
             <div className="flex items-center gap-2">
@@ -654,40 +602,31 @@ export function DatasetForm({
                 Data Quality
               </label>
             </div>
-            <div>
-              <label htmlFor="describedBy" className="block text-sm font-medium mb-1">
-                Described By
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="describedBy">Described By</Label>
+              <Input
                 id="describedBy"
                 type="url"
                 value={describedBy}
                 onChange={(e) => setDescribedBy(e.target.value)}
-                className="w-full rounded border px-3 py-2"
               />
             </div>
-            <div>
-              <label htmlFor="isPartOf" className="block text-sm font-medium mb-1">
-                Is Part Of
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="isPartOf">Is Part Of</Label>
+              <Input
                 id="isPartOf"
                 type="text"
                 value={isPartOf}
                 onChange={(e) => setIsPartOf(e.target.value)}
-                className="w-full rounded border px-3 py-2"
               />
             </div>
-            <div>
-              <label htmlFor="language" className="block text-sm font-medium mb-1">
-                Language
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="language">Language</Label>
+              <Input
                 id="language"
                 type="text"
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="w-full rounded border px-3 py-2"
               />
             </div>
           </div>
@@ -706,15 +645,12 @@ export function DatasetForm({
           </button>
           {showV3 && (
             <div className="space-y-4 pl-4">
-              <div>
-                <label htmlFor="seriesId" className="block text-sm font-medium mb-1">
-                  Series
-                </label>
-                <select
+              <div className="space-y-2">
+                <Label htmlFor="seriesId">Series</Label>
+                <NativeSelect
                   id="seriesId"
                   value={seriesId}
                   onChange={(e) => setSeriesId(e.target.value)}
-                  className="w-full rounded border px-3 py-2"
                 >
                   <option value="">No series</option>
                   {availableSeries.map((s) => (
@@ -722,43 +658,34 @@ export function DatasetForm({
                       {s.title}
                     </option>
                   ))}
-                </select>
+                </NativeSelect>
               </div>
-              <div>
-                <label htmlFor="dcatVersion" className="block text-sm font-medium mb-1">
-                  Version
-                </label>
-                <input
+              <div className="space-y-2">
+                <Label htmlFor="dcatVersion">Version</Label>
+                <Input
                   id="dcatVersion"
                   type="text"
                   value={dcatVersion}
                   onChange={(e) => setDcatVersion(e.target.value)}
-                  className="w-full rounded border px-3 py-2"
                   placeholder="e.g. 2.1"
                 />
               </div>
-              <div>
-                <label htmlFor="dcatVersionNotes" className="block text-sm font-medium mb-1">
-                  Version Notes
-                </label>
-                <textarea
+              <div className="space-y-2">
+                <Label htmlFor="dcatVersionNotes">Version Notes</Label>
+                <Textarea
                   id="dcatVersionNotes"
                   value={dcatVersionNotes}
                   onChange={(e) => setDcatVersionNotes(e.target.value)}
-                  className="w-full rounded border px-3 py-2"
                   rows={2}
                 />
               </div>
-              <div>
-                <label htmlFor="previousVersion" className="block text-sm font-medium mb-1">
-                  Previous Version
-                </label>
-                <input
+              <div className="space-y-2">
+                <Label htmlFor="previousVersion">Previous Version</Label>
+                <Input
                   id="previousVersion"
                   type="text"
                   value={previousVersion}
                   onChange={(e) => setPreviousVersion(e.target.value)}
-                  className="w-full rounded border px-3 py-2"
                   placeholder="URL or identifier of previous version"
                 />
               </div>
@@ -781,32 +708,29 @@ export function DatasetForm({
             onCancel={() => setShowDistForm(false)}
           />
         ) : (
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={() => setShowDistForm(true)}
-            className="rounded border border-dashed border-border px-3 py-2 text-sm text-text-tertiary hover:border-text-muted hover:text-text-secondary"
+            className="border-dashed"
           >
             + Add Distribution
-          </button>
+          </Button>
         )}
       </fieldset>
 
       {/* Submit */}
       <div className="flex gap-2">
-        <button
-          type="submit"
-          disabled={loading}
-          className="rounded bg-primary px-4 py-2 text-white hover:bg-primary-hover disabled:opacity-50"
-        >
+        <Button type="submit" disabled={loading}>
           {loading ? "Saving..." : initialData ? "Update" : "Create"}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="outline"
           onClick={() => router.push("/admin/datasets")}
-          className="rounded border border-border px-4 py-2 hover:bg-surface"
         >
           Cancel
-        </button>
+        </Button>
       </div>
     </form>
   );

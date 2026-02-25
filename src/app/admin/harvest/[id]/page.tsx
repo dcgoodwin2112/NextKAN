@@ -10,6 +10,15 @@ import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { HarvestDeleteButton } from "./HarvestDeleteButton";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -111,48 +120,53 @@ export default async function HarvestSourceDetailPage({ params }: Props) {
       {jobs.length === 0 ? (
         <p className="text-text-muted">No harvest jobs yet.</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-border text-sm">
-            <thead className="bg-surface">
-              <tr>
-                <th className="px-4 py-2 text-left font-medium text-text-muted">Started</th>
-                <th className="px-4 py-2 text-left font-medium text-text-muted">Status</th>
-                <th className="px-4 py-2 text-left font-medium text-text-muted">Created</th>
-                <th className="px-4 py-2 text-left font-medium text-text-muted">Updated</th>
-                <th className="px-4 py-2 text-left font-medium text-text-muted">Archived</th>
-                <th className="px-4 py-2 text-left font-medium text-text-muted">Errors</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {jobs.map((job) => (
-                <tr key={job.id}>
-                  <td className="px-4 py-2">
-                    {new Date(job.startedAt).toLocaleString()}
-                  </td>
-                  <td className="px-4 py-2">
-                    <span
-                      className={`rounded px-2 py-0.5 text-xs ${
-                        job.status === "success"
-                          ? "bg-success-subtle text-success-text"
-                          : job.status === "running"
-                            ? "bg-primary-subtle text-primary-subtle-text"
-                            : "bg-danger-subtle text-danger-text"
-                      }`}
-                    >
-                      {job.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-2">{job.datasetsCreated}</td>
-                  <td className="px-4 py-2">{job.datasetsUpdated}</td>
-                  <td className="px-4 py-2">{job.datasetsDeleted}</td>
-                  <td className="px-4 py-2">
-                    {job.errors ? JSON.parse(job.errors).length : 0}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Started</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead>Updated</TableHead>
+              <TableHead>Archived</TableHead>
+              <TableHead>Errors</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {jobs.map((job) => (
+              <TableRow key={job.id}>
+                <TableCell>
+                  {new Date(job.startedAt).toLocaleString()}
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant={
+                      job.status === "success"
+                        ? "default"
+                        : job.status === "running"
+                          ? "secondary"
+                          : "destructive"
+                    }
+                    className={
+                      job.status === "success"
+                        ? "bg-success-subtle text-success-text hover:bg-success-subtle"
+                        : job.status === "running"
+                          ? "bg-primary-subtle text-primary-subtle-text hover:bg-primary-subtle"
+                          : ""
+                    }
+                  >
+                    {job.status}
+                  </Badge>
+                </TableCell>
+                <TableCell>{job.datasetsCreated}</TableCell>
+                <TableCell>{job.datasetsUpdated}</TableCell>
+                <TableCell>{job.datasetsDeleted}</TableCell>
+                <TableCell>
+                  {job.errors ? JSON.parse(job.errors).length : 0}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       )}
     </div>
   );

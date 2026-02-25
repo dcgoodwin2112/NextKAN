@@ -2,6 +2,15 @@ import { prisma } from "@/lib/db";
 import { calculateQualityScore } from "@/lib/services/data-quality";
 import { QualityBadge } from "@/components/datasets/QualityBadge";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import type { DatasetWithRelations } from "@/lib/schemas/dcat-us";
 import Link from "next/link";
 
@@ -49,18 +58,24 @@ export default async function QualityReportPage() {
       <AdminPageHeader title="Data Quality Report" />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <div className="rounded border p-4 bg-background">
-          <p className="text-sm text-text-muted">Total Datasets</p>
-          <p className="text-2xl font-bold">{scored.length}</p>
-        </div>
-        <div className="rounded border p-4 bg-background">
-          <p className="text-sm text-text-muted">Average Quality Score</p>
-          <p className="text-2xl font-bold">{avgScore}/100</p>
-        </div>
-        <div className="rounded border p-4 bg-background">
-          <p className="text-sm text-text-muted">Most Common Gap</p>
-          <p className="text-2xl font-bold">{topMissing[0]?.[0] || "None"}</p>
-        </div>
+        <Card>
+          <CardContent>
+            <p className="text-sm text-text-muted">Total Datasets</p>
+            <p className="text-2xl font-bold">{scored.length}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent>
+            <p className="text-sm text-text-muted">Average Quality Score</p>
+            <p className="text-2xl font-bold">{avgScore}/100</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent>
+            <p className="text-sm text-text-muted">Most Common Gap</p>
+            <p className="text-2xl font-bold">{topMissing[0]?.[0] || "None"}</p>
+          </CardContent>
+        </Card>
       </div>
 
       {topMissing.length > 0 && (
@@ -79,38 +94,36 @@ export default async function QualityReportPage() {
         </div>
       )}
 
-      <div className="rounded border bg-background overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-surface border-b">
-            <tr>
-              <th className="text-left px-4 py-3 font-medium">Dataset</th>
-              <th className="text-left px-4 py-3 font-medium">Publisher</th>
-              <th className="text-left px-4 py-3 font-medium">Score</th>
-              <th className="text-left px-4 py-3 font-medium">Quality</th>
-              <th className="text-left px-4 py-3 font-medium">Top Suggestion</th>
-            </tr>
-          </thead>
-          <tbody>
-            {scored.map(({ dataset, quality }) => (
-              <tr key={dataset.id} className="border-b last:border-0">
-                <td className="px-4 py-3">
-                  <Link href={`/admin/datasets/${dataset.id}/edit`} className="text-primary hover:underline">
-                    {dataset.title}
-                  </Link>
-                </td>
-                <td className="px-4 py-3 text-text-tertiary">{dataset.publisher.name}</td>
-                <td className="px-4 py-3 font-mono">{quality.overall}/100</td>
-                <td className="px-4 py-3">
-                  <QualityBadge score={quality.overall} showScore={false} />
-                </td>
-                <td className="px-4 py-3 text-text-muted text-xs">
-                  {quality.suggestions[0] || "Complete"}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Dataset</TableHead>
+            <TableHead>Publisher</TableHead>
+            <TableHead>Score</TableHead>
+            <TableHead>Quality</TableHead>
+            <TableHead>Top Suggestion</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {scored.map(({ dataset, quality }) => (
+            <TableRow key={dataset.id}>
+              <TableCell>
+                <Link href={`/admin/datasets/${dataset.id}/edit`} className="text-primary hover:underline">
+                  {dataset.title}
+                </Link>
+              </TableCell>
+              <TableCell className="text-text-tertiary">{dataset.publisher.name}</TableCell>
+              <TableCell className="font-mono">{quality.overall}/100</TableCell>
+              <TableCell>
+                <QualityBadge score={quality.overall} showScore={false} />
+              </TableCell>
+              <TableCell className="text-text-muted text-xs">
+                {quality.suggestions[0] || "Complete"}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { NativeSelect } from "@/components/ui/native-select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { updateSettings } from "@/lib/actions/settings";
 
@@ -144,15 +145,14 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="setting-dcat-version">DCAT-US Version</Label>
-            <select
+            <NativeSelect
               id="setting-dcat-version"
               value={settings.DCAT_US_VERSION}
               onChange={(e) => update("DCAT_US_VERSION", e.target.value)}
-              className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
             >
               <option value="v1.1">v1.1</option>
               <option value="v3.0">v3.0</option>
-            </select>
+            </NativeSelect>
           </div>
 
           <div className="space-y-2">
@@ -188,15 +188,15 @@ function ToggleField({
   return (
     <div className="flex items-center justify-between">
       <Label htmlFor={id}>{label}</Label>
-      <select
+      <NativeSelect
         id={id}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-9 w-32 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
+        className="w-32"
       >
         <option value="true">Enabled</option>
         <option value="false">Disabled</option>
-      </select>
+      </NativeSelect>
     </div>
   );
 }

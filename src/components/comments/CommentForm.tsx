@@ -1,6 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 interface CommentFormProps {
   datasetId: string;
@@ -65,53 +69,40 @@ export function CommentForm({ datasetId, parentId, onSubmitted }: CommentFormPro
         <p className="text-sm text-danger-text bg-danger-subtle px-3 py-2 rounded">{errorMsg}</p>
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <label htmlFor="authorName" className="block text-sm font-medium text-text-secondary mb-1">
-            Name
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="authorName">Name</Label>
+          <Input
             id="authorName"
             type="text"
             value={authorName}
             onChange={(e) => setAuthorName(e.target.value)}
-            className="w-full rounded border px-3 py-2 text-sm"
             placeholder="Your name"
           />
         </div>
-        <div>
-          <label htmlFor="authorEmail" className="block text-sm font-medium text-text-secondary mb-1">
-            Email
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="authorEmail">Email</Label>
+          <Input
             id="authorEmail"
             type="email"
             value={authorEmail}
             onChange={(e) => setAuthorEmail(e.target.value)}
-            className="w-full rounded border px-3 py-2 text-sm"
             placeholder="your@email.com"
           />
         </div>
       </div>
-      <div>
-        <label htmlFor="commentContent" className="block text-sm font-medium text-text-secondary mb-1">
-          Comment
-        </label>
-        <textarea
+      <div className="space-y-2">
+        <Label htmlFor="commentContent">Comment</Label>
+        <Textarea
           id="commentContent"
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="w-full rounded border px-3 py-2 text-sm"
           rows={3}
           placeholder="Leave a comment..."
         />
       </div>
-      <button
-        type="submit"
-        disabled={status === "submitting"}
-        className="rounded bg-primary px-4 py-2 text-sm text-white hover:bg-primary-hover disabled:opacity-50"
-      >
+      <Button type="submit" disabled={status === "submitting"}>
         {status === "submitting" ? "Submitting..." : "Submit Comment"}
-      </button>
+      </Button>
     </form>
   );
 }
