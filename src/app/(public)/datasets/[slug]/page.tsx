@@ -246,6 +246,7 @@ export default async function DatasetDetailPage({
         <section className="border-t pt-6 mt-6">
           <h2 className="text-lg font-semibold mb-4">Version History</h2>
           <VersionHistory
+            datasetId={dataset.id}
             versions={versions.map((v) => ({
               id: v.id,
               version: v.version,

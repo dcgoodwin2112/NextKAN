@@ -4,6 +4,8 @@ const mockFindUnique = vi.fn();
 const mockCreate = vi.fn();
 const mockFindMany = vi.fn();
 const mockVersionFindUnique = vi.fn();
+const mockOrgFindFirst = vi.fn();
+const mockThemeFindMany = vi.fn();
 
 vi.mock("@/lib/db", () => ({
   prisma: {
@@ -15,14 +17,39 @@ vi.mock("@/lib/db", () => ({
       findMany: (...args: unknown[]) => mockFindMany(...args),
       findUnique: (...args: unknown[]) => mockVersionFindUnique(...args),
     },
+    organization: {
+      findFirst: (...args: unknown[]) => mockOrgFindFirst(...args),
+    },
+    theme: {
+      findMany: (...args: unknown[]) => mockThemeFindMany(...args),
+    },
   },
 }));
 
 vi.mock("@/lib/services/activity", () => ({
   logActivity: vi.fn().mockResolvedValue(undefined),
+  computeDiff: vi.fn().mockReturnValue({}),
 }));
 
-import { createVersion, compareVersions } from "./versioning";
+const mockUpdateDataset = vi.fn().mockResolvedValue({});
+vi.mock("@/lib/actions/datasets", () => ({
+  updateDataset: (...args: unknown[]) => mockUpdateDataset(...args),
+}));
+
+vi.mock("@/lib/plugins/hooks", () => ({
+  hooks: { run: vi.fn().mockResolvedValue(undefined) },
+}));
+
+vi.mock("@/lib/plugins/loader", () => ({
+  isPluginsEnabled: vi.fn().mockReturnValue(false),
+}));
+
+import {
+  createVersion,
+  compareVersions,
+  getVersionById,
+  revertToVersion,
+} from "./versioning";
 
 const mockDataset = {
   id: "a1b2c3d4-e5f6-1234-a567-123456789abc",
@@ -196,5 +223,140 @@ describe("compareVersions", () => {
     expect(diffs[0].field).toBe("distribution");
     expect(diffs[0].from).toHaveLength(1);
     expect(diffs[0].to).toHaveLength(2);
+  });
+});
+
+describe("getVersionById", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns version record by ID", async () => {
+    const mockVersion = {
+      id: "ver-1",
+      datasetId: "ds-1",
+      version: "1.0.0",
+      snapshot: "{}",
+      changelog: null,
+      createdAt: new Date(),
+      createdById: null,
+    };
+    mockVersionFindUnique.mockResolvedValue(mockVersion);
+
+    const result = await getVersionById("ver-1");
+
+    expect(result).toEqual(mockVersion);
+    expect(mockVersionFindUnique).toHaveBeenCalledWith({
+      where: { id: "ver-1" },
+    });
+  });
+
+  it("returns null for missing ID", async () => {
+    mockVersionFindUnique.mockResolvedValue(null);
+
+    const result = await getVersionById("nonexistent");
+
+    expect(result).toBeNull();
+  });
+});
+
+describe("revertToVersion", () => {
+  const datasetId = "a1b2c3d4-e5f6-1234-a567-123456789abc";
+  const versionId = "ver-1";
+  const snapshotData = {
+    "@type": "dcat:Dataset",
+    title: "Old Title",
+    description: "Old description",
+    identifier: "TEST-001",
+    accessLevel: "public",
+    modified: "2024-01-01",
+    keyword: ["old-keyword"],
+    theme: ["Government"],
+    publisher: {
+      "@type": "org:Organization",
+      name: "Test Agency",
+    },
+    contactPoint: {
+      "@type": "vcard:Contact",
+      fn: "Jane",
+      hasEmail: "mailto:jane@example.gov",
+    },
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("calls updateDataset with reversed snapshot fields", async () => {
+    mockVersionFindUnique.mockResolvedValue({
+      id: versionId,
+      datasetId,
+      version: "1.0.0",
+      snapshot: JSON.stringify(snapshotData),
+      changelog: null,
+      createdAt: new Date(),
+      createdById: null,
+    });
+    mockOrgFindFirst.mockResolvedValue({ id: "pub-1", name: "Test Agency" });
+    mockThemeFindMany.mockResolvedValue([
+      { id: "theme-1", name: "Government" },
+    ]);
+    // Mock for createVersion's dataset lookup
+    mockFindUnique.mockResolvedValue(mockDataset);
+    mockCreate.mockImplementation(({ data }) =>
+      Promise.resolve({ id: "ver-new", ...data, createdAt: new Date() })
+    );
+
+    await revertToVersion(datasetId, versionId, "user-1");
+
+    expect(mockUpdateDataset).toHaveBeenCalledWith(
+      datasetId,
+      expect.objectContaining({
+        title: "Old Title",
+        description: "Old description",
+        identifier: "TEST-001",
+        accessLevel: "public",
+        keywords: ["old-keyword"],
+        themeIds: ["theme-1"],
+      })
+    );
+  });
+
+  it("auto-creates new version with revert changelog", async () => {
+    mockVersionFindUnique.mockResolvedValue({
+      id: versionId,
+      datasetId,
+      version: "1.0.0",
+      snapshot: JSON.stringify(snapshotData),
+      changelog: null,
+      createdAt: new Date(),
+      createdById: null,
+    });
+    mockOrgFindFirst.mockResolvedValue({ id: "pub-1", name: "Test Agency" });
+    mockThemeFindMany.mockResolvedValue([]);
+    mockFindUnique.mockResolvedValue(mockDataset);
+    mockCreate.mockImplementation(({ data }) =>
+      Promise.resolve({ id: "ver-new", ...data, createdAt: new Date() })
+    );
+
+    await revertToVersion(datasetId, versionId, "user-1");
+
+    expect(mockCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          datasetId,
+          changelog: "Reverted to v1.0.0",
+          createdById: "user-1",
+        }),
+      })
+    );
+  });
+
+  it("throws if version not found", async () => {
+    mockVersionFindUnique.mockResolvedValue(null);
+
+    await expect(
+      revertToVersion(datasetId, "nonexistent")
+    ).rejects.toThrow("Version not found");
   });
 });
