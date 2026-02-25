@@ -18,6 +18,7 @@ import { WorkflowPanel } from "@/components/datasets/WorkflowPanel";
 import { QualityBadge } from "@/components/datasets/QualityBadge";
 import { VersionHistory } from "@/components/datasets/VersionHistory";
 import { CreateVersionForm } from "@/components/datasets/CreateVersionForm";
+import { DistributionPreviewPanel } from "@/components/admin/DistributionPreviewPanel";
 import { DatasetDeleteButton } from "./DatasetDeleteButton";
 import { prisma } from "@/lib/db";
 import { updateDataDictionary } from "@/lib/services/data-dictionary";
@@ -66,16 +67,36 @@ export default async function EditDatasetPage({ params }: Props) {
     }));
   }
 
-  // Load data dictionaries for each distribution
-  const dictionaries = await Promise.all(
-    dataset.distributions.map(async (dist) => {
-      const dict = await prisma.dataDictionary.findUnique({
-        where: { distributionId: dist.id },
-        include: { fields: { orderBy: { sortOrder: "asc" } } },
-      });
-      return { distributionId: dist.id, title: dist.title, dictionary: dict };
-    })
-  );
+  // Load data dictionaries and datastore tables for each distribution
+  const distributionIds = dataset.distributions.map((d) => d.id);
+  const [dictionaries, datastoreTables] = await Promise.all([
+    Promise.all(
+      dataset.distributions.map(async (dist) => {
+        const dict = await prisma.dataDictionary.findUnique({
+          where: { distributionId: dist.id },
+          include: { fields: { orderBy: { sortOrder: "asc" } } },
+        });
+        return { distributionId: dist.id, title: dist.title, dictionary: dict };
+      })
+    ),
+    prisma.datastoreTable.findMany({
+      where: { distributionId: { in: distributionIds } },
+      select: { distributionId: true, status: true, rowCount: true, columns: true, errorMessage: true },
+    }),
+  ]);
+
+  const distributionPreviews = dataset.distributions.map((dist) => ({
+    id: dist.id,
+    title: dist.title,
+    format: dist.format,
+    mediaType: dist.mediaType,
+    filePath: dist.filePath ?? null,
+    downloadURL: dist.downloadURL,
+    fileName: dist.fileName ?? null,
+    fileSize: dist.fileSize ?? null,
+    datastoreTable: datastoreTables.find((t) => t.distributionId === dist.id) ?? null,
+    hasDictionary: dictionaries.some((d) => d.distributionId === dist.id && d.dictionary),
+  }));
 
   async function handleUpdate(
     data: DatasetCreateInput & {
@@ -202,8 +223,15 @@ export default async function EditDatasetPage({ params }: Props) {
         onSubmit={handleUpdate}
       />
 
-      {dictionaries.length > 0 && (
+      {distributionPreviews.length > 0 && (
         <div className="mt-8">
+          <h2 className="text-lg font-semibold mb-4">Distribution Previews</h2>
+          <DistributionPreviewPanel distributions={distributionPreviews} />
+        </div>
+      )}
+
+      {dictionaries.length > 0 && (
+        <div className="mt-8" id="data-dictionaries">
           <h2 className="text-lg font-semibold mb-4">Data Dictionaries</h2>
           {dictionaries.map((d) => (
               <div key={d.distributionId} className="mb-4 rounded-lg border p-4">
