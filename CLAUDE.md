@@ -72,6 +72,10 @@ Data.gov harvesters consume this endpoint. If it's wrong, the catalog is useless
 - **Slugs** generated from titles via the `slugify` package
 - **API errors** handled via shared utility at `src/lib/utils/api.ts`
 
+## Git
+
+- Always use `--no-gpg-sign` on commits (GPG signing hangs in non-interactive contexts)
+
 ## Common Commands
 
 ```bash

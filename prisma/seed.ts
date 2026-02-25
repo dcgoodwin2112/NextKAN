@@ -1,6 +1,10 @@
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import bcrypt from "bcryptjs";
+import Papa from "papaparse";
+import { readFile } from "fs/promises";
+import Database from "better-sqlite3";
+import path from "path";
 
 const adapter = new PrismaBetterSqlite3({
   url: process.env.DATABASE_URL ?? "file:./dev.db",
@@ -25,6 +29,212 @@ const DEFAULT_THEMES = [
   { name: "Science & Research", slug: "science-research", color: "#673AB7" },
   { name: "Transportation", slug: "transportation", color: "#FF5722" },
 ];
+
+// --- Datastore helpers (mirrored from src/lib/services/datastore.ts) ---
+
+interface DatastoreColumn {
+  name: string;
+  type: "TEXT" | "INTEGER" | "REAL" | "BOOLEAN";
+}
+
+function sanitizeColumnName(raw: string): string {
+  let name = raw
+    .trim()
+    .replace(/[^a-zA-Z0-9_]/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_|_$/g, "");
+
+  if (!name || /^\d/.test(name)) {
+    name = `col_${name}`;
+  }
+
+  return name.toLowerCase();
+}
+
+function inferColumnTypes(
+  columns: string[],
+  sampleRows: Record<string, string>[]
+): DatastoreColumn[] {
+  const sample = sampleRows.slice(0, 100);
+
+  return columns.map((rawName) => {
+    const name = sanitizeColumnName(rawName);
+    const values = sample
+      .map((row) => row[rawName])
+      .filter((v) => v !== undefined && v !== null && v !== "");
+
+    if (values.length === 0) {
+      return { name, type: "TEXT" as const };
+    }
+
+    const allBoolean = values.every((v) =>
+      ["true", "false", "0", "1", "yes", "no"].includes(v.toLowerCase())
+    );
+    if (allBoolean) return { name, type: "BOOLEAN" as const };
+
+    const allInteger = values.every((v) => /^-?\d+$/.test(v));
+    if (allInteger) return { name, type: "INTEGER" as const };
+
+    const allReal = values.every((v) => /^-?\d+(\.\d+)?$/.test(v));
+    if (allReal) return { name, type: "REAL" as const };
+
+    return { name, type: "TEXT" as const };
+  });
+}
+
+function generateTableName(distributionId: string): string {
+  const hex = distributionId.replace(/-/g, "").slice(0, 8);
+  return `ds_${hex}`;
+}
+
+const datastoreTypeToDictType: Record<string, string> = {
+  TEXT: "string",
+  INTEGER: "integer",
+  REAL: "number",
+  BOOLEAN: "boolean",
+};
+
+async function importSeedCsvs(): Promise<void> {
+  const distributions = await prisma.distribution.findMany({
+    where: {
+      mediaType: "text/csv",
+      filePath: { not: null },
+    },
+  });
+
+  let imported = 0;
+
+  for (const dist of distributions) {
+    // Skip if already imported (idempotent)
+    const existing = await prisma.datastoreTable.findUnique({
+      where: { distributionId: dist.id },
+    });
+    if (existing) continue;
+
+    const filePath = path.resolve(dist.filePath!);
+    let fileContent: string;
+    try {
+      fileContent = await readFile(filePath, "utf-8");
+    } catch {
+      console.warn(`Seed: skipping ${dist.fileName} — file not found at ${filePath}`);
+      continue;
+    }
+
+    const parsed = Papa.parse<Record<string, string>>(fileContent, {
+      header: true,
+      skipEmptyLines: true,
+    });
+
+    const rawColumns = parsed.meta.fields ?? [];
+    if (rawColumns.length === 0) continue;
+
+    const columns = inferColumnTypes(rawColumns, parsed.data);
+
+    // Deduplicate sanitized column names
+    const seen = new Map<string, number>();
+    for (const col of columns) {
+      const count = seen.get(col.name) ?? 0;
+      if (count > 0) {
+        col.name = `${col.name}_${count}`;
+      }
+      seen.set(col.name, count + 1);
+    }
+
+    const tableName = generateTableName(dist.id);
+    const dbUrl = process.env.DATABASE_URL ?? "file:./dev.db";
+    const dbPath = dbUrl.replace(/^file:/, "");
+    const db = new Database(dbPath);
+
+    try {
+      // Create table
+      const colDefs = columns
+        .map((c) => `"${c.name}" ${c.type}`)
+        .join(", ");
+      db.exec(
+        `CREATE TABLE IF NOT EXISTS "${tableName}" (_rowid INTEGER PRIMARY KEY AUTOINCREMENT, ${colDefs})`
+      );
+
+      // Batch insert
+      const maxPerBatch = Math.min(
+        Math.floor(999 / columns.length),
+        1000
+      );
+      const insertCols = columns.map((c) => `"${c.name}"`).join(", ");
+      const rows = parsed.data;
+
+      for (let i = 0; i < rows.length; i += maxPerBatch) {
+        const batch = rows.slice(i, i + maxPerBatch);
+        const placeholders = batch
+          .map(() => `(${columns.map(() => "?").join(", ")})`)
+          .join(", ");
+
+        const values: unknown[] = [];
+        for (const row of batch) {
+          for (let ci = 0; ci < rawColumns.length; ci++) {
+            const rawVal = row[rawColumns[ci]] ?? null;
+            const col = columns[ci];
+
+            if (rawVal === null || rawVal === "") {
+              values.push(null);
+            } else if (col.type === "INTEGER") {
+              values.push(parseInt(rawVal, 10));
+            } else if (col.type === "REAL") {
+              values.push(parseFloat(rawVal));
+            } else if (col.type === "BOOLEAN") {
+              values.push(
+                ["true", "1", "yes"].includes(rawVal.toLowerCase()) ? 1 : 0
+              );
+            } else {
+              values.push(rawVal);
+            }
+          }
+        }
+
+        db.prepare(
+          `INSERT INTO "${tableName}" (${insertCols}) VALUES ${placeholders}`
+        ).run(...values);
+      }
+
+      // Create DatastoreTable record
+      await prisma.datastoreTable.create({
+        data: {
+          distributionId: dist.id,
+          tableName,
+          columns: JSON.stringify(columns),
+          rowCount: rows.length,
+          status: "ready",
+        },
+      });
+
+      // Create DataDictionary + fields
+      const existingDict = await prisma.dataDictionary.findUnique({
+        where: { distributionId: dist.id },
+      });
+      if (existingDict) {
+        await prisma.dataDictionary.delete({ where: { id: existingDict.id } });
+      }
+
+      await prisma.dataDictionary.create({
+        data: {
+          distributionId: dist.id,
+          fields: {
+            create: columns.map((col, index) => ({
+              name: col.name,
+              type: datastoreTypeToDictType[col.type] || "string",
+              sortOrder: index,
+            })),
+          },
+        },
+      });
+
+      imported++;
+    } finally {
+      db.close();
+    }
+  }
+
+  console.log(`Seed: ${imported} datastore tables imported`);
+}
 
 async function main() {
   const hashedPassword = await bcrypt.hash(
@@ -721,6 +931,10 @@ async function main() {
   }
 
   console.log("Seed: 12 datasets with keywords, distributions, and themes created");
+
+  // --- Import CSV data into datastore ---
+  await importSeedCsvs();
+
   console.log("Seed complete!");
 }
 
