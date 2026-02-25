@@ -8,6 +8,9 @@ Features and tasks deferred for future implementation.
 - **shadcn/ui Migration (Phase 1)** — Foundation layer: `components.json`, `cn()`, 12 shadcn components, Toaster, AdminHeader + AdminSidebar migrated.
 - **User Edit Functionality** — Edit page at `/admin/users/[id]/edit`, password reset, guard rails (self-role, last-admin), AlertDialog for delete, 17 unit tests.
 - **Admin Settings Page** — Setting model (key/value store), settings service with sync cache + 60s TTL, admin page at `/admin/settings` with General/Features/Catalog sections. 12 DB-backed settings, toggle functions use `getSetting()`, `siteConfig` uses getters. 28 new tests (498 total).
+- **Admin UX Review** — Reusable components: `AdminPageHeader`, `Breadcrumbs`, `EmptyState`, `ConfirmDeleteButton`. Loading skeletons for admin, datasets, quality, analytics. Applied to all ~22 admin pages. 18 new tests (516 total).
+- **shadcn/ui Migration (Phases 2–3)** — NativeSelect component (styled native `<select>` for test compatibility). All admin forms migrated to shadcn Input/Label/Textarea/Button/NativeSelect. All 10 admin tables migrated to shadcn Table. Stat cards migrated to shadcn Card. ~25 files modified, 0 test changes.
+- **Admin Dashboard Enhancement** — `getDashboardData()` orchestrator in `src/lib/services/dashboard.ts`. 5 dashboard rows: stats (published count/trend, downloads, pending review, avg quality), action items (feature-gated), catalog health (stale datasets, missing fields, dictionary coverage, empty orgs), trends (publishing rate + views/downloads charts, most viewed/downloaded), recent activity. 28 new tests (544 total).
 
 ---
 
@@ -20,9 +23,9 @@ Items ordered by recommended implementation sequence. Establish the design syste
 | ~~1~~ | ~~shadcn/ui Migration (Phase 1)~~ | ~~High~~ | ~~None~~ |
 | ~~2~~ | ~~User Edit Functionality~~ | ~~High~~ | ~~Phase 1 primitives~~ |
 | ~~3~~ | ~~Admin Settings Page~~ | ~~High~~ | ~~Phase 1 primitives~~ |
-| 4 | Admin UX Review | High | Phase 1 primitives, Settings |
-| 5 | shadcn/ui Migration (Phases 2–3) | High | UX Review (defines patterns) |
-| 6 | Enhance Admin Dashboard | Medium | UX Review (card/widget patterns) |
+| ~~4~~ | ~~Admin UX Review~~ | ~~High~~ | ~~Phase 1 primitives, Settings~~ |
+| ~~5~~ | ~~shadcn/ui Migration (Phases 2–3)~~ | ~~High~~ | ~~UX Review (defines patterns)~~ |
+| ~~6~~ | ~~Enhance Admin Dashboard~~ | ~~Medium~~ | ~~UX Review (card/widget patterns)~~ |
 | 7 | Admin Notification Center | Medium | Dashboard (reuses aggregation queries) |
 | 8 | Admin Activity Log Viewer | Medium | Phases 2–3 (DataTable) |
 | 9 | Organization Dashboard for OrgAdmins | Medium | Dashboard + Activity patterns |
