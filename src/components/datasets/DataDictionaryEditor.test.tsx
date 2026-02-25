@@ -39,8 +39,8 @@ describe("DataDictionaryEditor", () => {
       />
     );
 
-    expect(screen.getByText("id")).toBeInTheDocument();
-    expect(screen.getByText("value")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("id")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("value")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Record ID")).toBeInTheDocument();
     expect(screen.getByDisplayValue("The ID")).toBeInTheDocument();
   });
@@ -79,7 +79,7 @@ describe("DataDictionaryEditor", () => {
     expect(onSave).toHaveBeenCalledWith("dist-1", expect.any(Array));
   });
 
-  it("shows empty message when no fields", () => {
+  it("shows add field button when no fields", () => {
     render(
       <DataDictionaryEditor
         distributionId="dist-1"
@@ -88,8 +88,40 @@ describe("DataDictionaryEditor", () => {
       />
     );
 
-    expect(
-      screen.getByText("No data dictionary. Import CSV data to auto-generate one.")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Add Field")).toBeInTheDocument();
+    expect(screen.queryByText("Save Data Dictionary")).not.toBeInTheDocument();
+  });
+
+  it("adds a new field when add field button is clicked", async () => {
+    const user = userEvent.setup();
+    render(
+      <DataDictionaryEditor
+        distributionId="dist-1"
+        fields={[]}
+        onSave={vi.fn()}
+      />
+    );
+
+    await user.click(screen.getByText("Add Field"));
+
+    expect(screen.getByPlaceholderText("field_name")).toBeInTheDocument();
+    expect(screen.getByText("Save Data Dictionary")).toBeInTheDocument();
+  });
+
+  it("removes a field when remove button is clicked", async () => {
+    const user = userEvent.setup();
+    render(
+      <DataDictionaryEditor
+        distributionId="dist-1"
+        fields={mockFields}
+        onSave={vi.fn()}
+      />
+    );
+
+    const removeButtons = screen.getAllByText("Remove");
+    await user.click(removeButtons[0]);
+
+    expect(screen.queryByDisplayValue("id")).not.toBeInTheDocument();
+    expect(screen.getByDisplayValue("value")).toBeInTheDocument();
   });
 });

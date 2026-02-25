@@ -202,19 +202,17 @@ export default async function EditDatasetPage({ params }: Props) {
         onSubmit={handleUpdate}
       />
 
-      {dictionaries.some((d) => d.dictionary) && (
+      {dictionaries.length > 0 && (
         <div className="mt-8">
           <h2 className="text-lg font-semibold mb-4">Data Dictionaries</h2>
-          {dictionaries
-            .filter((d) => d.dictionary)
-            .map((d) => (
+          {dictionaries.map((d) => (
               <div key={d.distributionId} className="mb-4 rounded-lg border p-4">
                 <h3 className="text-sm font-medium text-text-secondary mb-2">
                   {d.title || d.distributionId}
                 </h3>
                 <DataDictionaryEditor
                   distributionId={d.distributionId}
-                  fields={d.dictionary!.fields}
+                  fields={d.dictionary?.fields ?? []}
                   onSave={handleSaveDictionary}
                 />
               </div>
