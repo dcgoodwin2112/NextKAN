@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 :root {
   --background: #ffffff;
@@ -32,6 +35,30 @@
   --diff-add-text: #166534;
   --diff-remove-bg: #fee2e2;
   --diff-remove-text: #991b1b;
+
+  /* shadcn variables */
+  --card: #ffffff;
+  --card-foreground: #171717;
+  --popover: #ffffff;
+  --popover-foreground: #171717;
+  --primary-foreground: #ffffff;
+  --muted: #f1f5f9;
+  --muted-foreground: #6b7280;
+  --accent-foreground: #171717;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --secondary-foreground: #171717;
+  --input: #d1d5db;
+  --ring: #1e40af;
+  --radius: 0.5rem;
+  --sidebar: #f8fafc;
+  --sidebar-foreground: #171717;
+  --sidebar-primary: #1e40af;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f1f5f9;
+  --sidebar-accent-foreground: #171717;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #1e40af;
 }
 
 .dark {
@@ -66,6 +93,29 @@
   --diff-add-text: #86efac;
   --diff-remove-bg: #450a0a;
   --diff-remove-text: #fca5a5;
+
+  /* shadcn variables */
+  --card: #18181b;
+  --card-foreground: #ededed;
+  --popover: #18181b;
+  --popover-foreground: #ededed;
+  --primary-foreground: #ffffff;
+  --muted: #1e1e22;
+  --muted-foreground: #9ca3af;
+  --accent-foreground: #ededed;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --secondary-foreground: #ededed;
+  --input: #3f3f46;
+  --ring: #2563eb;
+  --sidebar: #18181b;
+  --sidebar-foreground: #ededed;
+  --sidebar-primary: #3b82f6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1e1e22;
+  --sidebar-accent-foreground: #ededed;
+  --sidebar-border: #27272a;
+  --sidebar-ring: #2563eb;
 }
 
 @theme inline {
@@ -102,6 +152,33 @@
   --color-diff-remove-text: var(--diff-remove-text);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* shadcn theme mappings */
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 }
 
 body {
@@ -117,4 +194,10 @@ select {
   background-color: var(--input-bg);
   border-color: var(--input-border);
   color: var(--foreground);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
 }
