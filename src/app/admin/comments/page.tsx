@@ -1,6 +1,9 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getPendingComments, moderateComment, deleteComment } from "@/lib/services/comments";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { EmptyState } from "@/components/admin/EmptyState";
+import { CommentDeleteButton } from "./CommentDeleteButton";
 
 export default async function CommentsPage() {
   const session = await auth();
@@ -18,9 +21,8 @@ export default async function CommentsPage() {
     redir("/admin/comments");
   }
 
-  async function deleteAction(formData: FormData) {
+  async function deleteAction(id: string) {
     "use server";
-    const id = formData.get("id") as string;
     await deleteComment(id);
     const { redirect: redir } = await import("next/navigation");
     redir("/admin/comments");
@@ -28,10 +30,13 @@ export default async function CommentsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Comment Moderation</h1>
+      <AdminPageHeader title="Comment Moderation" />
 
       {comments.length === 0 ? (
-        <p className="text-text-muted">No pending comments.</p>
+        <EmptyState
+          title="No pending comments"
+          description="Comments awaiting moderation will appear here."
+        />
       ) : (
         <div className="rounded border bg-background overflow-hidden">
           <table className="w-full text-sm">
@@ -69,15 +74,10 @@ export default async function CommentsPage() {
                           Approve
                         </button>
                       </form>
-                      <form action={deleteAction}>
-                        <input type="hidden" name="id" value={comment.id} />
-                        <button
-                          type="submit"
-                          className="rounded bg-danger px-3 py-1 text-xs text-white hover:opacity-90"
-                        >
-                          Delete
-                        </button>
-                      </form>
+                      <CommentDeleteButton
+                        commentId={comment.id}
+                        onDelete={deleteAction}
+                      />
                     </div>
                   </td>
                 </tr>

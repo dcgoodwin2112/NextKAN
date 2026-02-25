@@ -6,6 +6,10 @@ import {
   deleteHarvestSource,
   updateHarvestSource,
 } from "@/lib/actions/harvest";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
+import { HarvestDeleteButton } from "./HarvestDeleteButton";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -40,39 +44,35 @@ export default async function HarvestSourceDetailPage({ params }: Props) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">{source.name}</h1>
-        <div className="flex gap-2">
-          <form action={handleRunNow}>
-            <button
-              type="submit"
-              className="rounded bg-primary px-4 py-2 text-sm text-white hover:bg-primary-hover"
-            >
-              Run Now
-            </button>
-          </form>
-          <form action={handleToggle}>
-            <button
-              type="submit"
-              className={`rounded border px-4 py-2 text-sm ${
-                source.enabled
-                  ? "border-warning-subtle text-warning-text hover:bg-warning-subtle"
-                  : "border-success text-success hover:bg-success-subtle"
-              }`}
-            >
-              {source.enabled ? "Disable" : "Enable"}
-            </button>
-          </form>
-          <form action={handleDelete}>
-            <button
-              type="submit"
-              className="rounded border border-danger px-4 py-2 text-sm text-danger hover:bg-danger-subtle"
-            >
-              Delete
-            </button>
-          </form>
-        </div>
-      </div>
+      <Breadcrumbs
+        items={[
+          { label: "Admin", href: "/admin" },
+          { label: "Harvest", href: "/admin/harvest" },
+          { label: source.name },
+        ]}
+      />
+      <AdminPageHeader title={source.name}>
+        <form action={handleRunNow}>
+          <Button type="submit" size="sm">
+            Run Now
+          </Button>
+        </form>
+        <form action={handleToggle}>
+          <Button
+            type="submit"
+            variant="outline"
+            size="sm"
+            className={
+              source.enabled
+                ? "border-warning-subtle text-warning-text hover:bg-warning-subtle"
+                : "border-success text-success hover:bg-success-subtle"
+            }
+          >
+            {source.enabled ? "Disable" : "Enable"}
+          </Button>
+        </form>
+        <HarvestDeleteButton onDelete={handleDelete} />
+      </AdminPageHeader>
 
       <div className="grid grid-cols-2 gap-4 text-sm mb-8">
         <div>

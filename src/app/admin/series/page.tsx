@@ -1,23 +1,27 @@
 import Link from "next/link";
 import { listSeries } from "@/lib/actions/series";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { EmptyState } from "@/components/admin/EmptyState";
+import { Button } from "@/components/ui/button";
 
 export default async function SeriesListPage() {
   const series = await listSeries();
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Dataset Series</h1>
-        <Link
-          href="/admin/series/new"
-          className="rounded bg-primary px-4 py-2 text-white hover:bg-primary-hover"
-        >
-          New Series
-        </Link>
-      </div>
+      <AdminPageHeader title="Dataset Series">
+        <Button asChild>
+          <Link href="/admin/series/new">New Series</Link>
+        </Button>
+      </AdminPageHeader>
 
       {series.length === 0 ? (
-        <p className="text-text-muted">No series created yet.</p>
+        <EmptyState
+          title="No series created yet"
+          description="Create a series to group related datasets together."
+          actionLabel="New Series"
+          actionHref="/admin/series/new"
+        />
       ) : (
         <table className="w-full text-sm">
           <thead>

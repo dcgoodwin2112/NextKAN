@@ -3,6 +3,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { MarkdownEditor } from "@/components/admin/MarkdownEditor";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 
 export default function NewPagePage() {
   const router = useRouter();
@@ -36,7 +38,14 @@ export default function NewPagePage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">New Page</h1>
+      <Breadcrumbs
+        items={[
+          { label: "Admin", href: "/admin" },
+          { label: "Pages", href: "/admin/pages" },
+          { label: "New Page" },
+        ]}
+      />
+      <AdminPageHeader title="New Page" />
       {error && (
         <div className="mb-4 rounded bg-danger-subtle p-3 text-sm text-danger-text">
           {error}

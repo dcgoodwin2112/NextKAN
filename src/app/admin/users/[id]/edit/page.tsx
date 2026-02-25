@@ -4,6 +4,8 @@ import { hasPermission } from "@/lib/auth/roles";
 import { getUser } from "@/lib/actions/users";
 import { listOrganizations } from "@/lib/actions/organizations";
 import { UserEditForm } from "@/components/admin/UserEditForm";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -29,7 +31,14 @@ export default async function EditUserPage({ params }: Props) {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Edit User</h1>
+      <Breadcrumbs
+        items={[
+          { label: "Admin", href: "/admin" },
+          { label: "Users", href: "/admin/users" },
+          { label: "Edit User" },
+        ]}
+      />
+      <AdminPageHeader title="Edit User" />
       <UserEditForm
         user={user}
         organizations={organizations}

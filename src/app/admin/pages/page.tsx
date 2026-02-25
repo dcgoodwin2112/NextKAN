@@ -1,23 +1,27 @@
 import Link from "next/link";
 import { listPages } from "@/lib/actions/pages";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { EmptyState } from "@/components/admin/EmptyState";
+import { Button } from "@/components/ui/button";
 
 export default async function AdminPagesPage() {
   const pages = await listPages();
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Pages</h1>
-        <Link
-          href="/admin/pages/new"
-          className="rounded bg-primary px-4 py-2 text-sm text-white hover:bg-primary-hover"
-        >
-          New Page
-        </Link>
-      </div>
+      <AdminPageHeader title="Pages">
+        <Button asChild size="sm">
+          <Link href="/admin/pages/new">New Page</Link>
+        </Button>
+      </AdminPageHeader>
 
       {pages.length === 0 ? (
-        <p className="text-text-muted">No pages yet.</p>
+        <EmptyState
+          title="No pages yet"
+          description="Create content pages for your catalog site."
+          actionLabel="New Page"
+          actionHref="/admin/pages/new"
+        />
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-border text-sm">

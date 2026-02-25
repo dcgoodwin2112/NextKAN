@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { hasPermission } from "@/lib/auth/roles";
 import { getSettings } from "@/lib/actions/settings";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { SettingsForm } from "./SettingsForm";
 
 export default async function AdminSettingsPage() {
@@ -16,7 +17,7 @@ export default async function AdminSettingsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Settings</h1>
+      <AdminPageHeader title="Settings" />
       <SettingsForm initialSettings={settings} />
     </div>
   );

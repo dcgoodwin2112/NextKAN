@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { calculateQualityScore } from "@/lib/services/data-quality";
 import { QualityBadge } from "@/components/datasets/QualityBadge";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import type { DatasetWithRelations } from "@/lib/schemas/dcat-us";
 import Link from "next/link";
 
@@ -45,7 +46,7 @@ export default async function QualityReportPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Data Quality Report</h1>
+      <AdminPageHeader title="Data Quality Report" />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <div className="rounded border p-4 bg-background">

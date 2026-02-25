@@ -3,6 +3,8 @@ import { listOrganizations } from "@/lib/actions/organizations";
 import { listThemes } from "@/lib/actions/themes";
 import { auth } from "@/lib/auth";
 import { DatasetForm } from "@/components/datasets/DatasetForm";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import type { DatasetCreateInput } from "@/lib/schemas/dataset";
 
 export default async function NewDatasetPage() {
@@ -42,7 +44,14 @@ export default async function NewDatasetPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">New Dataset</h1>
+      <Breadcrumbs
+        items={[
+          { label: "Admin", href: "/admin" },
+          { label: "Datasets", href: "/admin/datasets" },
+          { label: "New Dataset" },
+        ]}
+      />
+      <AdminPageHeader title="New Dataset" />
       <DatasetForm organizations={organizations} themes={themes} onSubmit={handleCreate} />
     </div>
   );

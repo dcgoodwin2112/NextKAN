@@ -1,23 +1,27 @@
 import Link from "next/link";
 import { listOrganizations } from "@/lib/actions/organizations";
 import { OrganizationCard } from "@/components/organizations/OrganizationCard";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { EmptyState } from "@/components/admin/EmptyState";
+import { Button } from "@/components/ui/button";
 
 export default async function AdminOrganizationsPage() {
   const organizations = await listOrganizations();
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Organizations</h1>
-        <Link
-          href="/admin/organizations/new"
-          className="rounded bg-primary px-4 py-2 text-white hover:bg-primary-hover"
-        >
-          New Organization
-        </Link>
-      </div>
+      <AdminPageHeader title="Organizations">
+        <Button asChild>
+          <Link href="/admin/organizations/new">New Organization</Link>
+        </Button>
+      </AdminPageHeader>
       {organizations.length === 0 ? (
-        <p className="text-text-muted">No organizations yet.</p>
+        <EmptyState
+          title="No organizations yet"
+          description="Create an organization to start publishing datasets."
+          actionLabel="New Organization"
+          actionHref="/admin/organizations/new"
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {organizations.map((org) => (

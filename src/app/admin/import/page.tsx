@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { importCSV, importJSON } from "@/lib/actions/import";
 
 interface ImportResult {
   created: number;
@@ -62,20 +64,10 @@ export default function AdminImportPage() {
         const isJson =
           file.name.endsWith(".json") || file.type === "application/json";
 
-        if (isJson) {
-          const catalog = JSON.parse(text);
-          const { bulkImportJSON } = await import(
-            "@/lib/services/bulk-import"
-          );
-          const res = await bulkImportJSON(catalog, organizationId);
-          setResult(res);
-        } else {
-          const { bulkImportCSV } = await import(
-            "@/lib/services/bulk-import"
-          );
-          const res = await bulkImportCSV(text, organizationId);
-          setResult(res);
-        }
+        const res = isJson
+          ? await importJSON(text, organizationId)
+          : await importCSV(text, organizationId);
+        setResult(res);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Import failed");
       }
@@ -84,7 +76,7 @@ export default function AdminImportPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Bulk Import</h1>
+      <AdminPageHeader title="Bulk Import" />
 
       <div className="max-w-2xl space-y-4">
         <div>
