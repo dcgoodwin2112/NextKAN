@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { NotificationBell } from "@/components/admin/NotificationBell";
 
 interface AdminHeaderProps {
   user: { name?: string | null; email?: string | null };
@@ -23,6 +24,7 @@ export function AdminHeader({ user }: AdminHeaderProps) {
       <h2 className="text-sm text-text-muted">Admin Panel</h2>
       <div className="flex items-center gap-2">
         <ThemeToggle />
+        <NotificationBell />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="gap-2">
