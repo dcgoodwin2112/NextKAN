@@ -33,7 +33,9 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
-# prisma test databases
+# prisma databases
+dev.db
+dev.db-journal
 prisma/*.db
 prisma/*.db-journal
 
