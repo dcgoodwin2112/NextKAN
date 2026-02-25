@@ -3,6 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Menu, X } from "lucide-react";
+import { cn } from "@/lib/utils/cn";
+import { Button } from "@/components/ui/button";
 
 const navItems = [
   { href: "/admin", label: "Dashboard" },
@@ -33,23 +36,24 @@ export function AdminSidebar({ userRole }: AdminSidebarProps) {
   return (
     <>
       {/* Mobile toggle */}
-      <button
-        type="button"
-        className="md:hidden fixed top-4 left-4 z-50 rounded bg-surface-alt p-2"
+      <Button
+        variant="outline"
+        size="icon"
+        className="md:hidden fixed top-4 left-4 z-50"
         onClick={() => setCollapsed(!collapsed)}
         aria-label="Toggle admin sidebar"
       >
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
+        {collapsed ? <X className="size-5" /> : <Menu className="size-5" />}
+      </Button>
 
       <aside
-        className={`${
-          collapsed ? "hidden" : "block"
-        } md:block w-64 border-r border-border bg-surface p-4 shrink-0`}
+        className={cn(
+          "w-64 border-r border-sidebar-border bg-sidebar p-4 shrink-0",
+          collapsed ? "hidden" : "block",
+          "md:block"
+        )}
       >
-        <Link href="/" className="block text-lg font-bold mb-6">
+        <Link href="/" className="block text-lg font-bold text-sidebar-foreground mb-6">
           NextKAN
         </Link>
         <nav className="space-y-1">
@@ -62,11 +66,12 @@ export function AdminSidebar({ userRole }: AdminSidebarProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`block rounded px-3 py-2 text-sm ${
+                className={cn(
+                  "block rounded px-3 py-2 text-sm",
                   isActive
-                    ? "bg-primary-subtle text-primary-subtle-text font-medium"
-                    : "text-text-secondary hover:bg-surface-alt"
-                }`}
+                    ? "bg-sidebar-primary/10 text-sidebar-primary font-medium"
+                    : "text-sidebar-foreground hover:bg-sidebar-accent"
+                )}
               >
                 {item.label}
               </Link>

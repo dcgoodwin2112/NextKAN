@@ -48,8 +48,9 @@ test.describe("Authentication", () => {
     await page.getByRole("button", { name: /sign in/i }).click();
     await expect(page).toHaveURL(/\/admin/, { timeout: 10000 });
 
-    // Click sign out and wait for navigation
-    await page.getByRole("button", { name: /sign out/i }).click();
+    // Open user dropdown and click Sign Out
+    await page.getByRole("button", { name: /admin/i }).click();
+    await page.getByRole("menuitem", { name: /sign out/i }).click();
     // signOut triggers a full redirect; wait for any navigation to complete
     await page.waitForTimeout(3000);
 
