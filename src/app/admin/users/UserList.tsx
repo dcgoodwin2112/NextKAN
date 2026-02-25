@@ -5,6 +5,17 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { NativeSelect } from "@/components/ui/native-select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -108,66 +119,61 @@ export function UserList({ users, organizations }: UserListProps) {
             {error && (
               <div className="text-sm text-danger-text bg-danger-subtle p-2 rounded">{error}</div>
             )}
-            <div>
-              <label htmlFor="new-email" className="block text-sm font-medium mb-1">Email *</label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="new-email">Email *</Label>
+              <Input
                 id="new-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded border px-3 py-2"
                 required
               />
             </div>
-            <div>
-              <label htmlFor="new-password" className="block text-sm font-medium mb-1">Password *</label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="new-password">Password *</Label>
+              <Input
                 id="new-password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded border px-3 py-2"
                 minLength={8}
                 required
               />
             </div>
-            <div>
-              <label htmlFor="new-name" className="block text-sm font-medium mb-1">Name</label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="new-name">Name</Label>
+              <Input
                 id="new-name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded border px-3 py-2"
               />
             </div>
-            <div>
-              <label htmlFor="new-role" className="block text-sm font-medium mb-1">Role</label>
-              <select
+            <div className="space-y-2">
+              <Label htmlFor="new-role">Role</Label>
+              <NativeSelect
                 id="new-role"
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                className="w-full rounded border px-3 py-2"
               >
                 <option value="admin">Admin</option>
                 <option value="orgAdmin">Org Admin</option>
                 <option value="editor">Editor</option>
                 <option value="viewer">Viewer</option>
-              </select>
+              </NativeSelect>
             </div>
-            <div>
-              <label htmlFor="new-org" className="block text-sm font-medium mb-1">Organization</label>
-              <select
+            <div className="space-y-2">
+              <Label htmlFor="new-org">Organization</Label>
+              <NativeSelect
                 id="new-org"
                 value={orgId}
                 onChange={(e) => setOrgId(e.target.value)}
-                className="w-full rounded border px-3 py-2"
               >
                 <option value="">None</option>
                 {organizations.map((org) => (
                   <option key={org.id} value={org.id}>{org.name}</option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="flex gap-2">
               <Button type="submit" disabled={loading}>
@@ -185,60 +191,58 @@ export function UserList({ users, organizations }: UserListProps) {
         )}
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full text-sm border">
-          <thead>
-            <tr className="bg-surface">
-              <th className="border px-3 py-2 text-left">Email</th>
-              <th className="border px-3 py-2 text-left">Name</th>
-              <th className="border px-3 py-2 text-left">Role</th>
-              <th className="border px-3 py-2 text-left">Organization</th>
-              <th className="border px-3 py-2 text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.id}>
-                <td className="border px-3 py-2">{user.email}</td>
-                <td className="border px-3 py-2">{user.name || "-"}</td>
-                <td className="border px-3 py-2">{user.role}</td>
-                <td className="border px-3 py-2">{user.organization?.name || "-"}</td>
-                <td className="border px-3 py-2">
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="xs" asChild>
-                      <Link href={`/admin/users/${user.id}/edit`}>Edit</Link>
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="xs" className="text-destructive hover:text-destructive">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Email</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead>Organization</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {users.map((user) => (
+            <TableRow key={user.id}>
+              <TableCell>{user.email}</TableCell>
+              <TableCell>{user.name || "-"}</TableCell>
+              <TableCell>{user.role}</TableCell>
+              <TableCell>{user.organization?.name || "-"}</TableCell>
+              <TableCell>
+                <div className="flex gap-2">
+                  <Button variant="ghost" size="xs" asChild>
+                    <Link href={`/admin/users/${user.id}/edit`}>Edit</Link>
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="xs" className="text-destructive hover:text-destructive">
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete User</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete {user.email}? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          variant="destructive"
+                          onClick={() => handleDelete(user.id)}
+                        >
                           Delete
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete User</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to delete {user.email}? This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            variant="destructive"
-                            onClick={() => handleDelete(user.id)}
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }

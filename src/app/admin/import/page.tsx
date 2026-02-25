@@ -2,6 +2,17 @@
 
 import { useState, useEffect, useTransition } from "react";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { NativeSelect } from "@/components/ui/native-select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { importCSV, importJSON } from "@/lib/actions/import";
 
 interface ImportResult {
@@ -79,64 +90,67 @@ export default function AdminImportPage() {
       <AdminPageHeader title="Bulk Import" />
 
       <div className="max-w-2xl space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-text-secondary">
-            Organization
-          </label>
-          <select
+        <div className="space-y-2">
+          <Label>Organization</Label>
+          <NativeSelect
             value={organizationId}
             onChange={(e) => setOrganizationId(e.target.value)}
-            className="mt-1 w-full rounded border px-3 py-2"
           >
             {organizations.map((org) => (
               <option key={org.id} value={org.id}>
                 {org.name}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-text-secondary">
-            File (CSV or DCAT-US JSON)
-          </label>
+        <div className="space-y-2">
+          <Label>File (CSV or DCAT-US JSON)</Label>
           <input
             type="file"
             accept=".csv,.json"
             onChange={handleFileChange}
             className="mt-1"
           />
-          <p className="mt-1 text-xs text-text-muted">
+          <p className="text-xs text-text-muted">
             CSV: title, description, keywords (semicolon-separated), accessLevel columns required
           </p>
         </div>
 
         {preview.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="text-xs border divide-y">
-              <tbody>
-                {preview.map((row, i) => (
-                  <tr key={i} className={i === 0 ? "bg-surface font-medium" : ""}>
-                    {row.map((cell, j) => (
-                      <td key={j} className="px-2 py-1 border-r truncate max-w-[200px]">
-                        {cell}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table className="text-xs">
+            {preview[0] && (
+              <TableHeader>
+                <TableRow>
+                  {preview[0].map((cell, j) => (
+                    <TableHead key={j} className="truncate max-w-[200px]">
+                      {cell}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+            )}
+            <TableBody>
+              {preview.slice(1).map((row, i) => (
+                <TableRow key={i}>
+                  {row.map((cell, j) => (
+                    <TableCell key={j} className="truncate max-w-[200px]">
+                      {cell}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
 
-        <button
+        <Button
           type="button"
           onClick={handleImport}
           disabled={!file || !organizationId || isPending}
-          className="rounded bg-primary px-4 py-2 text-white hover:bg-primary-hover disabled:opacity-50"
         >
           {isPending ? "Importing..." : "Import"}
-        </button>
+        </Button>
 
         {error && (
           <div className="rounded bg-danger-subtle p-3 text-sm text-danger-text">

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { ActivityFeed } from "@/components/admin/ActivityFeed";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default async function AdminDashboard() {
   const [datasetCount, orgCount, recentActivity] = await Promise.all([
@@ -16,20 +17,26 @@ export default async function AdminDashboard() {
     <div>
       <AdminPageHeader title="Dashboard" />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="rounded-lg border p-6">
-          <p className="text-sm text-text-muted">Datasets</p>
-          <p className="text-3xl font-bold">{datasetCount}</p>
-        </div>
-        <div className="rounded-lg border p-6">
-          <p className="text-sm text-text-muted">Organizations</p>
-          <p className="text-3xl font-bold">{orgCount}</p>
-        </div>
+        <Card>
+          <CardContent>
+            <p className="text-sm text-text-muted">Datasets</p>
+            <p className="text-3xl font-bold">{datasetCount}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent>
+            <p className="text-sm text-text-muted">Organizations</p>
+            <p className="text-3xl font-bold">{orgCount}</p>
+          </CardContent>
+        </Card>
       </div>
       <div className="mt-8">
         <h2 className="text-lg font-semibold mb-4">Recent Activity</h2>
-        <div className="rounded-lg border p-6">
-          <ActivityFeed activities={recentActivity as any} />
-        </div>
+        <Card>
+          <CardContent>
+            <ActivityFeed activities={recentActivity as any} />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

@@ -3,6 +3,15 @@ import { redirect } from "next/navigation";
 import { getPendingComments, moderateComment, deleteComment } from "@/lib/services/comments";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { EmptyState } from "@/components/admin/EmptyState";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { CommentDeleteButton } from "./CommentDeleteButton";
 
 export default async function CommentsPage() {
@@ -38,53 +47,48 @@ export default async function CommentsPage() {
           description="Comments awaiting moderation will appear here."
         />
       ) : (
-        <div className="rounded border bg-background overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-surface border-b">
-              <tr>
-                <th className="text-left px-4 py-3 font-medium">Author</th>
-                <th className="text-left px-4 py-3 font-medium">Content</th>
-                <th className="text-left px-4 py-3 font-medium">Dataset</th>
-                <th className="text-left px-4 py-3 font-medium">Date</th>
-                <th className="text-left px-4 py-3 font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {comments.map((comment: any) => (
-                <tr key={comment.id} className="border-b last:border-0">
-                  <td className="px-4 py-3">
-                    <div className="font-medium">{comment.authorName}</div>
-                    <div className="text-xs text-text-muted">{comment.authorEmail}</div>
-                  </td>
-                  <td className="px-4 py-3 max-w-xs truncate">{comment.content}</td>
-                  <td className="px-4 py-3 text-text-tertiary">
-                    {comment.dataset?.title ?? "Unknown"}
-                  </td>
-                  <td className="px-4 py-3 text-text-muted text-xs">
-                    {new Date(comment.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2">
-                      <form action={approveAction}>
-                        <input type="hidden" name="id" value={comment.id} />
-                        <button
-                          type="submit"
-                          className="rounded bg-success px-3 py-1 text-xs text-white hover:opacity-90"
-                        >
-                          Approve
-                        </button>
-                      </form>
-                      <CommentDeleteButton
-                        commentId={comment.id}
-                        onDelete={deleteAction}
-                      />
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Author</TableHead>
+              <TableHead>Content</TableHead>
+              <TableHead>Dataset</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {comments.map((comment: any) => (
+              <TableRow key={comment.id}>
+                <TableCell>
+                  <div className="font-medium">{comment.authorName}</div>
+                  <div className="text-xs text-text-muted">{comment.authorEmail}</div>
+                </TableCell>
+                <TableCell className="max-w-xs truncate">{comment.content}</TableCell>
+                <TableCell className="text-text-tertiary">
+                  {comment.dataset?.title ?? "Unknown"}
+                </TableCell>
+                <TableCell className="text-text-muted text-xs">
+                  {new Date(comment.createdAt).toLocaleDateString()}
+                </TableCell>
+                <TableCell>
+                  <div className="flex gap-2">
+                    <form action={approveAction}>
+                      <input type="hidden" name="id" value={comment.id} />
+                      <Button type="submit" size="xs" className="bg-success hover:bg-success/90">
+                        Approve
+                      </Button>
+                    </form>
+                    <CommentDeleteButton
+                      commentId={comment.id}
+                      onDelete={deleteAction}
+                    />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       )}
     </div>
   );

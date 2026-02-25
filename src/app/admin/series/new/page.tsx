@@ -1,5 +1,11 @@
 import { redirect } from "next/navigation";
 import { createSeries } from "@/lib/actions/series";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 
 export default function NewSeriesPage() {
   async function handleCreate(formData: FormData) {
@@ -14,48 +20,41 @@ export default function NewSeriesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">New Series</h1>
+      <Breadcrumbs
+        items={[
+          { label: "Admin", href: "/admin" },
+          { label: "Series", href: "/admin/series" },
+          { label: "New Series" },
+        ]}
+      />
+      <AdminPageHeader title="New Series" />
       <form action={handleCreate} className="max-w-xl space-y-4">
-        <div>
-          <label htmlFor="title" className="block text-sm font-medium mb-1">
-            Title *
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="title">Title *</Label>
+          <Input
             id="title"
             name="title"
             type="text"
-            className="w-full rounded border px-3 py-2"
           />
         </div>
-        <div>
-          <label htmlFor="identifier" className="block text-sm font-medium mb-1">
-            Identifier *
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="identifier">Identifier *</Label>
+          <Input
             id="identifier"
             name="identifier"
             type="text"
-            className="w-full rounded border px-3 py-2"
             placeholder="e.g. climate-data-annual"
           />
         </div>
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium mb-1">
-            Description
-          </label>
-          <textarea
+        <div className="space-y-2">
+          <Label htmlFor="description">Description</Label>
+          <Textarea
             id="description"
             name="description"
-            className="w-full rounded border px-3 py-2"
             rows={3}
           />
         </div>
-        <button
-          type="submit"
-          className="rounded bg-primary px-4 py-2 text-white hover:bg-primary-hover"
-        >
-          Create Series
-        </button>
+        <Button type="submit">Create Series</Button>
       </form>
     </div>
   );

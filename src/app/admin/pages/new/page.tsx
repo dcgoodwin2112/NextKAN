@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { MarkdownEditor } from "@/components/admin/MarkdownEditor";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 export default function NewPagePage() {
   const router = useRouter();
@@ -52,35 +55,27 @@ export default function NewPagePage() {
         </div>
       )}
       <form onSubmit={handleSubmit} className="space-y-4 max-w-3xl">
-        <div>
-          <label htmlFor="title" className="block text-sm font-medium text-text-secondary">
-            Title
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="title">Title</Label>
+          <Input
             id="title"
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="mt-1 w-full rounded border px-3 py-2"
           />
         </div>
-        <div>
-          <label htmlFor="slug" className="block text-sm font-medium text-text-secondary">
-            Slug (auto-generated if empty)
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="slug">Slug (auto-generated if empty)</Label>
+          <Input
             id="slug"
             type="text"
             value={slug}
             onChange={(e) => setSlug(e.target.value)}
-            className="mt-1 w-full rounded border px-3 py-2"
             placeholder="about-us"
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-text-secondary mb-1">
-            Content (Markdown)
-          </label>
+        <div className="space-y-2">
+          <Label>Content (Markdown)</Label>
           <MarkdownEditor value={content} onChange={setContent} />
         </div>
         <div className="flex items-center gap-4">
@@ -92,26 +87,20 @@ export default function NewPagePage() {
             />
             Published
           </label>
-          <div>
-            <label htmlFor="sortOrder" className="text-sm font-medium text-text-secondary mr-2">
-              Sort Order
-            </label>
-            <input
+          <div className="flex items-center gap-2">
+            <Label htmlFor="sortOrder">Sort Order</Label>
+            <Input
               id="sortOrder"
               type="number"
               value={sortOrder}
               onChange={(e) => setSortOrder(parseInt(e.target.value) || 0)}
-              className="w-20 rounded border px-2 py-1 text-sm"
+              className="w-20"
             />
           </div>
         </div>
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded bg-primary px-4 py-2 text-white hover:bg-primary-hover disabled:opacity-50"
-        >
+        <Button type="submit" disabled={isPending}>
           {isPending ? "Creating..." : "Create Page"}
-        </button>
+        </Button>
       </form>
     </div>
   );

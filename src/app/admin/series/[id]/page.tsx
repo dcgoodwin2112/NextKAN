@@ -1,6 +1,10 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { getSeries, updateSeries, deleteSeries } from "@/lib/actions/series";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { SeriesDeleteButton } from "./SeriesDeleteButton";
@@ -44,48 +48,34 @@ export default async function EditSeriesPage({ params }: Props) {
       </AdminPageHeader>
 
       <form action={handleUpdate} className="max-w-xl space-y-4">
-        <div>
-          <label htmlFor="title" className="block text-sm font-medium mb-1">
-            Title *
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="title">Title *</Label>
+          <Input
             id="title"
             name="title"
             type="text"
             defaultValue={series.title}
-            className="w-full rounded border px-3 py-2"
           />
         </div>
-        <div>
-          <label htmlFor="identifier" className="block text-sm font-medium mb-1">
-            Identifier *
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="identifier">Identifier *</Label>
+          <Input
             id="identifier"
             name="identifier"
             type="text"
             defaultValue={series.identifier}
-            className="w-full rounded border px-3 py-2"
           />
         </div>
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium mb-1">
-            Description
-          </label>
-          <textarea
+        <div className="space-y-2">
+          <Label htmlFor="description">Description</Label>
+          <Textarea
             id="description"
             name="description"
             defaultValue={series.description || ""}
-            className="w-full rounded border px-3 py-2"
             rows={3}
           />
         </div>
-        <button
-          type="submit"
-          className="rounded bg-primary px-4 py-2 text-white hover:bg-primary-hover"
-        >
-          Update Series
-        </button>
+        <Button type="submit">Update Series</Button>
       </form>
 
       {series.datasets.length > 0 && (

@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 interface DistributionFormProps {
   onAdd: (distribution: {
@@ -85,34 +88,26 @@ export function DistributionForm({ onAdd, onCancel }: DistributionFormProps) {
       {error && (
         <div className="rounded bg-danger-subtle p-2 text-sm text-danger-text">{error}</div>
       )}
-      <div>
-        <label htmlFor="dist-title" className="block text-sm font-medium mb-1">
-          Title
-        </label>
-        <input
+      <div className="space-y-2">
+        <Label htmlFor="dist-title">Title</Label>
+        <Input
           id="dist-title"
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full rounded border px-3 py-2 text-sm"
         />
       </div>
-      <div>
-        <label htmlFor="dist-description" className="block text-sm font-medium mb-1">
-          Description
-        </label>
-        <input
+      <div className="space-y-2">
+        <Label htmlFor="dist-description">Description</Label>
+        <Input
           id="dist-description"
           type="text"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full rounded border px-3 py-2 text-sm"
         />
       </div>
-      <div>
-        <label htmlFor="dist-file" className="block text-sm font-medium mb-1">
-          Upload File
-        </label>
+      <div className="space-y-2">
+        <Label htmlFor="dist-file">Upload File</Label>
         <input
           id="dist-file"
           type="file"
@@ -122,75 +117,63 @@ export function DistributionForm({ onAdd, onCancel }: DistributionFormProps) {
         />
         {uploading && <span className="text-sm text-text-muted ml-2">Uploading...</span>}
       </div>
-      <div>
-        <label htmlFor="dist-downloadURL" className="block text-sm font-medium mb-1">
-          Download URL
-        </label>
-        <input
+      <div className="space-y-2">
+        <Label htmlFor="dist-downloadURL">Download URL</Label>
+        <Input
           id="dist-downloadURL"
           type="url"
           value={downloadURL}
           onChange={(e) => setDownloadURL(e.target.value)}
-          className="w-full rounded border px-3 py-2 text-sm"
           placeholder="https://"
         />
       </div>
-      <div>
-        <label htmlFor="dist-accessURL" className="block text-sm font-medium mb-1">
-          Access URL
-        </label>
-        <input
+      <div className="space-y-2">
+        <Label htmlFor="dist-accessURL">Access URL</Label>
+        <Input
           id="dist-accessURL"
           type="url"
           value={accessURL}
           onChange={(e) => setAccessURL(e.target.value)}
-          className="w-full rounded border px-3 py-2 text-sm"
           placeholder="https://"
         />
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label htmlFor="dist-mediaType" className="block text-sm font-medium mb-1">
-            Media Type
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="dist-mediaType">Media Type</Label>
+          <Input
             id="dist-mediaType"
             type="text"
             value={mediaType}
             onChange={(e) => setMediaType(e.target.value)}
-            className="w-full rounded border px-3 py-2 text-sm"
             placeholder="text/csv"
           />
         </div>
-        <div>
-          <label htmlFor="dist-format" className="block text-sm font-medium mb-1">
-            Format
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="dist-format">Format</Label>
+          <Input
             id="dist-format"
             type="text"
             value={format}
             onChange={(e) => setFormat(e.target.value)}
-            className="w-full rounded border px-3 py-2 text-sm"
             placeholder="CSV"
           />
         </div>
       </div>
       <div className="flex gap-2">
-        <button
+        <Button
           type="button"
           onClick={handleSubmit}
-          className="rounded bg-success px-3 py-1.5 text-sm text-white hover:opacity-90"
+          className="bg-success hover:bg-success/90"
         >
           Add Distribution
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="outline"
           onClick={onCancel}
-          className="rounded border border-border px-3 py-1.5 text-sm hover:bg-surface-alt"
         >
           Cancel
-        </button>
+        </Button>
       </div>
     </div>
   );

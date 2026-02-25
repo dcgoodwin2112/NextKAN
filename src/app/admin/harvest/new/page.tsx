@@ -2,6 +2,12 @@
 
 import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { NativeSelect } from "@/components/ui/native-select";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 
 interface Organization {
   id: string;
@@ -70,95 +76,83 @@ export default function NewHarvestSourcePage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">New Harvest Source</h1>
+      <Breadcrumbs
+        items={[
+          { label: "Admin", href: "/admin" },
+          { label: "Harvest", href: "/admin/harvest" },
+          { label: "New Source" },
+        ]}
+      />
+      <AdminPageHeader title="New Harvest Source" />
       {error && (
         <div className="mb-4 rounded bg-danger-subtle p-3 text-sm text-danger-text">
           {error}
         </div>
       )}
       <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-text-secondary">
-            Name
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="name">Name</Label>
+          <Input
             id="name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="mt-1 w-full rounded border px-3 py-2"
             placeholder="City Open Data Portal"
           />
         </div>
-        <div>
-          <label htmlFor="url" className="block text-sm font-medium text-text-secondary">
-            URL
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="url">URL</Label>
+          <Input
             id="url"
             type="text"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            className="mt-1 w-full rounded border px-3 py-2"
             placeholder="https://example.com/data.json"
           />
         </div>
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="type" className="block text-sm font-medium text-text-secondary">
-              Type
-            </label>
-            <select
+          <div className="space-y-2">
+            <Label htmlFor="type">Type</Label>
+            <NativeSelect
               id="type"
               value={type}
               onChange={(e) => setType(e.target.value)}
-              className="mt-1 w-full rounded border px-3 py-2"
             >
               <option value="dcat-us">DCAT-US</option>
               <option value="ckan">CKAN</option>
-            </select>
+            </NativeSelect>
           </div>
-          <div>
-            <label htmlFor="organizationId" className="block text-sm font-medium text-text-secondary">
-              Organization
-            </label>
-            <select
+          <div className="space-y-2">
+            <Label htmlFor="organizationId">Organization</Label>
+            <NativeSelect
               id="organizationId"
               value={organizationId}
               onChange={(e) => setOrganizationId(e.target.value)}
-              className="mt-1 w-full rounded border px-3 py-2"
             >
               {organizations.map((org) => (
                 <option key={org.id} value={org.id}>
                   {org.name}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </div>
         </div>
-        <div>
-          <label htmlFor="schedule" className="block text-sm font-medium text-text-secondary">
-            Schedule (cron expression, optional)
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="schedule">Schedule (cron expression, optional)</Label>
+          <Input
             id="schedule"
             type="text"
             value={schedule}
             onChange={(e) => setSchedule(e.target.value)}
-            className="mt-1 w-full rounded border px-3 py-2"
             placeholder="0 2 * * *"
           />
           {schedulePreview && (
-            <p className="mt-1 text-xs text-text-muted">{schedulePreview}</p>
+            <p className="text-xs text-text-muted">{schedulePreview}</p>
           )}
         </div>
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded bg-primary px-4 py-2 text-white hover:bg-primary-hover disabled:opacity-50"
-        >
+        <Button type="submit" disabled={isPending}>
           {isPending ? "Creating..." : "Create Source"}
-        </button>
+        </Button>
       </form>
     </div>
   );

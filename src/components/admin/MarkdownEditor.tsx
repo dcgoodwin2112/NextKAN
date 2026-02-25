@@ -5,6 +5,8 @@ import { remark } from "remark";
 import remarkRehype from "remark-rehype";
 import rehypeSanitize from "rehype-sanitize";
 import rehypeStringify from "rehype-stringify";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 interface MarkdownEditorProps {
   value: string;
@@ -30,17 +32,14 @@ export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
   return (
     <div>
       <div className="mb-2 flex gap-2">
-        <button
+        <Button
           type="button"
+          variant={preview ? "default" : "secondary"}
+          size="sm"
           onClick={togglePreview}
-          className={`rounded px-3 py-1 text-sm ${
-            preview
-              ? "bg-primary text-white"
-              : "bg-surface-alt text-text-secondary"
-          }`}
         >
           {preview ? "Edit" : "Preview"}
-        </button>
+        </Button>
       </div>
       {preview ? (
         <div
@@ -48,10 +47,10 @@ export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
           dangerouslySetInnerHTML={{ __html: renderedHtml }}
         />
       ) : (
-        <textarea
+        <Textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full rounded border p-3 font-mono text-sm"
+          className="font-mono"
           rows={20}
           placeholder="Write your content in Markdown..."
         />

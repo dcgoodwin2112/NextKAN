@@ -6,6 +6,9 @@ import { MarkdownEditor } from "@/components/admin/MarkdownEditor";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { ConfirmDeleteButton } from "@/components/admin/ConfirmDeleteButton";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 interface PageData {
   id: string;
@@ -92,32 +95,24 @@ export default function EditPagePage() {
         </div>
       )}
       <form onSubmit={handleSubmit} className="space-y-4 max-w-3xl">
-        <div>
-          <label className="block text-sm font-medium text-text-secondary">
-            Title
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label>Title</Label>
+          <Input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="mt-1 w-full rounded border px-3 py-2"
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-text-secondary">
-            Slug
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label>Slug</Label>
+          <Input
             type="text"
             value={slug}
             onChange={(e) => setSlug(e.target.value)}
-            className="mt-1 w-full rounded border px-3 py-2"
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-text-secondary mb-1">
-            Content (Markdown)
-          </label>
+        <div className="space-y-2">
+          <Label>Content (Markdown)</Label>
           <MarkdownEditor value={content} onChange={setContent} />
         </div>
         <div className="flex items-center gap-4">
@@ -129,25 +124,19 @@ export default function EditPagePage() {
             />
             Published
           </label>
-          <div>
-            <label className="text-sm font-medium text-text-secondary mr-2">
-              Sort Order
-            </label>
-            <input
+          <div className="flex items-center gap-2">
+            <Label>Sort Order</Label>
+            <Input
               type="number"
               value={sortOrder}
               onChange={(e) => setSortOrder(parseInt(e.target.value) || 0)}
-              className="w-20 rounded border px-2 py-1 text-sm"
+              className="w-20"
             />
           </div>
         </div>
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded bg-primary px-4 py-2 text-white hover:bg-primary-hover disabled:opacity-50"
-        >
+        <Button type="submit" disabled={isPending}>
           {isPending ? "Saving..." : "Save Page"}
-        </button>
+        </Button>
       </form>
     </div>
   );

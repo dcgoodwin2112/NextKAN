@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Organization } from "@/generated/prisma/client";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { NativeSelect } from "@/components/ui/native-select";
 
 interface OrganizationFormProps {
   initialData?: Organization;
@@ -58,55 +63,40 @@ export function OrganizationForm({
           {error}
         </div>
       )}
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium mb-1">
-          Name *
-        </label>
-        <input
+      <div className="space-y-2">
+        <Label htmlFor="name">Name *</Label>
+        <Input
           id="name"
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full rounded border px-3 py-2"
           required
         />
       </div>
-      <div>
-        <label
-          htmlFor="description"
-          className="block text-sm font-medium mb-1"
-        >
-          Description
-        </label>
-        <textarea
+      <div className="space-y-2">
+        <Label htmlFor="description">Description</Label>
+        <Textarea
           id="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full rounded border px-3 py-2"
           rows={3}
         />
       </div>
-      <div>
-        <label htmlFor="imageUrl" className="block text-sm font-medium mb-1">
-          Image URL
-        </label>
-        <input
+      <div className="space-y-2">
+        <Label htmlFor="imageUrl">Image URL</Label>
+        <Input
           id="imageUrl"
           type="url"
           value={imageUrl}
           onChange={(e) => setImageUrl(e.target.value)}
-          className="w-full rounded border px-3 py-2"
         />
       </div>
-      <div>
-        <label htmlFor="parentId" className="block text-sm font-medium mb-1">
-          Parent Organization
-        </label>
-        <select
+      <div className="space-y-2">
+        <Label htmlFor="parentId">Parent Organization</Label>
+        <NativeSelect
           id="parentId"
           value={parentId}
           onChange={(e) => setParentId(e.target.value)}
-          className="w-full rounded border px-3 py-2"
         >
           <option value="">None</option>
           {organizations
@@ -116,23 +106,19 @@ export function OrganizationForm({
                 {org.name}
               </option>
             ))}
-        </select>
+        </NativeSelect>
       </div>
       <div className="flex gap-2">
-        <button
-          type="submit"
-          disabled={loading}
-          className="rounded bg-primary px-4 py-2 text-white hover:bg-primary-hover disabled:opacity-50"
-        >
+        <Button type="submit" disabled={loading}>
           {loading ? "Saving..." : initialData ? "Update" : "Create"}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="outline"
           onClick={() => router.push("/admin/organizations")}
-          className="rounded border border-border px-4 py-2 hover:bg-surface"
         >
           Cancel
-        </button>
+        </Button>
       </div>
     </form>
   );

@@ -3,6 +3,14 @@ import { listSeries } from "@/lib/actions/series";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { EmptyState } from "@/components/admin/EmptyState";
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default async function SeriesListPage() {
   const series = await listSeries();
@@ -23,33 +31,33 @@ export default async function SeriesListPage() {
           actionHref="/admin/series/new"
         />
       ) : (
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b text-left">
-              <th className="pb-2 font-medium">Title</th>
-              <th className="pb-2 font-medium">Identifier</th>
-              <th className="pb-2 font-medium">Datasets</th>
-              <th className="pb-2 font-medium"></th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Title</TableHead>
+              <TableHead>Identifier</TableHead>
+              <TableHead>Datasets</TableHead>
+              <TableHead></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {series.map((s) => (
-              <tr key={s.id} className="border-b">
-                <td className="py-2">{s.title}</td>
-                <td className="py-2 text-text-muted">{s.identifier}</td>
-                <td className="py-2">{(s as any)._count?.datasets ?? 0}</td>
-                <td className="py-2">
+              <TableRow key={s.id}>
+                <TableCell>{s.title}</TableCell>
+                <TableCell className="text-text-muted">{s.identifier}</TableCell>
+                <TableCell>{(s as any)._count?.datasets ?? 0}</TableCell>
+                <TableCell>
                   <Link
                     href={`/admin/series/${s.id}`}
                     className="text-primary hover:underline"
                   >
                     Edit
                   </Link>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       )}
     </div>
   );

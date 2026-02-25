@@ -2,6 +2,15 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getAnalyticsSummary } from "@/lib/services/analytics";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import Link from "next/link";
 
 interface Props {
@@ -52,22 +61,30 @@ export default async function AnalyticsDashboardPage({ searchParams }: Props) {
 
       {/* Summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div className="rounded border p-4 bg-background">
-          <p className="text-sm text-text-muted">Total Views</p>
-          <p className="text-2xl font-bold">{summary.totalViews.toLocaleString()}</p>
-        </div>
-        <div className="rounded border p-4 bg-background">
-          <p className="text-sm text-text-muted">Downloads</p>
-          <p className="text-2xl font-bold">{summary.totalDownloads.toLocaleString()}</p>
-        </div>
-        <div className="rounded border p-4 bg-background">
-          <p className="text-sm text-text-muted">API Calls</p>
-          <p className="text-2xl font-bold">{summary.totalApiCalls.toLocaleString()}</p>
-        </div>
-        <div className="rounded border p-4 bg-background">
-          <p className="text-sm text-text-muted">Unique Visitors</p>
-          <p className="text-2xl font-bold">{summary.uniqueVisitors.toLocaleString()}</p>
-        </div>
+        <Card>
+          <CardContent>
+            <p className="text-sm text-text-muted">Total Views</p>
+            <p className="text-2xl font-bold">{summary.totalViews.toLocaleString()}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent>
+            <p className="text-sm text-text-muted">Downloads</p>
+            <p className="text-2xl font-bold">{summary.totalDownloads.toLocaleString()}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent>
+            <p className="text-sm text-text-muted">API Calls</p>
+            <p className="text-2xl font-bold">{summary.totalApiCalls.toLocaleString()}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent>
+            <p className="text-sm text-text-muted">Unique Visitors</p>
+            <p className="text-2xl font-bold">{summary.uniqueVisitors.toLocaleString()}</p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Top Datasets */}
@@ -76,28 +93,26 @@ export default async function AnalyticsDashboardPage({ searchParams }: Props) {
         {summary.topDatasets.length === 0 ? (
           <p className="text-text-muted text-sm">No dataset activity in this period.</p>
         ) : (
-          <div className="rounded border bg-background overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-surface border-b">
-                <tr>
-                  <th className="text-left px-4 py-3 font-medium w-12">#</th>
-                  <th className="text-left px-4 py-3 font-medium">Dataset</th>
-                  <th className="text-right px-4 py-3 font-medium">Views</th>
-                  <th className="text-right px-4 py-3 font-medium">Downloads</th>
-                </tr>
-              </thead>
-              <tbody>
-                {summary.topDatasets.map((ds, i) => (
-                  <tr key={ds.entityId} className="border-b last:border-0">
-                    <td className="px-4 py-3 text-text-muted">{i + 1}</td>
-                    <td className="px-4 py-3">{ds.title}</td>
-                    <td className="px-4 py-3 text-right font-mono">{ds.views.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-right font-mono">{ds.downloads.toLocaleString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12">#</TableHead>
+                <TableHead>Dataset</TableHead>
+                <TableHead className="text-right">Views</TableHead>
+                <TableHead className="text-right">Downloads</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {summary.topDatasets.map((ds, i) => (
+                <TableRow key={ds.entityId}>
+                  <TableCell className="text-text-muted">{i + 1}</TableCell>
+                  <TableCell>{ds.title}</TableCell>
+                  <TableCell className="text-right font-mono">{ds.views.toLocaleString()}</TableCell>
+                  <TableCell className="text-right font-mono">{ds.downloads.toLocaleString()}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
       </div>
 
@@ -107,26 +122,24 @@ export default async function AnalyticsDashboardPage({ searchParams }: Props) {
         {summary.topSearchTerms.length === 0 ? (
           <p className="text-text-muted text-sm">No search activity in this period.</p>
         ) : (
-          <div className="rounded border bg-background overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-surface border-b">
-                <tr>
-                  <th className="text-left px-4 py-3 font-medium w-12">#</th>
-                  <th className="text-left px-4 py-3 font-medium">Term</th>
-                  <th className="text-right px-4 py-3 font-medium">Searches</th>
-                </tr>
-              </thead>
-              <tbody>
-                {summary.topSearchTerms.map((st, i) => (
-                  <tr key={st.term} className="border-b last:border-0">
-                    <td className="px-4 py-3 text-text-muted">{i + 1}</td>
-                    <td className="px-4 py-3">{st.term}</td>
-                    <td className="px-4 py-3 text-right font-mono">{st.count.toLocaleString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12">#</TableHead>
+                <TableHead>Term</TableHead>
+                <TableHead className="text-right">Searches</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {summary.topSearchTerms.map((st, i) => (
+                <TableRow key={st.term}>
+                  <TableCell className="text-text-muted">{i + 1}</TableCell>
+                  <TableCell>{st.term}</TableCell>
+                  <TableCell className="text-right font-mono">{st.count.toLocaleString()}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
       </div>
     </div>
