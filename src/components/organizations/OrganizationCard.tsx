@@ -16,7 +16,7 @@ export function OrganizationCard({
   adminView = false,
 }: OrganizationCardProps) {
   const href = adminView
-    ? `/admin/organizations/${organization.id}/edit`
+    ? `/admin/organizations/${organization.id}`
     : `/organizations/${organization.slug}`;
 
   return (
