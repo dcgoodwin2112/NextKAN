@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getAnalyticsSummary } from "@/lib/services/analytics";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import Link from "next/link";
 
 interface Props {
@@ -31,8 +32,7 @@ export default async function AnalyticsDashboardPage({ searchParams }: Props) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Analytics Dashboard</h1>
+      <AdminPageHeader title="Analytics Dashboard">
         <div className="flex gap-2">
           {periods.map((p) => (
             <Link
@@ -48,7 +48,7 @@ export default async function AnalyticsDashboardPage({ searchParams }: Props) {
             </Link>
           ))}
         </div>
-      </div>
+      </AdminPageHeader>
 
       {/* Summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

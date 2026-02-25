@@ -6,6 +6,9 @@ import {
   listOrganizations,
 } from "@/lib/actions/organizations";
 import { OrganizationForm } from "@/components/organizations/OrganizationForm";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
+import { OrgDeleteButton } from "./OrgDeleteButton";
 import { redirect } from "next/navigation";
 
 interface Props {
@@ -39,17 +42,16 @@ export default async function EditOrganizationPage({ params }: Props) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Edit Organization</h1>
-        <form action={handleDelete}>
-          <button
-            type="submit"
-            className="rounded border border-danger px-4 py-2 text-danger hover:bg-danger-subtle"
-          >
-            Delete
-          </button>
-        </form>
-      </div>
+      <Breadcrumbs
+        items={[
+          { label: "Admin", href: "/admin" },
+          { label: "Organizations", href: "/admin/organizations" },
+          { label: "Edit Organization" },
+        ]}
+      />
+      <AdminPageHeader title="Edit Organization">
+        <OrgDeleteButton onDelete={handleDelete} />
+      </AdminPageHeader>
       <OrganizationForm
         initialData={organization}
         organizations={organizations}

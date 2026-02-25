@@ -12,10 +12,13 @@ import { listSeries } from "@/lib/actions/series";
 import { DatasetForm } from "@/components/datasets/DatasetForm";
 import { DataDictionaryEditor } from "@/components/datasets/DataDictionaryEditor";
 import { ActivityFeed } from "@/components/admin/ActivityFeed";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { WorkflowPanel } from "@/components/datasets/WorkflowPanel";
 import { QualityBadge } from "@/components/datasets/QualityBadge";
 import { VersionHistory } from "@/components/datasets/VersionHistory";
 import { CreateVersionForm } from "@/components/datasets/CreateVersionForm";
+import { DatasetDeleteButton } from "./DatasetDeleteButton";
 import { prisma } from "@/lib/db";
 import { updateDataDictionary } from "@/lib/services/data-dictionary";
 import { isWorkflowEnabled, getAvailableTransitions, getWorkflowHistory, transitionWorkflow } from "@/lib/services/workflow";
@@ -167,20 +170,17 @@ export default async function EditDatasetPage({ params }: Props) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold">Edit Dataset</h1>
-          <QualityBadge score={qualityScore.overall} />
-        </div>
-        <form action={handleDelete}>
-          <button
-            type="submit"
-            className="rounded border border-danger px-4 py-2 text-danger hover:bg-danger-subtle"
-          >
-            Delete
-          </button>
-        </form>
-      </div>
+      <Breadcrumbs
+        items={[
+          { label: "Admin", href: "/admin" },
+          { label: "Datasets", href: "/admin/datasets" },
+          { label: "Edit Dataset" },
+        ]}
+      />
+      <AdminPageHeader title="Edit Dataset">
+        <QualityBadge score={qualityScore.overall} />
+        <DatasetDeleteButton onDelete={handleDelete} />
+      </AdminPageHeader>
 
       {workflowEnabled && (
         <div className="mb-6">

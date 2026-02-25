@@ -1,6 +1,9 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { getSeries, updateSeries, deleteSeries } from "@/lib/actions/series";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
+import { SeriesDeleteButton } from "./SeriesDeleteButton";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -29,17 +32,16 @@ export default async function EditSeriesPage({ params }: Props) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Edit Series</h1>
-        <form action={handleDelete}>
-          <button
-            type="submit"
-            className="rounded border border-danger px-4 py-2 text-danger hover:bg-danger-subtle"
-          >
-            Delete
-          </button>
-        </form>
-      </div>
+      <Breadcrumbs
+        items={[
+          { label: "Admin", href: "/admin" },
+          { label: "Series", href: "/admin/series" },
+          { label: "Edit Series" },
+        ]}
+      />
+      <AdminPageHeader title="Edit Series">
+        <SeriesDeleteButton onDelete={handleDelete} />
+      </AdminPageHeader>
 
       <form action={handleUpdate} className="max-w-xl space-y-4">
         <div>

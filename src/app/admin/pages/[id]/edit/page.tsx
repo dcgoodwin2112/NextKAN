@@ -3,6 +3,9 @@
 import { useState, useEffect, useTransition } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { MarkdownEditor } from "@/components/admin/MarkdownEditor";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
+import { ConfirmDeleteButton } from "@/components/admin/ConfirmDeleteButton";
 
 interface PageData {
   id: string;
@@ -62,7 +65,6 @@ export default function EditPagePage() {
   }
 
   function handleDelete() {
-    if (!confirm("Are you sure you want to delete this page?")) return;
     startTransition(async () => {
       const { deletePage } = await import("@/lib/actions/pages");
       await deletePage(params.id as string);
@@ -74,16 +76,16 @@ export default function EditPagePage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Edit Page</h1>
-        <button
-          type="button"
-          onClick={handleDelete}
-          className="rounded border border-danger px-4 py-2 text-danger hover:bg-danger-subtle"
-        >
-          Delete
-        </button>
-      </div>
+      <Breadcrumbs
+        items={[
+          { label: "Admin", href: "/admin" },
+          { label: "Pages", href: "/admin/pages" },
+          { label: "Edit Page" },
+        ]}
+      />
+      <AdminPageHeader title="Edit Page">
+        <ConfirmDeleteButton entityName="this page" onConfirm={handleDelete} />
+      </AdminPageHeader>
       {error && (
         <div className="mb-4 rounded bg-danger-subtle p-3 text-sm text-danger-text">
           {error}

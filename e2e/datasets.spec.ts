@@ -82,9 +82,15 @@ test.describe("Dataset admin workflow", () => {
       timeout: 10000,
     });
 
-    // Delete — use exact match to avoid matching "Remove keyword delete" button
-    await page.getByRole("button", { name: "Delete", exact: true }).click();
-    await expect(page).toHaveURL(/\/admin\/datasets/, { timeout: 10000 });
+    // Delete — click opens confirmation dialog, then confirm
+    await page.getByRole("button", { name: "Delete", exact: true }).first().click();
+    await expect(page.getByText("Are you sure?")).toBeVisible();
+    // Click the confirm Delete button inside the dialog
+    const dialog = page.getByRole("alertdialog");
+    await dialog.getByRole("button", { name: "Delete" }).click();
+    await expect(page).toHaveURL(/\/admin\/datasets$/, { timeout: 10000 });
+    // Verify the dataset is actually gone
+    await expect(page.getByText("E2E Delete Target")).not.toBeVisible();
   });
 
   test("created dataset appears on public listing when published", async ({

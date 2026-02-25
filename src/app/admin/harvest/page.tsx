@@ -1,26 +1,27 @@
 import Link from "next/link";
 import { listHarvestSources } from "@/lib/actions/harvest";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { EmptyState } from "@/components/admin/EmptyState";
+import { Button } from "@/components/ui/button";
 
 export default async function AdminHarvestPage() {
   const sources = await listHarvestSources();
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Harvest Sources</h1>
-        <Link
-          href="/admin/harvest/new"
-          className="rounded bg-primary px-4 py-2 text-sm text-white hover:bg-primary-hover"
-        >
-          New Source
-        </Link>
-      </div>
+      <AdminPageHeader title="Harvest Sources">
+        <Button asChild size="sm">
+          <Link href="/admin/harvest/new">New Source</Link>
+        </Button>
+      </AdminPageHeader>
 
       {sources.length === 0 ? (
-        <p className="text-text-muted">
-          No harvest sources configured. Create one to start harvesting datasets
-          from external catalogs.
-        </p>
+        <EmptyState
+          title="No harvest sources configured"
+          description="Create one to start harvesting datasets from external catalogs."
+          actionLabel="New Source"
+          actionHref="/admin/harvest/new"
+        />
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-border text-sm">

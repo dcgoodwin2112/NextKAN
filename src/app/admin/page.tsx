@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { ActivityFeed } from "@/components/admin/ActivityFeed";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 
 export default async function AdminDashboard() {
   const [datasetCount, orgCount, recentActivity] = await Promise.all([
@@ -13,7 +14,7 @@ export default async function AdminDashboard() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+      <AdminPageHeader title="Dashboard" />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="rounded-lg border p-6">
           <p className="text-sm text-text-muted">Datasets</p>
