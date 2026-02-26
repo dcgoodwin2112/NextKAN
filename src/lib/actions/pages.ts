@@ -8,6 +8,7 @@ import {
   type PageUpdateInput,
 } from "@/lib/schemas/page";
 import { generateSlug } from "@/lib/utils/slug";
+import { logActivity } from "@/lib/services/activity";
 
 export async function createPage(
   input: PageCreateInput,
@@ -16,16 +17,32 @@ export async function createPage(
   const data = pageCreateSchema.parse(input);
   const slug = data.slug || generateSlug(data.title);
 
-  return prisma.page.create({
+  const page = await prisma.page.create({
     data: {
       title: data.title,
       slug,
       content: data.content,
       published: data.published ?? false,
       sortOrder: data.sortOrder ?? 0,
+      navLocation: data.navLocation ?? "header",
+      parentId: data.parentId ?? null,
+      metaTitle: data.metaTitle ?? null,
+      metaDescription: data.metaDescription ?? null,
+      imageUrl: data.imageUrl || null,
+      template: data.template ?? "default",
       createdById: createdById || null,
     },
   });
+
+  logActivity({
+    action: "create",
+    entityType: "page",
+    entityId: page.id,
+    entityName: page.title,
+    userId: createdById,
+  }).catch(() => {});
+
+  return page;
 }
 
 export async function updatePage(id: string, input: PageUpdateInput) {
@@ -42,30 +59,139 @@ export async function updatePage(id: string, input: PageUpdateInput) {
   if (data.content !== undefined) updateData.content = data.content;
   if (data.published !== undefined) updateData.published = data.published;
   if (data.sortOrder !== undefined) updateData.sortOrder = data.sortOrder;
+  if (data.navLocation !== undefined) updateData.navLocation = data.navLocation;
+  if (data.parentId !== undefined) updateData.parentId = data.parentId;
+  if (data.metaTitle !== undefined) updateData.metaTitle = data.metaTitle || null;
+  if (data.metaDescription !== undefined) updateData.metaDescription = data.metaDescription || null;
+  if (data.imageUrl !== undefined) updateData.imageUrl = data.imageUrl || null;
+  if (data.template !== undefined) updateData.template = data.template;
 
-  return prisma.page.update({ where: { id }, data: updateData });
+  const page = await prisma.page.update({ where: { id }, data: updateData });
+
+  logActivity({
+    action: "update",
+    entityType: "page",
+    entityId: page.id,
+    entityName: page.title,
+  }).catch(() => {});
+
+  return page;
 }
 
 export async function deletePage(id: string) {
-  return prisma.page.delete({ where: { id } });
+  // Orphan children before deleting
+  await prisma.page.updateMany({
+    where: { parentId: id },
+    data: { parentId: null },
+  });
+
+  const page = await prisma.page.delete({ where: { id } });
+
+  logActivity({
+    action: "delete",
+    entityType: "page",
+    entityId: id,
+    entityName: page.title,
+  }).catch(() => {});
+
+  return page;
 }
 
 export async function getPageBySlug(slug: string) {
-  return prisma.page.findUnique({ where: { slug } });
+  return prisma.page.findUnique({
+    where: { slug },
+    include: {
+      parent: {
+        include: {
+          children: {
+            where: { published: true },
+            orderBy: { sortOrder: "asc" },
+            select: { id: true, title: true, slug: true },
+          },
+        },
+      },
+      children: { orderBy: { sortOrder: "asc" } },
+    },
+  });
 }
 
 export async function getPage(id: string) {
-  return prisma.page.findUnique({ where: { id } });
+  return prisma.page.findUnique({
+    where: { id },
+    include: {
+      parent: {
+        include: {
+          children: {
+            where: { published: true },
+            orderBy: { sortOrder: "asc" },
+            select: { id: true, title: true, slug: true },
+          },
+        },
+      },
+      children: { orderBy: { sortOrder: "asc" } },
+    },
+  });
 }
 
 export async function listPages() {
-  return prisma.page.findMany({ orderBy: { sortOrder: "asc" } });
+  return prisma.page.findMany({
+    orderBy: { sortOrder: "asc" },
+    include: { parent: true },
+  });
 }
 
 export async function listPublishedPages() {
   return prisma.page.findMany({
-    where: { published: true },
+    where: { published: true, parentId: null },
+    orderBy: { sortOrder: "asc" },
+    select: { id: true, title: true, slug: true, navLocation: true },
+  });
+}
+
+export async function listPublishedPagesByLocation(
+  location: "header" | "footer"
+) {
+  return prisma.page.findMany({
+    where: {
+      published: true,
+      parentId: null,
+      navLocation: { in: [location, "both"] },
+    },
     orderBy: { sortOrder: "asc" },
     select: { id: true, title: true, slug: true },
   });
+}
+
+export async function reorderPages(id: string, direction: "up" | "down") {
+  const page = await prisma.page.findUnique({ where: { id } });
+  if (!page) throw new Error("Page not found");
+
+  // Find adjacent sibling with same parent
+  const sibling = await prisma.page.findFirst({
+    where: {
+      parentId: page.parentId,
+      sortOrder: direction === "up"
+        ? { lt: page.sortOrder }
+        : { gt: page.sortOrder },
+    },
+    orderBy: {
+      sortOrder: direction === "up" ? "desc" : "asc",
+    },
+  });
+
+  if (!sibling) return page; // Already at boundary
+
+  // Swap sortOrder values
+  await prisma.$transaction([
+    prisma.page.update({
+      where: { id: page.id },
+      data: { sortOrder: sibling.sortOrder },
+    }),
+    prisma.page.update({
+      where: { id: sibling.id },
+      data: { sortOrder: page.sortOrder },
+    }),
+  ]);
+
+  return prisma.page.findUnique({ where: { id } });
 }

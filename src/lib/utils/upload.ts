@@ -15,6 +15,10 @@ export const ALLOWED_TYPES = [
   "application/geo+json",
   "text/plain",
   "application/zip",
+  "image/png",
+  "image/jpeg",
+  "image/gif",
+  "image/webp",
 ];
 
 export const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB

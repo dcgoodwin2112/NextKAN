@@ -12,8 +12,8 @@ test.describe("Content Pages", () => {
   test("admin can create a page", async ({ page }) => {
     await page.goto("/admin/pages/new");
 
-    await page.getByLabel(/title/i).fill("E2E About Page");
-    await page.locator("textarea").fill("# About Us\n\nThis is a test page.");
+    await page.getByLabel("Title", { exact: true }).fill("E2E About Page");
+    await page.locator("textarea").first().fill("# About Us\n\nThis is a test page.");
     await page.getByLabel(/published/i).check();
 
     await page.getByRole("button", { name: /create/i }).click();
@@ -26,8 +26,8 @@ test.describe("Content Pages", () => {
   test("published page renders at /pages/slug", async ({ page }) => {
     // Create a published page first
     await page.goto("/admin/pages/new");
-    await page.getByLabel(/title/i).fill("E2E Public Page");
-    await page.locator("textarea").fill("# Public Content\n\nVisible to everyone.");
+    await page.getByLabel("Title", { exact: true }).fill("E2E Public Page");
+    await page.locator("textarea").first().fill("# Public Content\n\nVisible to everyone.");
     await page.getByLabel(/published/i).check();
     await page.getByRole("button", { name: /create/i }).click();
     await expect(page).toHaveURL(/\/admin\/pages/, { timeout: 10000 });
@@ -40,8 +40,8 @@ test.describe("Content Pages", () => {
   test("navigation includes published pages", async ({ page }) => {
     // Create a published page
     await page.goto("/admin/pages/new");
-    await page.getByLabel(/title/i).fill("E2E Nav Page");
-    await page.locator("textarea").fill("Nav test content");
+    await page.getByLabel("Title", { exact: true }).fill("E2E Nav Page");
+    await page.locator("textarea").first().fill("Nav test content");
     await page.getByLabel(/published/i).check();
     await page.getByRole("button", { name: /create/i }).click();
     await expect(page).toHaveURL(/\/admin\/pages/, { timeout: 10000 });

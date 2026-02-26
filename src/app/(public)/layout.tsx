@@ -1,20 +1,23 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { siteConfig } from "@/lib/config";
-import { listPublishedPages } from "@/lib/actions/pages";
+import { listPublishedPagesByLocation } from "@/lib/actions/pages";
 
 export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const pages = await listPublishedPages();
+  const [headerPages, footerPages] = await Promise.all([
+    listPublishedPagesByLocation("header"),
+    listPublishedPagesByLocation("footer"),
+  ]);
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header siteName={siteConfig.name} pages={pages} />
+      <Header siteName={siteConfig.name} pages={headerPages} />
       <main className="flex-1">{children}</main>
-      <Footer />
+      <Footer pages={footerPages} />
     </div>
   );
 }
