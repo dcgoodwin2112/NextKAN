@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
+import { CollapsibleSection } from "@/components/admin/CollapsibleSection";
 import type { DatasetCreateInput } from "@/lib/schemas/dataset";
 import type { TemplateFields } from "@/lib/schemas/template";
 
@@ -155,19 +156,12 @@ export function DatasetForm({
   const [dcatVersionNotes, setDcatVersionNotes] = useState(initialData?.versionNotes || dv.versionNotes || "");
   const [seriesId, setSeriesId] = useState(initialData?.seriesId || dv.seriesId || "");
   const [previousVersion, setPreviousVersion] = useState(initialData?.previousVersion || dv.previousVersion || "");
-  const [showV3, setShowV3] = useState(false);
 
   // Distributions
   const [distributions, setDistributions] = useState<Distribution[]>(
     initialData?.distributions || []
   );
   const [showDistForm, setShowDistForm] = useState(false);
-
-  // Collapsible sections
-  const [showFederal, setShowFederal] = useState(false);
-  const [showAccess, setShowAccess] = useState(false);
-  const [showCoverage, setShowCoverage] = useState(false);
-  const [showAdditional, setShowAdditional] = useState(false);
 
   // UI state
   const [error, setError] = useState("");
@@ -439,270 +433,225 @@ export function DatasetForm({
       </fieldset>
 
       {/* Federal Fields */}
-      <fieldset className="space-y-4">
-        <button
-          type="button"
-          onClick={() => setShowFederal(!showFederal)}
-          className="text-lg font-semibold flex items-center gap-2"
-        >
-          <span>{showFederal ? "▼" : "▶"}</span> Federal Fields
-        </button>
-        {showFederal && (
-          <div className="space-y-4 pl-4">
-            <div className="space-y-2">
-              <Label htmlFor="bureauCode">Bureau Code</Label>
-              <Input
-                id="bureauCode"
-                type="text"
-                value={bureauCode}
-                onChange={(e) => setBureauCode(e.target.value)}
-                placeholder="015:11"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="programCode">Program Code</Label>
-              <Input
-                id="programCode"
-                type="text"
-                value={programCode}
-                onChange={(e) => setProgramCode(e.target.value)}
-                placeholder="015:001"
-              />
-            </div>
+      <CollapsibleSection title="Federal Fields" defaultOpen={false} headingLevel="h3">
+        <fieldset className="space-y-4 pl-4">
+          <div className="space-y-2">
+            <Label htmlFor="bureauCode">Bureau Code</Label>
+            <Input
+              id="bureauCode"
+              type="text"
+              value={bureauCode}
+              onChange={(e) => setBureauCode(e.target.value)}
+              placeholder="015:11"
+            />
           </div>
-        )}
-      </fieldset>
+          <div className="space-y-2">
+            <Label htmlFor="programCode">Program Code</Label>
+            <Input
+              id="programCode"
+              type="text"
+              value={programCode}
+              onChange={(e) => setProgramCode(e.target.value)}
+              placeholder="015:001"
+            />
+          </div>
+        </fieldset>
+      </CollapsibleSection>
 
       {/* Access & License */}
-      <fieldset className="space-y-4">
-        <button
-          type="button"
-          onClick={() => setShowAccess(!showAccess)}
-          className="text-lg font-semibold flex items-center gap-2"
-        >
-          <span>{showAccess ? "▼" : "▶"}</span> Access & License
-        </button>
-        {showAccess && (
-          <div className="space-y-4 pl-4">
-            <div className="space-y-2">
-              <Label htmlFor="license">License</Label>
-              <NativeSelect
-                id="license"
-                value={licenseId}
-                onChange={(e) => setLicenseId(e.target.value)}
-              >
-                <option value="">No license selected</option>
-                {LICENSES.map((l) => (
-                  <option key={l.id} value={l.id}>{l.name}</option>
-                ))}
-              </NativeSelect>
-              {licenseId === "other" && (
-                <Input
-                  id="customLicenseUrl"
-                  type="url"
-                  value={customLicenseUrl}
-                  onChange={(e) => setCustomLicenseUrl(e.target.value)}
-                  className="mt-2"
-                  placeholder="Enter license URL"
-                />
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="rights">Rights</Label>
+      <CollapsibleSection title="Access & License" defaultOpen={false} headingLevel="h3">
+        <fieldset className="space-y-4 pl-4">
+          <div className="space-y-2">
+            <Label htmlFor="license">License</Label>
+            <NativeSelect
+              id="license"
+              value={licenseId}
+              onChange={(e) => setLicenseId(e.target.value)}
+            >
+              <option value="">No license selected</option>
+              {LICENSES.map((l) => (
+                <option key={l.id} value={l.id}>{l.name}</option>
+              ))}
+            </NativeSelect>
+            {licenseId === "other" && (
               <Input
-                id="rights"
-                type="text"
-                value={rights}
-                onChange={(e) => setRights(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="landingPage">Landing Page</Label>
-              <Input
-                id="landingPage"
+                id="customLicenseUrl"
                 type="url"
-                value={landingPage}
-                onChange={(e) => setLandingPage(e.target.value)}
+                value={customLicenseUrl}
+                onChange={(e) => setCustomLicenseUrl(e.target.value)}
+                className="mt-2"
+                placeholder="Enter license URL"
               />
-            </div>
+            )}
           </div>
-        )}
-      </fieldset>
+          <div className="space-y-2">
+            <Label htmlFor="rights">Rights</Label>
+            <Input
+              id="rights"
+              type="text"
+              value={rights}
+              onChange={(e) => setRights(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="landingPage">Landing Page</Label>
+            <Input
+              id="landingPage"
+              type="url"
+              value={landingPage}
+              onChange={(e) => setLandingPage(e.target.value)}
+            />
+          </div>
+        </fieldset>
+      </CollapsibleSection>
 
       {/* Coverage */}
-      <fieldset className="space-y-4">
-        <button
-          type="button"
-          onClick={() => setShowCoverage(!showCoverage)}
-          className="text-lg font-semibold flex items-center gap-2"
-        >
-          <span>{showCoverage ? "▼" : "▶"}</span> Coverage
-        </button>
-        {showCoverage && (
-          <div className="space-y-4 pl-4">
-            <div className="space-y-2">
-              <Label htmlFor="spatial">Spatial</Label>
-              <Input
-                id="spatial"
-                type="text"
-                value={spatial}
-                onChange={(e) => setSpatial(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="temporal">Temporal</Label>
-              <Input
-                id="temporal"
-                type="text"
-                value={temporal}
-                onChange={(e) => setTemporal(e.target.value)}
-                placeholder="2020-01-01/2024-12-31"
-              />
-            </div>
+      <CollapsibleSection title="Coverage" defaultOpen={false} headingLevel="h3">
+        <fieldset className="space-y-4 pl-4">
+          <div className="space-y-2">
+            <Label htmlFor="spatial">Spatial</Label>
+            <Input
+              id="spatial"
+              type="text"
+              value={spatial}
+              onChange={(e) => setSpatial(e.target.value)}
+            />
           </div>
-        )}
-      </fieldset>
+          <div className="space-y-2">
+            <Label htmlFor="temporal">Temporal</Label>
+            <Input
+              id="temporal"
+              type="text"
+              value={temporal}
+              onChange={(e) => setTemporal(e.target.value)}
+              placeholder="2020-01-01/2024-12-31"
+            />
+          </div>
+        </fieldset>
+      </CollapsibleSection>
 
       {/* Additional Metadata */}
-      <fieldset className="space-y-4">
-        <button
-          type="button"
-          onClick={() => setShowAdditional(!showAdditional)}
-          className="text-lg font-semibold flex items-center gap-2"
-        >
-          <span>{showAdditional ? "▼" : "▶"}</span> Additional Metadata
-        </button>
-        {showAdditional && (
-          <div className="space-y-4 pl-4">
-            <div className="space-y-2">
-              <Label htmlFor="issued">Issued Date</Label>
-              <Input
-                id="issued"
-                type="date"
-                value={issued}
-                onChange={(e) => setIssued(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="accrualPeriodicity">Accrual Periodicity</Label>
-              <Input
-                id="accrualPeriodicity"
-                type="text"
-                value={accrualPeriodicity}
-                onChange={(e) => setAccrualPeriodicity(e.target.value)}
-                placeholder="R/P1Y"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="conformsTo">Conforms To</Label>
-              <Input
-                id="conformsTo"
-                type="url"
-                value={conformsTo}
-                onChange={(e) => setConformsTo(e.target.value)}
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                id="dataQuality"
-                type="checkbox"
-                checked={dataQuality === true}
-                onChange={(e) => setDataQuality(e.target.checked ? true : undefined)}
-              />
-              <label htmlFor="dataQuality" className="text-sm font-medium">
-                Data Quality
-              </label>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="describedBy">Described By</Label>
-              <Input
-                id="describedBy"
-                type="url"
-                value={describedBy}
-                onChange={(e) => setDescribedBy(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="isPartOf">Is Part Of</Label>
-              <Input
-                id="isPartOf"
-                type="text"
-                value={isPartOf}
-                onChange={(e) => setIsPartOf(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="language">Language</Label>
-              <Input
-                id="language"
-                type="text"
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-              />
-            </div>
+      <CollapsibleSection title="Additional Metadata" defaultOpen={false} headingLevel="h3">
+        <fieldset className="space-y-4 pl-4">
+          <div className="space-y-2">
+            <Label htmlFor="issued">Issued Date</Label>
+            <Input
+              id="issued"
+              type="date"
+              value={issued}
+              onChange={(e) => setIssued(e.target.value)}
+            />
           </div>
-        )}
-      </fieldset>
+          <div className="space-y-2">
+            <Label htmlFor="accrualPeriodicity">Accrual Periodicity</Label>
+            <Input
+              id="accrualPeriodicity"
+              type="text"
+              value={accrualPeriodicity}
+              onChange={(e) => setAccrualPeriodicity(e.target.value)}
+              placeholder="R/P1Y"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="conformsTo">Conforms To</Label>
+            <Input
+              id="conformsTo"
+              type="url"
+              value={conformsTo}
+              onChange={(e) => setConformsTo(e.target.value)}
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              id="dataQuality"
+              type="checkbox"
+              checked={dataQuality === true}
+              onChange={(e) => setDataQuality(e.target.checked ? true : undefined)}
+            />
+            <label htmlFor="dataQuality" className="text-sm font-medium">
+              Data Quality
+            </label>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="describedBy">Described By</Label>
+            <Input
+              id="describedBy"
+              type="url"
+              value={describedBy}
+              onChange={(e) => setDescribedBy(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="isPartOf">Is Part Of</Label>
+            <Input
+              id="isPartOf"
+              type="text"
+              value={isPartOf}
+              onChange={(e) => setIsPartOf(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="language">Language</Label>
+            <Input
+              id="language"
+              type="text"
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+            />
+          </div>
+        </fieldset>
+      </CollapsibleSection>
 
       {/* DCAT-US v3.0 */}
       {availableSeries.length > 0 && (
-        <fieldset className="space-y-4">
-          <button
-            type="button"
-            onClick={() => setShowV3(!showV3)}
-            className="text-lg font-semibold flex items-center gap-2"
-          >
-            <span>{showV3 ? "▼" : "▶"}</span> DCAT-US v3.0
-          </button>
-          {showV3 && (
-            <div className="space-y-4 pl-4">
-              <div className="space-y-2">
-                <Label htmlFor="seriesId">Series</Label>
-                <NativeSelect
-                  id="seriesId"
-                  value={seriesId}
-                  onChange={(e) => setSeriesId(e.target.value)}
-                >
-                  <option value="">No series</option>
-                  {availableSeries.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.title}
-                    </option>
-                  ))}
-                </NativeSelect>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="dcatVersion">Version</Label>
-                <Input
-                  id="dcatVersion"
-                  type="text"
-                  value={dcatVersion}
-                  onChange={(e) => setDcatVersion(e.target.value)}
-                  placeholder="e.g. 2.1"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="dcatVersionNotes">Version Notes</Label>
-                <Textarea
-                  id="dcatVersionNotes"
-                  value={dcatVersionNotes}
-                  onChange={(e) => setDcatVersionNotes(e.target.value)}
-                  rows={2}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="previousVersion">Previous Version</Label>
-                <Input
-                  id="previousVersion"
-                  type="text"
-                  value={previousVersion}
-                  onChange={(e) => setPreviousVersion(e.target.value)}
-                  placeholder="URL or identifier of previous version"
-                />
-              </div>
+        <CollapsibleSection title="DCAT-US v3.0" defaultOpen={false} headingLevel="h3">
+          <fieldset className="space-y-4 pl-4">
+            <div className="space-y-2">
+              <Label htmlFor="seriesId">Series</Label>
+              <NativeSelect
+                id="seriesId"
+                value={seriesId}
+                onChange={(e) => setSeriesId(e.target.value)}
+              >
+                <option value="">No series</option>
+                {availableSeries.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.title}
+                  </option>
+                ))}
+              </NativeSelect>
             </div>
-          )}
-        </fieldset>
+            <div className="space-y-2">
+              <Label htmlFor="dcatVersion">Version</Label>
+              <Input
+                id="dcatVersion"
+                type="text"
+                value={dcatVersion}
+                onChange={(e) => setDcatVersion(e.target.value)}
+                placeholder="e.g. 2.1"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="dcatVersionNotes">Version Notes</Label>
+              <Textarea
+                id="dcatVersionNotes"
+                value={dcatVersionNotes}
+                onChange={(e) => setDcatVersionNotes(e.target.value)}
+                rows={2}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="previousVersion">Previous Version</Label>
+              <Input
+                id="previousVersion"
+                type="text"
+                value={previousVersion}
+                onChange={(e) => setPreviousVersion(e.target.value)}
+                placeholder="URL or identifier of previous version"
+              />
+            </div>
+          </fieldset>
+        </CollapsibleSection>
       )}
 
       {/* Distributions */}

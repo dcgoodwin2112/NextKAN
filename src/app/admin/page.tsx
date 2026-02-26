@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { CollapsibleSection } from "@/components/admin/CollapsibleSection";
 import Link from "next/link";
 
 export default async function AdminDashboard() {
@@ -68,7 +69,7 @@ export default async function AdminDashboard() {
       {/* Action items row */}
       {hasActionItems && (
         <div className="mt-8">
-          <h2 className="text-lg font-semibold mb-4">Action Required</h2>
+          <CollapsibleSection title="Action Required">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {actionItems.pendingReview.length > 0 && (
               <Card>
@@ -153,12 +154,13 @@ export default async function AdminDashboard() {
               </Card>
             )}
           </div>
+          </CollapsibleSection>
         </div>
       )}
 
       {/* Catalog health row */}
       <div className="mt-8">
-        <h2 className="text-lg font-semibold mb-4">Catalog Health</h2>
+        <CollapsibleSection title="Catalog Health">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <Card>
             <CardContent>
@@ -242,11 +244,12 @@ export default async function AdminDashboard() {
             </CardContent>
           </Card>
         </div>
+        </CollapsibleSection>
       </div>
 
       {/* Trends row */}
       <div className="mt-8">
-        <h2 className="text-lg font-semibold mb-4">Trends</h2>
+        <CollapsibleSection title="Trends">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <Card>
             <CardContent>
@@ -317,16 +320,18 @@ export default async function AdminDashboard() {
             </Card>
           )}
         </div>
+        </CollapsibleSection>
       </div>
 
       {/* Recent activity row */}
       <div className="mt-8">
-        <h2 className="text-lg font-semibold mb-4">Recent Activity</h2>
-        <Card>
-          <CardContent>
-            <ActivityFeed activities={recentActivity as any} />
-          </CardContent>
-        </Card>
+        <CollapsibleSection title="Recent Activity">
+          <Card>
+            <CardContent>
+              <ActivityFeed activities={recentActivity as any} />
+            </CardContent>
+          </Card>
+        </CollapsibleSection>
       </div>
     </div>
   );

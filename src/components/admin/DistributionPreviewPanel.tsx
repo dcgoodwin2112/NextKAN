@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DataPreview } from "@/components/datasets/DataPreview";
@@ -79,7 +80,11 @@ export function DistributionPreviewPanel({
               onClick={() => toggle(dist.id)}
               className="w-full px-4 py-3 flex items-center gap-2 text-left"
             >
-              <span className="text-sm">{isOpen ? "▼" : "▶"}</span>
+              {isOpen ? (
+                <ChevronDown className="size-4 shrink-0" />
+              ) : (
+                <ChevronRight className="size-4 shrink-0" />
+              )}
               <span className="font-medium text-sm flex-1">{label}</span>
               {dist.format && (
                 <Badge variant="outline">{dist.format.toUpperCase()}</Badge>
