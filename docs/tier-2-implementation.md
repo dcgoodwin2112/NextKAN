@@ -3,7 +3,7 @@
 > **Status: COMPLETE** — All features implemented and tested. 226 unit/component/integration tests passing, 24 E2E tests passing.
 >
 > **Adjustments from original spec:**
-> - Feature 14 (Datastore) — initially deferred, then completed as standalone effort (see `docs/deferred-tasks.md`)
+> - Feature 14 (Datastore) — initially deferred, then completed as standalone effort (see `docs/backlog-completed.md`)
 > - Feature 15 (Contact Point model) — skipped; existing `contactName`/`contactEmail` fields + DCAT-US transformer already output proper `vcard:Contact` with `mailto:` prefix
 > - Full WCAG audit — deferred to Tier 3 (basic semantic HTML + focus indicators done)
 > - CSS theming adapted for Tailwind 4 (`@theme inline` block, not `:root` vars)
@@ -254,7 +254,7 @@ Update `src/app/(public)/datasets/[slug]/page.tsx`:
 
 ## Feature 14: Datastore (Queryable Tabular Data) — COMPLETE
 
-> **Implemented as standalone effort.** See `docs/deferred-tasks.md` for original deferral context.
+> **Implemented as standalone effort.** See `docs/backlog-completed.md` for original deferral context.
 > See `src/lib/services/datastore.ts` and `src/app/api/datastore/` for implementation.
 
 ---

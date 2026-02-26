@@ -12,9 +12,47 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { PageReorderButtons } from "./PageReorderButtons";
 
 export default async function AdminPagesPage() {
   const pages = await listPages();
+
+  // Group: parents first, then children under them
+  const topLevel = pages.filter((p) => !p.parentId);
+  const children = pages.filter((p) => p.parentId);
+  const childrenByParent = new Map<string, typeof pages>();
+  for (const child of children) {
+    const list = childrenByParent.get(child.parentId!) || [];
+    list.push(child);
+    childrenByParent.set(child.parentId!, list);
+  }
+
+  // Build flat ordered list with hierarchy info
+  const orderedPages: {
+    page: (typeof pages)[number];
+    isChild: boolean;
+    isFirst: boolean;
+    isLast: boolean;
+  }[] = [];
+
+  for (let i = 0; i < topLevel.length; i++) {
+    const p = topLevel[i];
+    orderedPages.push({
+      page: p,
+      isChild: false,
+      isFirst: i === 0,
+      isLast: i === topLevel.length - 1,
+    });
+    const kids = childrenByParent.get(p.id) || [];
+    for (let j = 0; j < kids.length; j++) {
+      orderedPages.push({
+        page: kids[j],
+        isChild: true,
+        isFirst: j === 0,
+        isLast: j === kids.length - 1,
+      });
+    }
+  }
 
   return (
     <div>
@@ -38,15 +76,26 @@ export default async function AdminPagesPage() {
               <TableHead>Title</TableHead>
               <TableHead>Slug</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Nav</TableHead>
+              <TableHead>Template</TableHead>
               <TableHead>Order</TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {pages.map((page) => (
+            {orderedPages.map(({ page, isChild, isFirst, isLast }) => (
               <TableRow key={page.id}>
-                <TableCell className="font-medium">{page.title}</TableCell>
-                <TableCell className="text-text-muted">/pages/{page.slug}</TableCell>
+                <TableCell className="font-medium">
+                  {isChild && (
+                    <span className="text-text-muted mr-1">↳</span>
+                  )}
+                  <span className={isChild ? "pl-4" : ""}>
+                    {page.title}
+                  </span>
+                </TableCell>
+                <TableCell className="text-text-muted">
+                  /pages/{page.slug}
+                </TableCell>
                 <TableCell>
                   <Badge
                     variant={page.published ? "default" : "secondary"}
@@ -59,7 +108,19 @@ export default async function AdminPagesPage() {
                     {page.published ? "Published" : "Draft"}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-text-muted">{page.sortOrder}</TableCell>
+                <TableCell className="text-text-muted capitalize">
+                  {page.navLocation}
+                </TableCell>
+                <TableCell className="text-text-muted capitalize">
+                  {page.template}
+                </TableCell>
+                <TableCell>
+                  <PageReorderButtons
+                    pageId={page.id}
+                    isFirst={isFirst}
+                    isLast={isLast}
+                  />
+                </TableCell>
                 <TableCell>
                   <Link
                     href={`/admin/pages/${page.id}/edit`}
