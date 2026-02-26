@@ -25,7 +25,7 @@ const filterSchema = z.object({
 });
 
 export const datastoreQuerySchema = z.object({
-  limit: z.coerce.number().int().min(1).max(10000).default(100),
+  limit: z.coerce.number().int().min(0).max(10000).default(100),
   offset: z.coerce.number().int().min(0).default(0),
   sort: z.string().optional(),
   order: z.enum(["asc", "desc"]).default("asc"),

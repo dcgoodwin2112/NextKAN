@@ -19,3 +19,11 @@ export const savedChartCreateSchema = z.object({
 });
 
 export type SavedChartCreateInput = z.infer<typeof savedChartCreateSchema>;
+
+export const savedChartUpdateSchema = z.object({
+  title: z.string().optional(),
+  chartType: z.enum(chartTypes).optional(),
+  config: chartConfigSchema.optional(),
+});
+
+export type ChartUpdateInput = z.infer<typeof savedChartUpdateSchema>;
