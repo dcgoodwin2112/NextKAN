@@ -38,6 +38,7 @@ model Organization {
   users          User[]
   datasets       Dataset[]
   harvestSources HarvestSource[]
+  templates      DatasetTemplate[]
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
@@ -244,15 +245,23 @@ model SavedChart {
 }
 
 model Page {
-  id          String   @id @default(uuid())
-  title       String
-  slug        String   @unique
-  content     String   // Markdown
-  published   Boolean  @default(false)
-  sortOrder   Int      @default(0)
-  createdById String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(uuid())
+  title           String
+  slug            String   @unique
+  content         String   // Markdown
+  published       Boolean  @default(false)
+  sortOrder       Int      @default(0)
+  navLocation     String   @default("header") // "header"|"footer"|"both"|"none"
+  parentId        String?
+  parent          Page?    @relation("PageHierarchy", fields: [parentId], references: [id])
+  children        Page[]   @relation("PageHierarchy")
+  metaTitle       String?
+  metaDescription String?
+  imageUrl        String?
+  template        String   @default("default") // "default"|"full-width"|"sidebar"
+  createdById     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model DatasetKeyword {
@@ -353,6 +362,18 @@ model Setting {
   key       String   @id
   value     String
   updatedAt DateTime @updatedAt
+}
+
+model DatasetTemplate {
+  id             String        @id @default(uuid())
+  name           String
+  description    String?
+  fields         String        // JSON blob of partial dataset field values
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  createdById    String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 }
 
 model Comment {

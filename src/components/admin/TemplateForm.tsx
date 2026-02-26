@@ -2,17 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { DistributionForm } from "./DistributionForm";
-import { DistributionList } from "./DistributionList";
 import { LICENSES, getLicenseByUrl } from "@/lib/data/licenses";
-import { MetadataCompleteness } from "./MetadataCompleteness";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
-import type { DatasetCreateInput } from "@/lib/schemas/dataset";
-import type { TemplateFields } from "@/lib/schemas/template";
+import type { TemplateCreateInput, TemplateFields } from "@/lib/schemas/template";
 
 interface Organization {
   id: string;
@@ -24,150 +20,92 @@ interface ThemeOption {
   name: string;
 }
 
-interface Distribution {
-  id?: string;
-  title?: string | null;
-  description?: string | null;
-  downloadURL?: string | null;
-  accessURL?: string | null;
-  mediaType?: string | null;
-  format?: string | null;
-}
-
 interface SeriesOption {
   id: string;
   title: string;
 }
 
-interface DatasetWithRelations {
+interface TemplateData {
   id: string;
-  title: string;
-  description: string;
-  identifier: string;
-  accessLevel: string;
-  status: string;
-  publisherId: string;
-  contactName?: string | null;
-  contactEmail?: string | null;
-  bureauCode?: string | null;
-  programCode?: string | null;
-  license?: string | null;
-  rights?: string | null;
-  spatial?: string | null;
-  temporal?: string | null;
-  issued?: Date | null;
-  accrualPeriodicity?: string | null;
-  conformsTo?: string | null;
-  dataQuality?: boolean | null;
-  describedBy?: string | null;
-  isPartOf?: string | null;
-  landingPage?: string | null;
-  language?: string | null;
-  references?: string | null;
-  keywords: { keyword: string }[];
-  distributions: Distribution[];
-  themes?: { theme: { id: string; name: string } }[];
-  // DCAT-US v3.0
-  version?: string | null;
-  versionNotes?: string | null;
-  seriesId?: string | null;
-  previousVersion?: string | null;
+  name: string;
+  description: string | null;
+  organizationId: string | null;
+  fields: TemplateFields;
 }
 
-interface DatasetFormProps {
-  initialData?: DatasetWithRelations;
-  defaultValues?: Partial<TemplateFields>;
+interface TemplateFormProps {
+  initialData?: TemplateData;
   organizations: Organization[];
   themes?: ThemeOption[];
   series?: SeriesOption[];
-  onSubmit: (data: DatasetCreateInput & { distributions?: Distribution[] }) => Promise<void>;
+  onSubmit: (data: TemplateCreateInput) => Promise<void>;
 }
 
-export function DatasetForm({
+export function TemplateForm({
   initialData,
-  defaultValues,
   organizations,
   themes: availableThemes = [],
   series: availableSeries = [],
   onSubmit,
-}: DatasetFormProps) {
+}: TemplateFormProps) {
   const router = useRouter();
-  const dv = defaultValues || {};
+  const fields = initialData?.fields || {};
 
-  // Resolve license from defaultValues
-  const dvLicenseMatch = dv.license ? getLicenseByUrl(dv.license) : undefined;
-
-  // Basic Info
-  const [title, setTitle] = useState(initialData?.title || "");
+  // Template info
+  const [name, setName] = useState(initialData?.name || "");
   const [description, setDescription] = useState(initialData?.description || "");
-  const [identifier, setIdentifier] = useState(initialData?.identifier || "");
-  const [accessLevel, setAccessLevel] = useState(initialData?.accessLevel || dv.accessLevel || "public");
-  const [status, setStatus] = useState(initialData?.status || "draft");
-  const [keywordInput, setKeywordInput] = useState("");
-  const [keywords, setKeywords] = useState<string[]>(
-    initialData?.keywords.map((k) => k.keyword) || dv.keywords || []
-  );
-
-  // Themes
-  const [selectedThemeIds, setSelectedThemeIds] = useState<string[]>(
-    initialData?.themes?.map((t) => t.theme.id) || dv.themeIds || []
-  );
+  const [organizationId, setOrganizationId] = useState(initialData?.organizationId || "");
 
   // Publisher & Contact
-  const [publisherId, setPublisherId] = useState(initialData?.publisherId || dv.publisherId || "");
-  const [contactName, setContactName] = useState(initialData?.contactName || dv.contactName || "");
-  const [contactEmail, setContactEmail] = useState(initialData?.contactEmail || dv.contactEmail || "");
+  const [publisherId, setPublisherId] = useState(fields.publisherId || "");
+  const [contactName, setContactName] = useState(fields.contactName || "");
+  const [contactEmail, setContactEmail] = useState(fields.contactEmail || "");
+
+  // Keywords & Themes
+  const [keywordInput, setKeywordInput] = useState("");
+  const [keywords, setKeywords] = useState<string[]>(fields.keywords || []);
+  const [selectedThemeIds, setSelectedThemeIds] = useState<string[]>(fields.themeIds || []);
+
+  // Classification
+  const [accessLevel, setAccessLevel] = useState(fields.accessLevel || "");
 
   // Federal
-  const [bureauCode, setBureauCode] = useState(initialData?.bureauCode || dv.bureauCode || "");
-  const [programCode, setProgramCode] = useState(initialData?.programCode || dv.programCode || "");
+  const [bureauCode, setBureauCode] = useState(fields.bureauCode || "");
+  const [programCode, setProgramCode] = useState(fields.programCode || "");
 
-  // Access & License
-  const initialLicenseMatch = initialData?.license ? getLicenseByUrl(initialData.license) : undefined;
-  const [licenseId, setLicenseId] = useState(
-    initialLicenseMatch?.id || (initialData?.license ? "other" : "")
-    || dvLicenseMatch?.id || (dv.license ? "other" : "")
-  );
+  // License
+  const initialLicenseMatch = fields.license ? getLicenseByUrl(fields.license) : undefined;
+  const [licenseId, setLicenseId] = useState(initialLicenseMatch?.id || (fields.license ? "other" : ""));
   const [customLicenseUrl, setCustomLicenseUrl] = useState(
-    initialLicenseMatch ? "" : (initialData?.license || "")
-    || (dvLicenseMatch ? "" : (dv.license || ""))
+    initialLicenseMatch ? "" : (fields.license || "")
   );
-  const [rights, setRights] = useState(initialData?.rights || dv.rights || "");
-  const [landingPage, setLandingPage] = useState(initialData?.landingPage || dv.landingPage || "");
+  const [rights, setRights] = useState(fields.rights || "");
+  const [landingPage, setLandingPage] = useState(fields.landingPage || "");
 
   // Coverage
-  const [spatial, setSpatial] = useState(initialData?.spatial || dv.spatial || "");
-  const [temporal, setTemporal] = useState(initialData?.temporal || dv.temporal || "");
+  const [spatial, setSpatial] = useState(fields.spatial || "");
+  const [temporal, setTemporal] = useState(fields.temporal || "");
 
   // Additional
-  const [issued, setIssued] = useState(
-    initialData?.issued ? new Date(initialData.issued).toISOString().split("T")[0] : ""
-  );
-  const [accrualPeriodicity, setAccrualPeriodicity] = useState(initialData?.accrualPeriodicity || dv.accrualPeriodicity || "");
-  const [conformsTo, setConformsTo] = useState(initialData?.conformsTo || dv.conformsTo || "");
-  const [dataQuality, setDataQuality] = useState(initialData?.dataQuality ?? dv.dataQuality ?? undefined);
-  const [describedBy, setDescribedBy] = useState(initialData?.describedBy || dv.describedBy || "");
-  const [isPartOf, setIsPartOf] = useState(initialData?.isPartOf || dv.isPartOf || "");
-  const [language, setLanguage] = useState(initialData?.language || dv.language || "en-us");
+  const [accrualPeriodicity, setAccrualPeriodicity] = useState(fields.accrualPeriodicity || "");
+  const [conformsTo, setConformsTo] = useState(fields.conformsTo || "");
+  const [dataQuality, setDataQuality] = useState(fields.dataQuality ?? undefined);
+  const [describedBy, setDescribedBy] = useState(fields.describedBy || "");
+  const [isPartOf, setIsPartOf] = useState(fields.isPartOf || "");
+  const [language, setLanguage] = useState(fields.language || "");
 
   // DCAT-US v3.0
-  const [dcatVersion, setDcatVersion] = useState(initialData?.version || dv.version || "");
-  const [dcatVersionNotes, setDcatVersionNotes] = useState(initialData?.versionNotes || dv.versionNotes || "");
-  const [seriesId, setSeriesId] = useState(initialData?.seriesId || dv.seriesId || "");
-  const [previousVersion, setPreviousVersion] = useState(initialData?.previousVersion || dv.previousVersion || "");
-  const [showV3, setShowV3] = useState(false);
-
-  // Distributions
-  const [distributions, setDistributions] = useState<Distribution[]>(
-    initialData?.distributions || []
-  );
-  const [showDistForm, setShowDistForm] = useState(false);
+  const [dcatVersion, setDcatVersion] = useState(fields.version || "");
+  const [dcatVersionNotes, setDcatVersionNotes] = useState(fields.versionNotes || "");
+  const [seriesId, setSeriesId] = useState(fields.seriesId || "");
+  const [previousVersion, setPreviousVersion] = useState(fields.previousVersion || "");
 
   // Collapsible sections
   const [showFederal, setShowFederal] = useState(false);
   const [showAccess, setShowAccess] = useState(false);
   const [showCoverage, setShowCoverage] = useState(false);
   const [showAdditional, setShowAdditional] = useState(false);
+  const [showV3, setShowV3] = useState(false);
 
   // UI state
   const [error, setError] = useState("");
@@ -188,71 +126,54 @@ export function DatasetForm({
     setKeywords(keywords.filter((k) => k !== kw));
   }
 
-  function addDistribution(dist: Distribution) {
-    setDistributions([...distributions, dist]);
-    setShowDistForm(false);
-  }
-
-  function removeDistribution(index: number) {
-    setDistributions(distributions.filter((_, i) => i !== index));
+  /** Build the fields object, stripping empty/undefined values. */
+  function buildFields(): TemplateFields {
+    const f: TemplateFields = {};
+    if (publisherId) f.publisherId = publisherId;
+    if (contactName) f.contactName = contactName;
+    if (contactEmail) f.contactEmail = contactEmail;
+    if (keywords.length > 0) f.keywords = keywords;
+    if (selectedThemeIds.length > 0) f.themeIds = selectedThemeIds;
+    if (accessLevel) f.accessLevel = accessLevel as TemplateFields["accessLevel"];
+    if (bureauCode) f.bureauCode = bureauCode;
+    if (programCode) f.programCode = programCode;
+    const licenseUrl = licenseId === "other" ? customLicenseUrl : (LICENSES.find(l => l.id === licenseId)?.url || "");
+    if (licenseUrl) f.license = licenseUrl;
+    if (rights) f.rights = rights;
+    if (landingPage) f.landingPage = landingPage;
+    if (spatial) f.spatial = spatial;
+    if (temporal) f.temporal = temporal;
+    if (accrualPeriodicity) f.accrualPeriodicity = accrualPeriodicity;
+    if (conformsTo) f.conformsTo = conformsTo;
+    if (dataQuality !== undefined) f.dataQuality = dataQuality;
+    if (describedBy) f.describedBy = describedBy;
+    if (isPartOf) f.isPartOf = isPartOf;
+    if (language) f.language = language;
+    if (dcatVersion) f.version = dcatVersion;
+    if (dcatVersionNotes) f.versionNotes = dcatVersionNotes;
+    if (seriesId) f.seriesId = seriesId;
+    if (previousVersion) f.previousVersion = previousVersion;
+    return f;
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
 
-    if (!title.trim()) {
-      setError("Title is required");
-      return;
-    }
-    if (!description.trim()) {
-      setError("Description is required");
-      return;
-    }
-    if (!publisherId) {
-      setError("Publisher is required");
-      return;
-    }
-    if (keywords.length === 0) {
-      setError("At least one keyword is required");
+    if (!name.trim()) {
+      setError("Template name is required");
       return;
     }
 
     setLoading(true);
-
     try {
       await onSubmit({
-        title,
-        description,
-        identifier: identifier || undefined,
-        accessLevel: accessLevel as "public" | "restricted public" | "non-public",
-        status: status as "draft" | "published" | "archived",
-        publisherId,
-        contactName: contactName || undefined,
-        contactEmail: contactEmail || undefined,
-        keywords,
-        themeIds: selectedThemeIds.length > 0 ? selectedThemeIds : undefined,
-        bureauCode: bureauCode || undefined,
-        programCode: programCode || undefined,
-        license: licenseId === "other" ? (customLicenseUrl || undefined) : (LICENSES.find(l => l.id === licenseId)?.url || undefined),
-        rights: rights || undefined,
-        spatial: spatial || undefined,
-        temporal: temporal || undefined,
-        issued: issued ? new Date(issued).toISOString() : undefined,
-        accrualPeriodicity: accrualPeriodicity || undefined,
-        conformsTo: conformsTo || undefined,
-        dataQuality,
-        describedBy: describedBy || undefined,
-        isPartOf: isPartOf || undefined,
-        landingPage: landingPage || undefined,
-        language: language || undefined,
-        version: dcatVersion || undefined,
-        versionNotes: dcatVersionNotes || undefined,
-        seriesId: seriesId || undefined,
-        previousVersion: previousVersion || undefined,
-        distributions,
+        name,
+        description: description || undefined,
+        organizationId: organizationId || undefined,
+        fields: buildFields(),
       });
-      router.push("/admin/datasets");
+      router.push("/admin/templates");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -269,59 +190,87 @@ export function DatasetForm({
         </div>
       )}
 
-      <MetadataCompleteness
-        values={{
-          title,
-          description,
-          keywords,
-          publisherId,
-          contactName,
-          contactEmail,
-          accessLevel,
-          license: licenseId === "other" ? customLicenseUrl : (LICENSES.find(l => l.id === licenseId)?.url || ""),
-          rights,
-          spatial,
-          temporal,
-          accrualPeriodicity,
-          landingPage,
-          issued,
-          language,
-        }}
-      />
-
-      {/* Basic Info */}
+      {/* Template Info */}
       <fieldset className="space-y-4">
-        <legend className="text-lg font-semibold">Basic Info</legend>
+        <legend className="text-lg font-semibold">Template Info</legend>
         <div className="space-y-2">
-          <Label htmlFor="title">Title *</Label>
+          <Label htmlFor="name">Name *</Label>
           <Input
-            id="title"
+            id="name"
             type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="description">Description *</Label>
+          <Label htmlFor="description">Description</Label>
           <Textarea
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            rows={4}
+            rows={2}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="identifier">Identifier</Label>
+          <Label htmlFor="organizationId">Scope</Label>
+          <NativeSelect
+            id="organizationId"
+            value={organizationId}
+            onChange={(e) => setOrganizationId(e.target.value)}
+          >
+            <option value="">Global (available to all)</option>
+            {organizations.map((org) => (
+              <option key={org.id} value={org.id}>
+                {org.name}
+              </option>
+            ))}
+          </NativeSelect>
+        </div>
+      </fieldset>
+
+      {/* Publisher & Contact Presets */}
+      <fieldset className="space-y-4">
+        <legend className="text-lg font-semibold">Publisher & Contact</legend>
+        <div className="space-y-2">
+          <Label htmlFor="publisherId">Publisher</Label>
+          <NativeSelect
+            id="publisherId"
+            value={publisherId}
+            onChange={(e) => setPublisherId(e.target.value)}
+          >
+            <option value="">No default</option>
+            {organizations.map((org) => (
+              <option key={org.id} value={org.id}>
+                {org.name}
+              </option>
+            ))}
+          </NativeSelect>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="contactName">Contact Name</Label>
           <Input
-            id="identifier"
+            id="contactName"
             type="text"
-            value={identifier}
-            onChange={(e) => setIdentifier(e.target.value)}
-            placeholder="Auto-generated if blank"
+            value={contactName}
+            onChange={(e) => setContactName(e.target.value)}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="keywords">Keywords * (press Enter to add)</Label>
+          <Label htmlFor="contactEmail">Contact Email</Label>
+          <Input
+            id="contactEmail"
+            type="email"
+            value={contactEmail}
+            onChange={(e) => setContactEmail(e.target.value)}
+          />
+        </div>
+      </fieldset>
+
+      {/* Keywords & Themes */}
+      <fieldset className="space-y-4">
+        <legend className="text-lg font-semibold">Keywords & Themes</legend>
+        <div className="space-y-2">
+          <Label htmlFor="keywords">Default Keywords (press Enter to add)</Label>
           <Input
             id="keywords"
             type="text"
@@ -353,7 +302,7 @@ export function DatasetForm({
         </div>
         {availableThemes.length > 0 && (
           <div>
-            <Label className="mb-1">Themes</Label>
+            <Label className="mb-1">Default Themes</Label>
             <div className="grid grid-cols-2 gap-1 max-h-48 overflow-y-auto border rounded p-2">
               {availableThemes.map((theme) => (
                 <label key={theme.id} className="flex items-center gap-2 text-sm py-0.5">
@@ -381,60 +330,11 @@ export function DatasetForm({
             value={accessLevel}
             onChange={(e) => setAccessLevel(e.target.value)}
           >
+            <option value="">No default</option>
             <option value="public">Public</option>
             <option value="restricted public">Restricted Public</option>
             <option value="non-public">Non-Public</option>
           </NativeSelect>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="status">Status</Label>
-          <NativeSelect
-            id="status"
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-          >
-            <option value="draft">Draft</option>
-            <option value="published">Published</option>
-            <option value="archived">Archived</option>
-          </NativeSelect>
-        </div>
-      </fieldset>
-
-      {/* Publisher & Contact */}
-      <fieldset className="space-y-4">
-        <legend className="text-lg font-semibold">Publisher & Contact</legend>
-        <div className="space-y-2">
-          <Label htmlFor="publisherId">Publisher *</Label>
-          <NativeSelect
-            id="publisherId"
-            value={publisherId}
-            onChange={(e) => setPublisherId(e.target.value)}
-          >
-            <option value="">Select publisher...</option>
-            {organizations.map((org) => (
-              <option key={org.id} value={org.id}>
-                {org.name}
-              </option>
-            ))}
-          </NativeSelect>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="contactName">Contact Name</Label>
-          <Input
-            id="contactName"
-            type="text"
-            value={contactName}
-            onChange={(e) => setContactName(e.target.value)}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="contactEmail">Contact Email</Label>
-          <Input
-            id="contactEmail"
-            type="email"
-            value={contactEmail}
-            onChange={(e) => setContactEmail(e.target.value)}
-          />
         </div>
       </fieldset>
 
@@ -491,7 +391,7 @@ export function DatasetForm({
                 value={licenseId}
                 onChange={(e) => setLicenseId(e.target.value)}
               >
-                <option value="">No license selected</option>
+                <option value="">No default</option>
                 {LICENSES.map((l) => (
                   <option key={l.id} value={l.id}>{l.name}</option>
                 ))}
@@ -575,15 +475,6 @@ export function DatasetForm({
         {showAdditional && (
           <div className="space-y-4 pl-4">
             <div className="space-y-2">
-              <Label htmlFor="issued">Issued Date</Label>
-              <Input
-                id="issued"
-                type="date"
-                value={issued}
-                onChange={(e) => setIssued(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
               <Label htmlFor="accrualPeriodicity">Accrual Periodicity</Label>
               <Input
                 id="accrualPeriodicity"
@@ -663,7 +554,7 @@ export function DatasetForm({
                   value={seriesId}
                   onChange={(e) => setSeriesId(e.target.value)}
                 >
-                  <option value="">No series</option>
+                  <option value="">No default</option>
                   {availableSeries.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.title}
@@ -705,40 +596,15 @@ export function DatasetForm({
         </fieldset>
       )}
 
-      {/* Distributions */}
-      <fieldset className="space-y-4">
-        <legend className="text-lg font-semibold">Distributions</legend>
-        <DistributionList
-          distributions={distributions}
-          onRemove={removeDistribution}
-          editable
-        />
-        {showDistForm ? (
-          <DistributionForm
-            onAdd={addDistribution}
-            onCancel={() => setShowDistForm(false)}
-          />
-        ) : (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setShowDistForm(true)}
-            className="border-dashed"
-          >
-            + Add Distribution
-          </Button>
-        )}
-      </fieldset>
-
       {/* Submit */}
       <div className="flex gap-2">
         <Button type="submit" disabled={loading}>
-          {loading ? "Saving..." : initialData ? "Update" : "Create"}
+          {loading ? "Saving..." : initialData ? "Update Template" : "Create Template"}
         </Button>
         <Button
           type="button"
           variant="outline"
-          onClick={() => router.push("/admin/datasets")}
+          onClick={() => router.push("/admin/templates")}
         >
           Cancel
         </Button>

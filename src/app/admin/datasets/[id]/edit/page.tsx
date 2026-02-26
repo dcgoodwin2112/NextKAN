@@ -19,6 +19,7 @@ import { QualityBadge } from "@/components/datasets/QualityBadge";
 import { VersionHistory } from "@/components/datasets/VersionHistory";
 import { CreateVersionForm } from "@/components/datasets/CreateVersionForm";
 import { DistributionPreviewPanel } from "@/components/admin/DistributionPreviewPanel";
+import { SaveAsTemplateButton } from "@/components/datasets/SaveAsTemplateButton";
 import { DatasetDeleteButton } from "./DatasetDeleteButton";
 import { prisma } from "@/lib/db";
 import { updateDataDictionary } from "@/lib/services/data-dictionary";
@@ -200,6 +201,7 @@ export default async function EditDatasetPage({ params }: Props) {
       />
       <AdminPageHeader title="Edit Dataset">
         <QualityBadge score={qualityScore.overall} />
+        <SaveAsTemplateButton datasetFields={dataset} organizations={organizations} />
         <DatasetDeleteButton onDelete={handleDelete} />
       </AdminPageHeader>
 

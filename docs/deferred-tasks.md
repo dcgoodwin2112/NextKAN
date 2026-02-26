@@ -18,6 +18,7 @@ Features and tasks deferred for future implementation.
 - **Enhance Dataset Revisions** — `getVersionById()` + `revertToVersion()` in versioning.ts. `VersionDetail` snapshot viewer, `VersionActions` (compare + revert with AlertDialog), `VersionHistory` with admin detail links. Version detail page at `/admin/datasets/[id]/versions/[versionId]` with snapshot viewer, compare-with-current diff, and revert. 15 new tests (612 total).
 - **Admin Chart Management** — Chart list page at `/admin/charts`, new chart page at `/admin/charts/new`, edit page at `/admin/charts/[id]/edit`. Server actions: `listCharts()`, `listChartableDistributions()`, `createChart()`, `updateChart()`, `deleteChart()`. ChartDeleteButton with AlertDialog. Sidebar nav entry. Datastore fixes: `limit=0` schema change (`.min(1)` → `.min(0)`), route short-circuits column-only queries (skips raw SQLite), missing table detection returns 410 + marks datastore stale. Error handling + loading states in all chart column fetchers. 13 new tests (625 total).
 - **Enhance Content Pages** — Page model extended with navLocation, parentId, metaTitle, metaDescription, imageUrl, template fields. Page hierarchy, nav location filtering, reorder actions, activity logging. MarkdownEditor: 3-mode (edit/split/preview) with image upload. Footer renders page links. Public pages: template layouts (default/full-width/sidebar), SEO meta, hero image, breadcrumbs, child page links. Template descriptions in admin forms.
+- **Dataset Templates** — DatasetTemplate model (JSON `fields` blob, optional org scope). Zod schemas, CRUD actions with activity logging. TemplateForm component. Admin pages at `/admin/templates` (list/new/edit/delete). TemplateSelector on new dataset page. SaveAsTemplateButton on dataset edit page. DatasetForm `defaultValues` prop. 25 new tests (676 total).
 
 ---
 
@@ -40,7 +41,7 @@ Items ordered by recommended implementation sequence. Establish the design syste
 | ~~11~~ | ~~Enhance Dataset Revisions~~ | ~~Medium~~ | ~~Stable UI patterns~~ |
 | ~~12~~ | ~~Admin Chart Management~~ | ~~Medium~~ | ~~Phases 2–3 (DataTable, Dialog)~~ |
 | ~~13~~ | ~~Enhance Content Pages~~ | ~~Medium~~ | ~~Stable forms + editor patterns~~ |
-| 14 | Dataset Templates | Medium | Stable DatasetForm (after form migration) |
+| ~~14~~ | ~~Dataset Templates~~ | ~~Medium~~ | ~~Stable DatasetForm (after form migration)~~ |
 
 ### Step 1: shadcn/ui Migration (Phase 1: Foundation)
 

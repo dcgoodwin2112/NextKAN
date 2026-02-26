@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 const navItems = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/datasets", label: "Datasets" },
+  { href: "/admin/templates", label: "Templates" },
   { href: "/admin/series", label: "Series" },
   { href: "/admin/organizations", label: "Organizations" },
   { href: "/admin/harvest", label: "Harvest", requiredRole: "admin" },
