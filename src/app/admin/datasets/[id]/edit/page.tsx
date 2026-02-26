@@ -20,6 +20,7 @@ import { VersionHistory } from "@/components/datasets/VersionHistory";
 import { CreateVersionForm } from "@/components/datasets/CreateVersionForm";
 import { DistributionPreviewPanel } from "@/components/admin/DistributionPreviewPanel";
 import { SaveAsTemplateButton } from "@/components/datasets/SaveAsTemplateButton";
+import { CollapsibleSection } from "@/components/admin/CollapsibleSection";
 import { DatasetDeleteButton } from "./DatasetDeleteButton";
 import { prisma } from "@/lib/db";
 import { updateDataDictionary } from "@/lib/services/data-dictionary";
@@ -227,15 +228,16 @@ export default async function EditDatasetPage({ params }: Props) {
 
       {distributionPreviews.length > 0 && (
         <div className="mt-8">
-          <h2 className="text-lg font-semibold mb-4">Distribution Previews</h2>
-          <DistributionPreviewPanel distributions={distributionPreviews} />
+          <CollapsibleSection title="Distribution Previews">
+            <DistributionPreviewPanel distributions={distributionPreviews} />
+          </CollapsibleSection>
         </div>
       )}
 
       {dictionaries.length > 0 && (
         <div className="mt-8" id="data-dictionaries">
-          <h2 className="text-lg font-semibold mb-4">Data Dictionaries</h2>
-          {dictionaries.map((d) => (
+          <CollapsibleSection title="Data Dictionaries">
+            {dictionaries.map((d) => (
               <div key={d.distributionId} className="mb-4 rounded-lg border p-4">
                 <h3 className="text-sm font-medium text-text-secondary mb-2">
                   {d.title || d.distributionId}
@@ -247,22 +249,23 @@ export default async function EditDatasetPage({ params }: Props) {
                 />
               </div>
             ))}
+          </CollapsibleSection>
         </div>
       )}
 
       <div className="mt-8">
-        <h2 className="text-lg font-semibold mb-4">Version History</h2>
-        <div className="rounded-lg border p-6 space-y-4">
-          <CreateVersionForm onSubmit={handleCreateVersion} />
-          <VersionHistory datasetId={dataset.id} versions={serializedVersions} isAdmin />
-        </div>
+        <CollapsibleSection title="Version History" bordered>
+          <div className="space-y-4">
+            <CreateVersionForm onSubmit={handleCreateVersion} />
+            <VersionHistory datasetId={dataset.id} versions={serializedVersions} isAdmin />
+          </div>
+        </CollapsibleSection>
       </div>
 
       <div className="mt-8">
-        <h2 className="text-lg font-semibold mb-4">Activity History</h2>
-        <div className="rounded-lg border p-6">
+        <CollapsibleSection title="Activity History" bordered>
           <ActivityFeed activities={activities as any} />
-        </div>
+        </CollapsibleSection>
       </div>
     </div>
   );

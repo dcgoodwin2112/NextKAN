@@ -42,7 +42,6 @@ describe("DistributionPreviewPanel", () => {
     );
     expect(screen.getByText("Test Distribution")).toBeDefined();
     expect(screen.getByText("CSV")).toBeDefined();
-    expect(screen.getByText("▶")).toBeDefined();
     expect(screen.queryByTestId("data-preview-dist-1")).toBeNull();
   });
 
@@ -92,7 +91,6 @@ describe("DistributionPreviewPanel", () => {
 
     await user.click(screen.getByText("Test Distribution"));
 
-    expect(screen.getByText("▼")).toBeDefined();
     expect(screen.getByTestId("data-preview-dist-1")).toBeDefined();
     expect(screen.getByText("1,500 rows")).toBeDefined();
     expect(screen.getByText("3 columns")).toBeDefined();

@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { hasPermission } from "@/lib/auth/roles";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { UserList } from "./UserList";
 import { listUsers } from "@/lib/actions/users";
 import { listOrganizations } from "@/lib/actions/organizations";
@@ -20,7 +21,7 @@ export default async function UsersPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">User Management</h1>
+      <AdminPageHeader title="User Management" />
       <UserList users={users} organizations={organizations} />
     </div>
   );
