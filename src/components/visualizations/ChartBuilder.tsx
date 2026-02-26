@@ -33,17 +33,20 @@ export function ChartBuilder({ distributionId }: ChartBuilderProps) {
   // Load columns from datastore
   useEffect(() => {
     async function loadColumns() {
+      setError(null);
       try {
         const res = await fetch(
           `/api/datastore/${distributionId}?limit=0`
         );
-        if (!res.ok) return;
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          setError(body.error || `Failed to load columns (${res.status})`);
+          return;
+        }
         const json = await res.json();
-        if (json.columns) {
+        if (json.columns?.length) {
           setColumns(json.columns);
-          if (json.columns.length > 0) {
-            setXColumn(json.columns[0].name);
-          }
+          setXColumn(json.columns[0].name);
           const numericCols = json.columns.filter(
             (c: ColumnInfo) =>
               c.type === "INTEGER" || c.type === "REAL"
@@ -51,9 +54,11 @@ export function ChartBuilder({ distributionId }: ChartBuilderProps) {
           if (numericCols.length > 0) {
             setYColumns([numericCols[0].name]);
           }
+        } else {
+          setError("No columns found in this datastore");
         }
       } catch {
-        // ignore
+        setError("Failed to load columns");
       }
     }
     loadColumns();

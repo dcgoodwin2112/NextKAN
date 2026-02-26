@@ -40,8 +40,13 @@ describe("datastoreQuerySchema", () => {
     expect(result.order).toBe("desc");
   });
 
-  it("rejects limit below 1", () => {
-    expect(() => datastoreQuerySchema.parse({ limit: "0" })).toThrow();
+  it("accepts limit of 0 for column-only queries", () => {
+    const result = datastoreQuerySchema.parse({ limit: "0" });
+    expect(result.limit).toBe(0);
+  });
+
+  it("rejects negative limit", () => {
+    expect(() => datastoreQuerySchema.parse({ limit: "-1" })).toThrow();
   });
 
   it("rejects limit above 10000", () => {

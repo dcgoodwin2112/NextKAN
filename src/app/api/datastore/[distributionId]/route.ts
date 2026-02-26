@@ -24,14 +24,45 @@ export async function GET(
     const query = datastoreQuerySchema.parse(searchParams);
     const columns: DatastoreColumn[] = JSON.parse(datastoreTable.columns);
 
-    const { records, total } = queryDatastore(
-      datastoreTable.tableName,
-      columns,
-      query
-    );
+    // Skip querying the raw SQLite table when only columns are needed
+    if (query.limit === 0 && query.offset === 0 && !query.filters) {
+      return NextResponse.json({
+        columns,
+        records: [],
+        total: datastoreTable.rowCount ?? 0,
+        limit: 0,
+        offset: 0,
+      });
+    }
+
+    let records: Record<string, unknown>[];
+    let total: number;
+    try {
+      const result = queryDatastore(
+        datastoreTable.tableName,
+        columns,
+        query
+      );
+      records = result.records;
+      total = result.total;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "";
+      if (msg.includes("no such table")) {
+        // Dynamic table missing — mark datastore as stale
+        await prisma.datastoreTable.update({
+          where: { id: datastoreTable.id },
+          data: { status: "error", errorMessage: "Table missing — re-import CSV to rebuild" },
+        });
+        return NextResponse.json(
+          { error: "Datastore table missing. Re-import the CSV to rebuild it." },
+          { status: 410 }
+        );
+      }
+      throw err;
+    }
 
     return NextResponse.json({
-      columns: columns.map((c) => c.name),
+      columns,
       records,
       total,
       limit: query.limit,

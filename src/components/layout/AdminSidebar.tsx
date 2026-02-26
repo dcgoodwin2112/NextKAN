@@ -15,6 +15,7 @@ const navItems = [
   { href: "/admin/harvest", label: "Harvest", requiredRole: "admin" },
   { href: "/admin/import", label: "Import" },
   { href: "/admin/quality", label: "Quality" },
+  { href: "/admin/charts", label: "Charts" },
   { href: "/admin/comments", label: "Comments", requiredRole: "admin" },
   { href: "/admin/analytics", label: "Analytics", requiredRole: "admin" },
   { href: "/admin/activity", label: "Activity", requiredRole: "admin" },

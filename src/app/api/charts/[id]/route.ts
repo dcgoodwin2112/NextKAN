@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { handleApiError } from "@/lib/utils/api";
+import { handleApiError, unauthorized } from "@/lib/utils/api";
 
 export async function GET(
   _request: NextRequest,
@@ -44,6 +45,26 @@ export async function GET(
       },
       data,
     });
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      return unauthorized();
+    }
+
+    const { id } = await params;
+
+    await prisma.savedChart.delete({ where: { id } });
+
+    return NextResponse.json({ success: true });
   } catch (error) {
     return handleApiError(error);
   }
