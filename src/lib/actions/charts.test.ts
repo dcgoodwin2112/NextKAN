@@ -179,7 +179,7 @@ describe("charts actions", () => {
   });
 
   describe("listChartableDistributions", () => {
-    it("returns only ready distributions", async () => {
+    it("returns only ready distributions with structured fields", async () => {
       (prismaMock.datastoreTable.findMany as any).mockResolvedValue([
         {
           distributionId: "dist-1",
@@ -187,7 +187,7 @@ describe("charts actions", () => {
           distribution: {
             title: "data.csv",
             format: "CSV",
-            dataset: { title: "Budget Data" },
+            dataset: { title: "Budget Data", publisher: { name: "Finance" } },
           },
         },
       ]);
@@ -197,7 +197,10 @@ describe("charts actions", () => {
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual({
         distributionId: "dist-1",
-        label: "Budget Data — data.csv",
+        datasetTitle: "Budget Data",
+        distributionTitle: "data.csv",
+        format: "CSV",
+        organization: "Finance",
         rowCount: 50,
       });
       expect(prismaMock.datastoreTable.findMany).toHaveBeenCalledWith({

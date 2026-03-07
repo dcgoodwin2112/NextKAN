@@ -204,5 +204,74 @@ export async function deleteUser(id: string) {
   }).catch(() => {});
 }
 
+export async function searchUsers(params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  role?: string;
+  organizationId?: string;
+  sort?: string;
+}) {
+  await requirePermission("user:manage");
+
+  const page = params?.page ?? 1;
+  const limit = params?.limit ?? 20;
+  const skip = (page - 1) * limit;
+
+  const where: Record<string, unknown> = {};
+
+  if (params?.search?.trim()) {
+    const terms = params.search.trim().split(/\s+/);
+    where.AND = terms.map((term) => ({
+      OR: [
+        { name: { contains: term } },
+        { email: { contains: term } },
+      ],
+    }));
+  }
+
+  if (params?.role) {
+    where.role = params.role;
+  }
+
+  if (params?.organizationId) {
+    where.organizationId = params.organizationId;
+  }
+
+  type UserOrderBy = Record<string, string>;
+  const sortMap: Record<string, UserOrderBy> = {
+    name_asc: { name: "asc" },
+    name_desc: { name: "desc" },
+    email_asc: { email: "asc" },
+    email_desc: { email: "desc" },
+    created_desc: { createdAt: "desc" },
+    created_asc: { createdAt: "asc" },
+    role_asc: { role: "asc" },
+    role_desc: { role: "desc" },
+  };
+  const orderBy = sortMap[params?.sort ?? ""] ?? { createdAt: "desc" };
+
+  const [users, total] = await Promise.all([
+    prisma.user.findMany({
+      where,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        organizationId: true,
+        organization: { select: { name: true } },
+        createdAt: true,
+      },
+      orderBy,
+      skip,
+      take: limit,
+    }),
+    prisma.user.count({ where }),
+  ]);
+
+  return { users, total };
+}
+
 /** @deprecated Use updateUser() instead */
 export const updateUserRole = updateUser;

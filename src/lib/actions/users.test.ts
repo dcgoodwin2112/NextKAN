@@ -42,6 +42,7 @@ import {
   updateUser,
   resetPassword,
   deleteUser,
+  searchUsers,
 } from "./users";
 
 describe("user actions", () => {
@@ -232,6 +233,86 @@ describe("user actions", () => {
       await expect(
         resetPassword("u1", { password: "short" })
       ).rejects.toThrow();
+    });
+  });
+
+  describe("searchUsers", () => {
+    it("returns {users, total} with pagination", async () => {
+      const mockUsers = [
+        { id: "u1", email: "a@b.com", name: "A", role: "admin", organizationId: null, organization: null, createdAt: new Date() },
+      ];
+      (prismaMock.user.findMany as any).mockResolvedValue(mockUsers);
+      (prismaMock.user.count as any).mockResolvedValue(1);
+
+      const result = await searchUsers({ page: 1, limit: 10 });
+      expect(result).toEqual({ users: mockUsers, total: 1 });
+      expect(prismaMock.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: 0, take: 10 })
+      );
+    });
+
+    it("applies search filter on name/email", async () => {
+      (prismaMock.user.findMany as any).mockResolvedValue([]);
+      (prismaMock.user.count as any).mockResolvedValue(0);
+
+      await searchUsers({ search: "john" });
+      expect(prismaMock.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            AND: [
+              { OR: [{ name: { contains: "john" } }, { email: { contains: "john" } }] },
+            ],
+          },
+        })
+      );
+    });
+
+    it("applies role filter", async () => {
+      (prismaMock.user.findMany as any).mockResolvedValue([]);
+      (prismaMock.user.count as any).mockResolvedValue(0);
+
+      await searchUsers({ role: "editor" });
+      expect(prismaMock.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { role: "editor" },
+        })
+      );
+    });
+
+    it("applies org filter", async () => {
+      (prismaMock.user.findMany as any).mockResolvedValue([]);
+      (prismaMock.user.count as any).mockResolvedValue(0);
+
+      await searchUsers({ organizationId: "org-1" });
+      expect(prismaMock.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { organizationId: "org-1" },
+        })
+      );
+    });
+
+    it("applies sort parameter", async () => {
+      (prismaMock.user.findMany as any).mockResolvedValue([]);
+      (prismaMock.user.count as any).mockResolvedValue(0);
+
+      await searchUsers({ sort: "name_asc" });
+      expect(prismaMock.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          orderBy: { name: "asc" },
+        })
+      );
+    });
+
+    it("defaults to created_desc sort", async () => {
+      (prismaMock.user.findMany as any).mockResolvedValue([]);
+      (prismaMock.user.count as any).mockResolvedValue(0);
+
+      await searchUsers();
+      expect(prismaMock.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          orderBy: { createdAt: "desc" },
+        })
+      );
     });
   });
 

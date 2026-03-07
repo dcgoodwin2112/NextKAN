@@ -2,6 +2,8 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface SearchBarProps {
   action?: string;
@@ -19,29 +21,28 @@ export function SearchBar({
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const trimmed = query.trim();
+    const params = new URLSearchParams(searchParams.toString());
     if (trimmed) {
-      router.push(`${action}?search=${encodeURIComponent(trimmed)}`);
+      params.set("search", trimmed);
     } else {
-      router.push(action);
+      params.delete("search");
     }
+    params.delete("page");
+    const qs = params.toString();
+    router.push(qs ? `${action}?${qs}` : action);
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex gap-2" role="search">
-      <input
+      <Input
         type="search"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder={placeholder}
-        className="flex-1 rounded border border-input-border bg-input-bg px-3 py-2"
+        className="flex-1"
         aria-label="Search datasets"
       />
-      <button
-        type="submit"
-        className="rounded bg-primary px-4 py-2 text-white hover:bg-primary-hover"
-      >
-        Search
-      </button>
+      <Button type="submit">Search</Button>
     </form>
   );
 }

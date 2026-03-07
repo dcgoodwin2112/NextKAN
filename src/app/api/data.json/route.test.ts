@@ -54,7 +54,7 @@ describe("GET /data.json", () => {
 
     expect(prismaMock.dataset.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { status: "published" },
+        where: { status: "published", deletedAt: null },
       })
     );
   });

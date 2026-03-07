@@ -5,6 +5,19 @@ export default function DatasetsLoading() {
         <div className="h-8 w-32 bg-muted rounded" />
         <div className="h-9 w-28 bg-muted rounded" />
       </div>
+      <div className="space-y-4 mb-6">
+        <div className="max-w-xl">
+          <div className="flex gap-2">
+            <div className="h-9 flex-1 bg-muted rounded" />
+            <div className="h-9 w-20 bg-muted rounded" />
+          </div>
+        </div>
+        <div className="flex gap-4">
+          <div className="h-9 w-32 bg-muted rounded" />
+          <div className="h-9 w-40 bg-muted rounded" />
+          <div className="h-9 w-40 bg-muted rounded" />
+        </div>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {[1, 2, 3, 4, 5, 6].map((i) => (
           <div key={i} className="rounded-lg border p-4 space-y-3">

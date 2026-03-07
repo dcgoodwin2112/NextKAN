@@ -9,6 +9,10 @@ import {
 import { ChartRenderer } from "@/components/visualizations/ChartRenderer";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
+import {
+  DistributionPicker,
+  type ChartableDistribution,
+} from "@/components/admin/DistributionPicker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -26,11 +30,7 @@ interface ColumnInfo {
   type: string;
 }
 
-interface ChartableDist {
-  distributionId: string;
-  label: string;
-  rowCount: number;
-}
+type ChartableDist = ChartableDistribution;
 
 export default function NewChartPage() {
   const router = useRouter();
@@ -157,19 +157,12 @@ export default function NewChartPage() {
           {/* Config form */}
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="distribution">Distribution</Label>
-              <NativeSelect
-                id="distribution"
+              <Label>Distribution</Label>
+              <DistributionPicker
+                distributions={distributions}
                 value={distributionId}
-                onChange={(e) => handleDistributionChange(e.target.value)}
-              >
-                <option value="">Select a distribution...</option>
-                {distributions.map((d) => (
-                  <option key={d.distributionId} value={d.distributionId}>
-                    {d.label} ({d.rowCount} rows)
-                  </option>
-                ))}
-              </NativeSelect>
+                onChange={handleDistributionChange}
+              />
             </div>
 
             <div className="space-y-2">

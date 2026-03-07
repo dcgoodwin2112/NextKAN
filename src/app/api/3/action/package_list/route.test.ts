@@ -47,7 +47,7 @@ describe("GET /api/3/action/package_list", () => {
 
     expect(mockFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { status: "published" },
+        where: { status: "published", deletedAt: null },
       })
     );
   });

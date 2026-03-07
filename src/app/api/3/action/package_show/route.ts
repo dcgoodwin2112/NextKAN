@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
       where: {
         OR: [{ slug: id }, { identifier: id }],
         status: "published",
+        deletedAt: null,
       },
       include: datasetIncludes,
     });

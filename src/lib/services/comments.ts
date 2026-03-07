@@ -72,3 +72,57 @@ export async function getPendingComments(): Promise<Comment[]> {
     orderBy: { createdAt: "desc" },
   });
 }
+
+export async function searchComments(params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+  sort?: string;
+}) {
+  const page = params?.page ?? 1;
+  const limit = params?.limit ?? 20;
+  const skip = (page - 1) * limit;
+
+  const where: Record<string, unknown> = {};
+
+  // Status filter: default to pending
+  const status = params?.status ?? "pending";
+  if (status === "pending") {
+    where.approved = false;
+  } else if (status === "approved") {
+    where.approved = true;
+  }
+  // "all" = no approved filter
+
+  if (params?.search?.trim()) {
+    const terms = params.search.trim().split(/\s+/);
+    where.AND = terms.map((term) => ({
+      OR: [
+        { authorName: { contains: term } },
+        { authorEmail: { contains: term } },
+        { content: { contains: term } },
+      ],
+    }));
+  }
+
+  const orderBy =
+    params?.sort === "created_asc"
+      ? { createdAt: "asc" as const }
+      : { createdAt: "desc" as const };
+
+  const [comments, total] = await Promise.all([
+    prisma.comment.findMany({
+      where,
+      include: {
+        dataset: { select: { title: true } },
+      },
+      orderBy,
+      skip,
+      take: limit,
+    }),
+    prisma.comment.count({ where }),
+  ]);
+
+  return { comments, total };
+}

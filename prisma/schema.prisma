@@ -136,6 +136,9 @@ model Dataset {
   harvestSourceId  String?
   harvestIdentifier String?
 
+  // Soft delete
+  deletedAt DateTime?
+
   // Relations
   distributions       Distribution[]
   keywords            DatasetKeyword[]
@@ -148,6 +151,7 @@ model Dataset {
   @@index([publisherId])
   @@index([harvestSourceId, harvestIdentifier])
   @@index([workflowStatus])
+  @@index([deletedAt])
 }
 
 model Distribution {

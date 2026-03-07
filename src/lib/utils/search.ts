@@ -52,7 +52,8 @@ export function buildSearchWhere(params: SearchParams | string): Prisma.DatasetW
     conditions.push({ accessLevel: params.accessLevel });
   }
 
-  if (conditions.length === 0) return {};
-  if (conditions.length === 1) return conditions[0];
-  return { AND: conditions };
+  const base: Prisma.DatasetWhereInput = { deletedAt: null };
+  if (conditions.length === 0) return base;
+  if (conditions.length === 1) return { ...conditions[0], ...base };
+  return { AND: conditions, ...base };
 }

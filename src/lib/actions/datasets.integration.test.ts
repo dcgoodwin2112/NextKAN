@@ -37,6 +37,7 @@ import {
   deleteDataset,
   listDatasets,
   addDistribution,
+  purgeDataset,
 } from "./datasets";
 
 const testPrisma = getTestPrisma();
@@ -113,7 +114,7 @@ describe("Dataset CRUD integration", () => {
     expect(updated.keywords[0].keyword).toBe("updated-keyword");
   });
 
-  it("distributions are created with dataset and cascade-deleted", async () => {
+  it("distributions are created with dataset and cascade-deleted on purge", async () => {
     const created = await createDataset(baseInput());
 
     await addDistribution(created.id, {
@@ -127,8 +128,18 @@ describe("Dataset CRUD integration", () => {
     expect(fetched!.distributions).toHaveLength(1);
     expect(fetched!.distributions[0].title).toBe("CSV");
 
-    // Delete dataset — distributions should cascade
+    // Soft delete — distributions still exist
     await deleteDataset(created.id);
+    const softDeleted = await getDataset(created.id);
+    expect(softDeleted).toBeNull();
+
+    const distCountAfterSoftDelete = await testPrisma.distribution.count({
+      where: { datasetId: created.id },
+    });
+    expect(distCountAfterSoftDelete).toBe(1);
+
+    // Purge — distributions cascade-deleted
+    await purgeDataset(created.id);
     const distCount = await testPrisma.distribution.count({
       where: { datasetId: created.id },
     });

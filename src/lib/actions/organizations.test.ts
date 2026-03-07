@@ -16,6 +16,7 @@ import {
   getOrganization,
   getOrganizationBySlug,
   listOrganizations,
+  searchOrganizations,
 } from "./organizations";
 
 describe("createOrganization", () => {
@@ -165,5 +166,71 @@ describe("listOrganizations", () => {
     prismaMock.organization.findMany.mockResolvedValue([]);
     const result = await listOrganizations();
     expect(Array.isArray(result)).toBe(true);
+  });
+});
+
+describe("searchOrganizations", () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+  });
+
+  it("returns organizations and total with pagination", async () => {
+    const mockOrgs = [{ id: "org-1", name: "Org One" }];
+    prismaMock.organization.findMany.mockResolvedValue(mockOrgs as any);
+    prismaMock.organization.count.mockResolvedValue(1);
+
+    const result = await searchOrganizations({ page: 1, limit: 10 });
+
+    expect(result).toEqual({ organizations: mockOrgs, total: 1 });
+    expect(prismaMock.organization.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 0, take: 10 })
+    );
+  });
+
+  it("applies search filter on name and description", async () => {
+    prismaMock.organization.findMany.mockResolvedValue([]);
+    prismaMock.organization.count.mockResolvedValue(0);
+
+    await searchOrganizations({ search: "health data" });
+
+    const call = prismaMock.organization.findMany.mock.calls[0][0];
+    expect(call.where).toEqual({
+      AND: [
+        { OR: [{ name: { contains: "health" } }, { description: { contains: "health" } }] },
+        { OR: [{ name: { contains: "data" } }, { description: { contains: "data" } }] },
+      ],
+    });
+  });
+
+  it("applies sort parameter", async () => {
+    prismaMock.organization.findMany.mockResolvedValue([]);
+    prismaMock.organization.count.mockResolvedValue(0);
+
+    await searchOrganizations({ sort: "datasets_desc" });
+
+    const call = prismaMock.organization.findMany.mock.calls[0][0];
+    expect(call.orderBy).toEqual({ datasets: { _count: "desc" } });
+  });
+
+  it("defaults to name_asc sort", async () => {
+    prismaMock.organization.findMany.mockResolvedValue([]);
+    prismaMock.organization.count.mockResolvedValue(0);
+
+    await searchOrganizations();
+
+    const call = prismaMock.organization.findMany.mock.calls[0][0];
+    expect(call.orderBy).toEqual({ name: "asc" });
+  });
+
+  it("paginates correctly for page 2", async () => {
+    prismaMock.organization.findMany.mockResolvedValue([]);
+    prismaMock.organization.count.mockResolvedValue(25);
+
+    const result = await searchOrganizations({ page: 2, limit: 10 });
+
+    expect(result.total).toBe(25);
+    expect(prismaMock.organization.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 10, take: 10 })
+    );
   });
 });

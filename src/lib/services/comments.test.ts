@@ -13,6 +13,7 @@ import {
   moderateComment,
   getPendingComments,
   deleteComment,
+  searchComments,
 } from "./comments";
 
 const COMMENT_ID = "a1b2c3d4-e5f6-1234-a567-123456789abc";
@@ -173,6 +174,74 @@ describe("comments service", () => {
       expect(prismaMock.comment.delete).toHaveBeenCalledWith({
         where: { id: COMMENT_ID },
       });
+    });
+  });
+
+  describe("searchComments", () => {
+    it("returns {comments, total} with pagination", async () => {
+      prismaMock.comment.findMany.mockResolvedValue([baseComment] as any);
+      prismaMock.comment.count.mockResolvedValue(1);
+
+      const result = await searchComments({ page: 1, limit: 10 });
+      expect(result).toEqual({ comments: [baseComment], total: 1 });
+      expect(prismaMock.comment.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: 0, take: 10 })
+      );
+    });
+
+    it("defaults to pending status filter", async () => {
+      prismaMock.comment.findMany.mockResolvedValue([]);
+      prismaMock.comment.count.mockResolvedValue(0);
+
+      await searchComments();
+      expect(prismaMock.comment.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ approved: false }),
+        })
+      );
+    });
+
+    it("filters by approved status", async () => {
+      prismaMock.comment.findMany.mockResolvedValue([]);
+      prismaMock.comment.count.mockResolvedValue(0);
+
+      await searchComments({ status: "approved" });
+      expect(prismaMock.comment.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ approved: true }),
+        })
+      );
+    });
+
+    it("shows all comments when status is all", async () => {
+      prismaMock.comment.findMany.mockResolvedValue([]);
+      prismaMock.comment.count.mockResolvedValue(0);
+
+      await searchComments({ status: "all" });
+      const call = prismaMock.comment.findMany.mock.calls[0][0] as any;
+      expect(call.where).not.toHaveProperty("approved");
+    });
+
+    it("applies search filter", async () => {
+      prismaMock.comment.findMany.mockResolvedValue([]);
+      prismaMock.comment.count.mockResolvedValue(0);
+
+      await searchComments({ search: "john" });
+      expect(prismaMock.comment.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            AND: [
+              {
+                OR: [
+                  { authorName: { contains: "john" } },
+                  { authorEmail: { contains: "john" } },
+                  { content: { contains: "john" } },
+                ],
+              },
+            ],
+          }),
+        })
+      );
     });
   });
 

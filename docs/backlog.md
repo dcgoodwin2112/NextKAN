@@ -4,6 +4,116 @@ Pending features and tasks for future implementation. See `docs/backlog-complete
 
 ---
 
+## Admin UX
+
+### Custom Fields for Datasets
+
+**Priority:** Medium
+**Reason:** The dataset schema is fixed to DCAT-US v1.1 fields. Organizations often need domain-specific metadata (e.g., "Data Steward", "Update Frequency Detail", "Department Code", "Grant Number") that doesn't map to any DCAT-US property. Currently the only workaround is stuffing values into `references` or `describedBy`, which loses structure and searchability.
+
+#### Scope
+
+- **CustomFieldDefinition model:** Admin-defined field definitions with `name` (machine key), `label` (display), `type` (text, number, date, url, select, multiselect, boolean), `required`, `options` (JSON array for select/multiselect), `sortOrder`, optional `organizationId` (org-scoped vs global). Unique on `[name]` (or `[name, organizationId]` for scoped fields).
+- **DatasetCustomFieldValue model:** Per-dataset values linking `datasetId` + `customFieldDefinitionId` + `value` (stored as text). Cascade delete with dataset.
+- **Admin field management page:** `/admin/custom-fields` — CRUD for field definitions. Reorder, preview, set required/optional. Org-scoped fields only appear for datasets in that org.
+- **DatasetForm integration:** Render custom fields in a "Custom Fields" CollapsibleSection (after Additional Metadata). Dynamic form controls based on field type. Validate required fields on submit.
+- **Server action changes:** `createDataset()` / `updateDataset()` accept optional `customFields: Record<string, string>` and upsert `DatasetCustomFieldValue` records. `getDataset()` includes custom field values in response.
+- **Public display:** Custom fields rendered in a "Additional Information" section on the public dataset detail page as a key-value list.
+- **DCAT-US compatibility:** Custom fields do NOT appear in `/data.json` output (they're outside the DCAT-US spec). Optionally include them in the bulk JSON export under an `_extras` key (following CKAN's convention).
+- **Search integration:** Extend `buildSearchWhere()` to optionally search custom field values (text search across `DatasetCustomFieldValue.value`).
+- **Template support:** Extend `TemplateFields` to include default custom field values so templates can pre-fill org-specific fields.
+
+#### Key Files
+
+- `prisma/schema.prisma` — `CustomFieldDefinition` + `DatasetCustomFieldValue` models
+- `src/lib/schemas/custom-fields.ts` — Zod schemas for definition CRUD and value validation
+- `src/lib/actions/custom-fields.ts` — CRUD actions for field definitions
+- `src/lib/actions/datasets.ts` — extend `createDataset()` / `updateDataset()` / `getDataset()`
+- `src/app/admin/custom-fields/` — admin management pages (list, new, edit)
+- `src/components/datasets/DatasetForm.tsx` — dynamic custom field rendering
+- `src/components/datasets/CustomFieldsSection.tsx` — reusable custom fields form section
+- `src/app/datasets/[slug]/page.tsx` — public display of custom field values
+
+---
+
+### Bulk Actions on Admin Lists
+
+**Priority:** Medium
+**Reason:** Admin list pages (datasets, users, organizations, pages) only support one-at-a-time operations. Both CKAN and DKAN provide bulk operations — selecting multiple items and applying an action (publish, unpublish, delete, change organization). Managing catalogs with 100+ datasets requires batch operations.
+
+#### Scope
+
+- **Selectable rows:** Add checkbox column to admin dataset table/grid. "Select all" checkbox in header. Selected count indicator.
+- **Bulk action bar:** Sticky bar appears when items are selected, showing count and action buttons:
+  - **Datasets:** Publish, Unpublish (set to draft), Archive, Delete (soft delete), Change Organization
+  - **Users:** Change Role, Delete
+  - **Pages:** Publish, Unpublish, Delete
+- **Confirmation dialog:** AlertDialog before destructive bulk actions showing count and action description.
+- **Server actions:** New `bulkUpdateDatasets(ids: string[], update: Partial)` and `bulkDeleteDatasets(ids: string[])` actions. Single transaction for atomicity.
+- **Start with datasets:** The dataset list is the highest-value target. Extend pattern to other admin lists afterward.
+- **Requires dataset list search/filter first:** This builds on the Admin Dataset List item — bulk actions are most useful when you can filter to a subset then act on it.
+
+#### Key Files
+
+- `src/app/admin/datasets/page.tsx` — selectable grid/table, bulk action bar
+- `src/lib/actions/datasets.ts` — `bulkUpdateDatasets()`, `bulkDeleteDatasets()`
+- `src/components/admin/BulkActionBar.tsx` — reusable sticky bar component
+
+---
+
+### API Token Management
+
+**Priority:** Medium
+**Reason:** NextKAN has no API authentication mechanism beyond session cookies. External scripts, CI pipelines, harvest clients, and third-party integrations cannot authenticate to the API. CKAN 2.9+ provides per-user API tokens (create, revoke, encrypted storage) manageable from the user profile UI. Without this, the API is either fully open or fully session-gated.
+
+#### Scope
+
+- **ApiToken model:** `id`, `userId`, `name` (user-provided label, e.g. "CI Pipeline"), `tokenHash` (bcrypt/SHA-256 hash — never store plaintext), `lastUsedAt`, `expiresAt` (optional), `createdAt`. Cascade delete with user.
+- **Token generation:** Generate cryptographically random token (e.g. `crypto.randomBytes(32).toString('hex')`), display once on creation, store only the hash. Prefix tokens with `nkan_` for easy identification.
+- **Auth middleware:** Check `Authorization: Bearer <token>` header on API routes. Look up token hash, resolve user, attach to request context. Fall back to session auth if no bearer token.
+- **User profile UI:** Token management section on `/admin/users/[id]/edit` (or dedicated page). Create token (name + optional expiry), list active tokens (name, created, last used, expiry), revoke individual tokens.
+- **Rate limiting (optional):** Per-token rate limiting via in-memory counter or database tracking.
+- **Admin visibility:** Admins can view (but not read) token metadata for any user. Admins can revoke any user's tokens.
+
+#### Key Files
+
+- `prisma/schema.prisma` — `ApiToken` model
+- `src/lib/schemas/api-token.ts` — Zod schemas for create/list
+- `src/lib/actions/api-tokens.ts` — CRUD actions (create, list, revoke)
+- `src/lib/auth/api-token.ts` — token verification middleware
+- `src/app/api/` — integrate bearer auth into existing API route handlers
+- `src/app/admin/users/[id]/edit/page.tsx` — token management UI section
+
+---
+
+### User Self-Registration
+
+**Priority:** Low
+**Reason:** NextKAN only supports admin-created user accounts. Both CKAN and DKAN offer configurable registration modes — open registration, registration with admin approval, or admin-only. Organizations that want community contributors or inter-agency collaboration need a self-service signup flow.
+
+#### Scope
+
+- **Registration modes** (via admin setting `USER_REGISTRATION_MODE`):
+  - `disabled` (default, current behavior) — admin-only account creation
+  - `approval` — users register, account is inactive until admin approves
+  - `open` — users register and immediately get access with a configurable default role
+- **Registration page:** `/register` — public form with name, email, password, optional organization request. Only rendered when mode is not `disabled`.
+- **Approval workflow:** New `User.status` field (`active`, `pending`, `disabled`). Admin users page shows pending accounts with approve/reject actions. Email notification to admins on new registration. Email notification to user on approval.
+- **Default role:** `USER_DEFAULT_ROLE` setting (default: `viewer`). Applied on registration or approval.
+- **Anti-abuse:** Rate limiting on registration endpoint. Optional CAPTCHA integration (e.g. hCaptcha/Turnstile) via env var.
+- **Email verification (optional):** Send verification link on registration. Account not active until email confirmed.
+
+#### Key Files
+
+- `prisma/schema.prisma` — add `status` field to User model
+- `src/app/(public)/register/page.tsx` — registration form page
+- `src/lib/actions/users.ts` — `registerUser()`, `approveUser()`, `rejectUser()`
+- `src/lib/services/settings.ts` — `getUserRegistrationMode()`, `getUserDefaultRole()`
+- `src/app/admin/users/page.tsx` — pending user approval UI
+- `src/lib/services/email.ts` — registration + approval email templates
+
+---
+
 ## Public UI/UX
 
 ### Public Page UX Polish

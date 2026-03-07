@@ -163,6 +163,9 @@ export async function updateDataset(id: string, input: DatasetUpdateInput) {
 
   // Fetch before-state for diff
   const before = await prisma.dataset.findUnique({ where: { id } });
+  if (before?.deletedAt) {
+    throw new Error("Cannot update a deleted dataset");
+  }
 
   const result = await prisma.$transaction(async (tx) => {
     await tx.dataset.update({
@@ -223,39 +226,46 @@ export async function updateDataset(id: string, input: DatasetUpdateInput) {
 }
 
 export async function deleteDataset(id: string) {
+  const dataset = await prisma.dataset.findUnique({ where: { id } });
+  if (!dataset || dataset.deletedAt) return;
+
   if (isPluginsEnabled()) {
     hooks.run("dataset:beforeDelete", id).catch(() => {});
   }
 
-  const dataset = await prisma.dataset.findUnique({ where: { id } });
-  await prisma.dataset.delete({ where: { id } });
+  await prisma.dataset.update({
+    where: { id },
+    data: { deletedAt: new Date() },
+  });
 
-  if (dataset) {
-    logActivity({
-      action: "dataset:deleted",
-      entityType: "dataset",
-      entityId: id,
-      entityName: dataset.title,
-    }).catch(() => {});
+  logActivity({
+    action: "dataset:deleted",
+    entityType: "dataset",
+    entityId: id,
+    entityName: dataset.title,
+  }).catch(() => {});
 
-    if (isPluginsEnabled()) {
-      hooks.run("dataset:afterDelete", id, dataset.title).catch(() => {});
-    }
+  if (isPluginsEnabled()) {
+    hooks.run("dataset:afterDelete", id, dataset.title).catch(() => {});
   }
 }
 
 export async function getDataset(id: string) {
-  return prisma.dataset.findUnique({
+  const dataset = await prisma.dataset.findUnique({
     where: { id },
     include: datasetIncludes,
   });
+  if (dataset?.deletedAt) return null;
+  return dataset;
 }
 
 export async function getDatasetBySlug(slug: string) {
-  return prisma.dataset.findUnique({
+  const dataset = await prisma.dataset.findUnique({
     where: { slug },
     include: datasetIncludes,
   });
+  if (dataset?.deletedAt) return null;
+  return dataset;
 }
 
 export async function listDatasets(params?: {
@@ -268,6 +278,7 @@ export async function listDatasets(params?: {
   format?: string;
   theme?: string;
   accessLevel?: string;
+  sort?: string;
 }) {
   const page = params?.page ?? 1;
   const limit = params?.limit ?? 20;
@@ -287,11 +298,21 @@ export async function listDatasets(params?: {
     where.status = params.status;
   }
 
+  const sortMap: Record<string, Record<string, string>> = {
+    modified_desc: { modified: "desc" },
+    modified_asc: { modified: "asc" },
+    title_asc: { title: "asc" },
+    title_desc: { title: "desc" },
+    created_desc: { issued: "desc" },
+    created_asc: { issued: "asc" },
+  };
+  const orderBy = sortMap[params?.sort ?? ""] ?? { modified: "desc" };
+
   const [datasets, total] = await Promise.all([
     prisma.dataset.findMany({
       where,
       include: datasetIncludes,
-      orderBy: { modified: "desc" },
+      orderBy,
       skip,
       take: limit,
     }),
@@ -299,6 +320,74 @@ export async function listDatasets(params?: {
   ]);
 
   return { datasets, total };
+}
+
+export async function listDeletedDatasets(params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+}) {
+  const page = params?.page ?? 1;
+  const limit = params?.limit ?? 20;
+  const skip = (page - 1) * limit;
+
+  const where: Record<string, unknown> = { deletedAt: { not: null } };
+
+  if (params?.search?.trim()) {
+    const terms = params.search.trim().split(/\s+/);
+    where.AND = terms.map((term) => ({
+      OR: [
+        { title: { contains: term } },
+        { description: { contains: term } },
+      ],
+    }));
+  }
+
+  const [datasets, total] = await Promise.all([
+    prisma.dataset.findMany({
+      where,
+      include: { publisher: true },
+      orderBy: { deletedAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    prisma.dataset.count({ where }),
+  ]);
+
+  return { datasets, total };
+}
+
+export async function restoreDataset(id: string) {
+  const dataset = await prisma.dataset.findUnique({ where: { id } });
+  if (!dataset) throw new Error("Dataset not found");
+  if (!dataset.deletedAt) throw new Error("Dataset is not in trash");
+
+  await prisma.dataset.update({
+    where: { id },
+    data: { deletedAt: null },
+  });
+
+  logActivity({
+    action: "dataset:restored",
+    entityType: "dataset",
+    entityId: id,
+    entityName: dataset.title,
+  }).catch(() => {});
+}
+
+export async function purgeDataset(id: string) {
+  const dataset = await prisma.dataset.findUnique({ where: { id } });
+  if (!dataset) throw new Error("Dataset not found");
+  if (!dataset.deletedAt) throw new Error("Cannot purge a live dataset. Move to trash first.");
+
+  await prisma.dataset.delete({ where: { id } });
+
+  logActivity({
+    action: "dataset:purged",
+    entityType: "dataset",
+    entityId: id,
+    entityName: dataset.title,
+  }).catch(() => {});
 }
 
 // Distribution actions
