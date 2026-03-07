@@ -21,6 +21,7 @@ model User {
 
   datasets         Dataset[]
   reviewedDatasets Dataset[] @relation("DatasetReviewer")
+  apiTokens        ApiToken[]
 }
 
 model Organization {
@@ -412,6 +413,20 @@ model CustomFieldDefinition {
   values         DatasetCustomFieldValue[]
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+}
+
+model ApiToken {
+  id         String    @id @default(uuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String
+  tokenHash  String    @unique
+  prefix     String
+  lastUsedAt DateTime?
+  expiresAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId])
 }
 
 model DatasetCustomFieldValue {

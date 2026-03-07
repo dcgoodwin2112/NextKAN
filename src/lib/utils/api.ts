@@ -8,6 +8,9 @@ export function handleApiError(error: unknown) {
       { status: 400 }
     );
   }
+  if (error instanceof Error && error.name === "PermissionError") {
+    return NextResponse.json({ error: error.message }, { status: 401 });
+  }
   if (error instanceof Error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

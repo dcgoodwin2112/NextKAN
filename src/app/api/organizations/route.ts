@@ -5,6 +5,7 @@ import {
   createOrganization,
 } from "@/lib/actions/organizations";
 import { handleApiError, unauthorized } from "@/lib/utils/api";
+import { withTokenAuth } from "@/lib/utils/with-token-auth";
 
 export async function GET() {
   try {
@@ -16,16 +17,18 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    const session = await auth();
-    if (!session?.user) {
-      return unauthorized();
-    }
+  return withTokenAuth(request, async () => {
+    try {
+      const session = await auth();
+      if (!session?.user) {
+        return unauthorized();
+      }
 
-    const body = await request.json();
-    const organization = await createOrganization(body);
-    return NextResponse.json(organization, { status: 201 });
-  } catch (error) {
-    return handleApiError(error);
-  }
+      const body = await request.json();
+      const organization = await createOrganization(body);
+      return NextResponse.json(organization, { status: 201 });
+    } catch (error) {
+      return handleApiError(error);
+    }
+  });
 }

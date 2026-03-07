@@ -6,31 +6,6 @@ Pending features and tasks for future implementation. See `docs/backlog-complete
 
 ## Admin UX
 
-### API Token Management
-
-**Priority:** Medium
-**Reason:** NextKAN has no API authentication mechanism beyond session cookies. External scripts, CI pipelines, harvest clients, and third-party integrations cannot authenticate to the API. CKAN 2.9+ provides per-user API tokens (create, revoke, encrypted storage) manageable from the user profile UI. Without this, the API is either fully open or fully session-gated.
-
-#### Scope
-
-- **ApiToken model:** `id`, `userId`, `name` (user-provided label, e.g. "CI Pipeline"), `tokenHash` (bcrypt/SHA-256 hash — never store plaintext), `lastUsedAt`, `expiresAt` (optional), `createdAt`. Cascade delete with user.
-- **Token generation:** Generate cryptographically random token (e.g. `crypto.randomBytes(32).toString('hex')`), display once on creation, store only the hash. Prefix tokens with `nkan_` for easy identification.
-- **Auth middleware:** Check `Authorization: Bearer <token>` header on API routes. Look up token hash, resolve user, attach to request context. Fall back to session auth if no bearer token.
-- **User profile UI:** Token management section on `/admin/users/[id]/edit` (or dedicated page). Create token (name + optional expiry), list active tokens (name, created, last used, expiry), revoke individual tokens.
-- **Rate limiting (optional):** Per-token rate limiting via in-memory counter or database tracking.
-- **Admin visibility:** Admins can view (but not read) token metadata for any user. Admins can revoke any user's tokens.
-
-#### Key Files
-
-- `prisma/schema.prisma` — `ApiToken` model
-- `src/lib/schemas/api-token.ts` — Zod schemas for create/list
-- `src/lib/actions/api-tokens.ts` — CRUD actions (create, list, revoke)
-- `src/lib/auth/api-token.ts` — token verification middleware
-- `src/app/api/` — integrate bearer auth into existing API route handlers
-- `src/app/admin/users/[id]/edit/page.tsx` — token management UI section
-
----
-
 ### User Self-Registration
 
 **Priority:** Low

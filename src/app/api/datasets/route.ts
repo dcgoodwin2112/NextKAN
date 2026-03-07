@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { listDatasets, createDataset } from "@/lib/actions/datasets";
 import { handleApiError, unauthorized } from "@/lib/utils/api";
+import { withTokenAuth } from "@/lib/utils/with-token-auth";
 import { parseSpatial, extractBbox, bboxIntersects } from "@/lib/schemas/spatial";
 
 export async function GET(request: NextRequest) {
@@ -51,16 +52,18 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    const session = await auth();
-    if (!session?.user) {
-      return unauthorized();
-    }
+  return withTokenAuth(request, async () => {
+    try {
+      const session = await auth();
+      if (!session?.user) {
+        return unauthorized();
+      }
 
-    const body = await request.json();
-    const dataset = await createDataset(body, session.user.id);
-    return NextResponse.json(dataset, { status: 201 });
-  } catch (error) {
-    return handleApiError(error);
-  }
+      const body = await request.json();
+      const dataset = await createDataset(body, session.user.id);
+      return NextResponse.json(dataset, { status: 201 });
+    } catch (error) {
+      return handleApiError(error);
+    }
+  });
 }
