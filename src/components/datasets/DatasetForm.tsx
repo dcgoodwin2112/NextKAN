@@ -75,13 +75,25 @@ interface DatasetWithRelations {
   previousVersion?: string | null;
 }
 
+interface CustomFieldDef {
+  id: string;
+  name: string;
+  label: string;
+  type: string;
+  required: boolean;
+  options: string[] | null;
+  sortOrder: number;
+}
+
 interface DatasetFormProps {
   initialData?: DatasetWithRelations;
-  defaultValues?: Partial<TemplateFields>;
+  defaultValues?: Partial<TemplateFields> & { customFields?: Record<string, string> };
   organizations: Organization[];
   themes?: ThemeOption[];
   series?: SeriesOption[];
-  onSubmit: (data: DatasetCreateInput & { distributions?: Distribution[] }) => Promise<void>;
+  customFieldDefinitions?: CustomFieldDef[];
+  initialCustomFieldValues?: Record<string, string>;
+  onSubmit: (data: DatasetCreateInput & { distributions?: Distribution[]; customFields?: Record<string, string> }) => Promise<void>;
 }
 
 export function DatasetForm({
@@ -90,6 +102,8 @@ export function DatasetForm({
   organizations,
   themes: availableThemes = [],
   series: availableSeries = [],
+  customFieldDefinitions: cfDefs = [],
+  initialCustomFieldValues,
   onSubmit,
 }: DatasetFormProps) {
   const router = useRouter();
@@ -157,6 +171,12 @@ export function DatasetForm({
   const [seriesId, setSeriesId] = useState(initialData?.seriesId || dv.seriesId || "");
   const [previousVersion, setPreviousVersion] = useState(initialData?.previousVersion || dv.previousVersion || "");
 
+  // Custom Fields
+  const [customFields, setCustomFields] = useState<Record<string, string>>(() => {
+    const initial = initialCustomFieldValues || dv.customFields || {};
+    return { ...initial };
+  });
+
   // Distributions
   const [distributions, setDistributions] = useState<Distribution[]>(
     initialData?.distributions || []
@@ -212,6 +232,13 @@ export function DatasetForm({
       return;
     }
 
+    for (const def of cfDefs) {
+      if (def.required && !customFields[def.name]?.trim()) {
+        setError(`Custom field "${def.label}" is required`);
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
@@ -245,6 +272,7 @@ export function DatasetForm({
         seriesId: seriesId || undefined,
         previousVersion: previousVersion || undefined,
         distributions,
+        customFields: cfDefs.length > 0 ? customFields : undefined,
       });
       router.push("/admin/datasets");
       router.refresh();
@@ -650,6 +678,97 @@ export function DatasetForm({
                 placeholder="URL or identifier of previous version"
               />
             </div>
+          </fieldset>
+        </CollapsibleSection>
+      )}
+
+      {/* Custom Fields */}
+      {cfDefs.length > 0 && (
+        <CollapsibleSection title="Custom Fields" defaultOpen={true} headingLevel="h3">
+          <fieldset className="space-y-4 pl-4">
+            {cfDefs.map((def) => {
+              const cfValue = customFields[def.name] || "";
+              const setCfValue = (v: string) =>
+                setCustomFields({ ...customFields, [def.name]: v });
+
+              if (def.type === "boolean") {
+                return (
+                  <div key={def.id} className="flex items-center gap-2">
+                    <input
+                      id={`cf-${def.name}`}
+                      type="checkbox"
+                      checked={cfValue === "true"}
+                      onChange={(e) => setCfValue(e.target.checked ? "true" : "false")}
+                    />
+                    <label htmlFor={`cf-${def.name}`} className="text-sm font-medium">
+                      {def.label}{def.required ? " *" : ""}
+                    </label>
+                  </div>
+                );
+              }
+
+              if (def.type === "select") {
+                return (
+                  <div key={def.id} className="space-y-2">
+                    <Label htmlFor={`cf-${def.name}`}>
+                      {def.label}{def.required ? " *" : ""}
+                    </Label>
+                    <NativeSelect
+                      id={`cf-${def.name}`}
+                      value={cfValue}
+                      onChange={(e) => setCfValue(e.target.value)}
+                    >
+                      <option value="">Select...</option>
+                      {(def.options || []).map((opt) => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </NativeSelect>
+                  </div>
+                );
+              }
+
+              if (def.type === "multiselect") {
+                const selected: string[] = cfValue ? (() => { try { return JSON.parse(cfValue); } catch { return []; } })() : [];
+                return (
+                  <div key={def.id} className="space-y-2">
+                    <Label>
+                      {def.label}{def.required ? " *" : ""}
+                    </Label>
+                    <div className="grid grid-cols-2 gap-1 max-h-48 overflow-y-auto border rounded p-2">
+                      {(def.options || []).map((opt) => (
+                        <label key={opt} className="flex items-center gap-2 text-sm py-0.5">
+                          <input
+                            type="checkbox"
+                            checked={selected.includes(opt)}
+                            onChange={(e) => {
+                              const next = e.target.checked
+                                ? [...selected, opt]
+                                : selected.filter((s) => s !== opt);
+                              setCfValue(JSON.stringify(next));
+                            }}
+                          />
+                          {opt}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
+
+              return (
+                <div key={def.id} className="space-y-2">
+                  <Label htmlFor={`cf-${def.name}`}>
+                    {def.label}{def.required ? " *" : ""}
+                  </Label>
+                  <Input
+                    id={`cf-${def.name}`}
+                    type={def.type === "number" ? "number" : def.type === "date" ? "date" : "text"}
+                    value={cfValue}
+                    onChange={(e) => setCfValue(e.target.value)}
+                  />
+                </div>
+              );
+            })}
           </fieldset>
         </CollapsibleSection>
       )}

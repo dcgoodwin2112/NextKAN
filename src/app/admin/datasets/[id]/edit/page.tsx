@@ -22,6 +22,7 @@ import { DistributionPreviewPanel } from "@/components/admin/DistributionPreview
 import { SaveAsTemplateButton } from "@/components/datasets/SaveAsTemplateButton";
 import { CollapsibleSection } from "@/components/admin/CollapsibleSection";
 import { DatasetDeleteButton } from "./DatasetDeleteButton";
+import { listCustomFieldDefinitions, getCustomFieldsForDataset } from "@/lib/actions/custom-fields";
 import { prisma } from "@/lib/db";
 import { updateDataDictionary } from "@/lib/services/data-dictionary";
 import { isWorkflowEnabled, getAvailableTransitions, getWorkflowHistory, transitionWorkflow } from "@/lib/services/workflow";
@@ -37,7 +38,7 @@ interface Props {
 
 export default async function EditDatasetPage({ params }: Props) {
   const { id } = await params;
-  const [dataset, organizations, themes, allSeries, activities, session, versions] = await Promise.all([
+  const [dataset, organizations, themes, allSeries, activities, session, versions, allCustomFields, customFieldValues] = await Promise.all([
     getDataset(id),
     listOrganizations(),
     listThemes(),
@@ -49,12 +50,24 @@ export default async function EditDatasetPage({ params }: Props) {
     }),
     auth(),
     getVersionHistory(id),
+    listCustomFieldDefinitions(),
+    getCustomFieldsForDataset(id),
   ]);
 
   if (!dataset) notFound();
 
   const qualityScore = calculateQualityScore(dataset as unknown as DatasetWithRelations);
   const workflowEnabled = isWorkflowEnabled();
+
+  const customFieldDefs = allCustomFields.map((d) => ({
+    id: d.id,
+    name: d.name,
+    label: d.label,
+    type: d.type,
+    required: d.required,
+    options: d.options ? JSON.parse(d.options) : null,
+    sortOrder: d.sortOrder,
+  }));
   const userRole = (session?.user as any)?.role as string || "viewer";
 
   let workflowTransitions: string[] = [];
@@ -110,11 +123,12 @@ export default async function EditDatasetPage({ params }: Props) {
         mediaType?: string | null;
         format?: string | null;
       }[];
+      customFields?: Record<string, string>;
     }
   ) {
     "use server";
-    const { distributions, ...datasetData } = data;
-    await updateDataset(id, datasetData);
+    const { distributions, customFields: cf, ...datasetData } = data;
+    await updateDataset(id, datasetData, cf);
 
     if (distributions !== undefined) {
       const existingIds = dataset!.distributions.map((d) => d.id);
@@ -223,6 +237,8 @@ export default async function EditDatasetPage({ params }: Props) {
         organizations={organizations}
         themes={themes}
         series={allSeries.map((s) => ({ id: s.id, title: s.title }))}
+        customFieldDefinitions={customFieldDefs}
+        initialCustomFieldValues={customFieldValues}
         onSubmit={handleUpdate}
       />
 

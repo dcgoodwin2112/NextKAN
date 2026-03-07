@@ -15,6 +15,7 @@ import { getEmailService } from "@/lib/services/email";
 import { datasetCreatedEmail } from "@/lib/email-templates/dataset-created";
 import { hooks } from "@/lib/plugins/hooks";
 import { isPluginsEnabled } from "@/lib/plugins/loader";
+import { validateCustomFieldValue } from "@/lib/schemas/custom-field";
 
 const datasetIncludes = {
   publisher: { include: { parent: true } },
@@ -22,9 +23,14 @@ const datasetIncludes = {
   keywords: true,
   themes: { include: { theme: true } },
   series: true,
+  customFieldValues: { include: { definition: true } },
 } as const;
 
-export async function createDataset(input: DatasetCreateInput, createdById?: string) {
+export async function createDataset(
+  input: DatasetCreateInput,
+  createdById?: string,
+  customFields?: Record<string, string>
+) {
   const data = datasetCreateSchema.parse(input);
   const slug = generateSlug(data.title);
 
@@ -87,6 +93,24 @@ export async function createDataset(input: DatasetCreateInput, createdById?: str
       });
     }
 
+    if (customFields && Object.keys(customFields).length > 0) {
+      const definitions = await tx.customFieldDefinition.findMany({
+        where: { name: { in: Object.keys(customFields) } },
+      });
+      const cfData: { datasetId: string; definitionId: string; value: string }[] = [];
+      for (const def of definitions) {
+        const value = customFields[def.name];
+        if (value !== undefined && value !== "") {
+          const error = validateCustomFieldValue(value, def);
+          if (error) throw new Error(`Custom field "${def.label}": ${error}`);
+          cfData.push({ datasetId: dataset.id, definitionId: def.id, value });
+        }
+      }
+      if (cfData.length > 0) {
+        await tx.datasetCustomFieldValue.createMany({ data: cfData });
+      }
+    }
+
     return tx.dataset.findUniqueOrThrow({
       where: { id: dataset.id },
       include: datasetIncludes,
@@ -122,7 +146,7 @@ export async function createDataset(input: DatasetCreateInput, createdById?: str
   return result;
 }
 
-export async function updateDataset(id: string, input: DatasetUpdateInput) {
+export async function updateDataset(id: string, input: DatasetUpdateInput, customFields?: Record<string, string>) {
   const data = datasetUpdateSchema.parse(input);
   const updateData: Record<string, unknown> = { modified: new Date() };
 
@@ -194,6 +218,27 @@ export async function updateDataset(id: string, input: DatasetUpdateInput) {
             datasetId: id,
           })),
         });
+      }
+    }
+
+    if (customFields !== undefined) {
+      await tx.datasetCustomFieldValue.deleteMany({ where: { datasetId: id } });
+      if (Object.keys(customFields).length > 0) {
+        const definitions = await tx.customFieldDefinition.findMany({
+          where: { name: { in: Object.keys(customFields) } },
+        });
+        const cfData: { datasetId: string; definitionId: string; value: string }[] = [];
+        for (const def of definitions) {
+          const value = customFields[def.name];
+          if (value !== undefined && value !== "") {
+            const error = validateCustomFieldValue(value, def);
+            if (error) throw new Error(`Custom field "${def.label}": ${error}`);
+            cfData.push({ datasetId: id, definitionId: def.id, value });
+          }
+        }
+        if (cfData.length > 0) {
+          await tx.datasetCustomFieldValue.createMany({ data: cfData });
+        }
       }
     }
 

@@ -47,6 +47,7 @@ interface DatasetFields {
   versionNotes?: string | null;
   seriesId?: string | null;
   previousVersion?: string | null;
+  customFieldValues?: { definition: { name: string }; value: string }[];
 }
 
 interface SaveAsTemplateButtonProps {
@@ -92,6 +93,13 @@ export function SaveAsTemplateButton({
     if (d.versionNotes) f.versionNotes = d.versionNotes;
     if (d.seriesId) f.seriesId = d.seriesId;
     if (d.previousVersion) f.previousVersion = d.previousVersion;
+    if (d.customFieldValues?.length) {
+      const cf: Record<string, string> = {};
+      for (const v of d.customFieldValues) {
+        cf[v.definition.name] = v.value;
+      }
+      if (Object.keys(cf).length > 0) f.customFields = cf;
+    }
     return f;
   }
 

@@ -16,14 +16,15 @@ describe("buildSearchWhere", () => {
     expect(result2).toHaveProperty("deletedAt", null);
   });
 
-  it("creates OR conditions across title, description, keywords", () => {
+  it("creates OR conditions across title, description, keywords, customFieldValues", () => {
     const result = buildSearchWhere("census");
     expect(result.AND).toHaveLength(1);
     const orConditions = (result.AND as any[])[0].OR;
-    expect(orConditions).toHaveLength(3);
+    expect(orConditions).toHaveLength(4);
     expect(orConditions[0]).toHaveProperty("title");
     expect(orConditions[1]).toHaveProperty("description");
     expect(orConditions[2]).toHaveProperty("keywords");
+    expect(orConditions[3]).toHaveProperty("customFieldValues");
   });
 
   it("handles multi-word queries with AND logic", () => {

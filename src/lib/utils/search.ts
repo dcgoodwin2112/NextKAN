@@ -27,6 +27,7 @@ export function buildSearchWhere(params: SearchParams | string): Prisma.DatasetW
           { title: { contains: term } },
           { description: { contains: term } },
           { keywords: { some: { keyword: { contains: term } } } },
+          { customFieldValues: { some: { value: { contains: term } } } },
         ],
       })),
     });

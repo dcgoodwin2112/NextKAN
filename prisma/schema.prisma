@@ -35,12 +35,13 @@ model Organization {
   parent   Organization?  @relation("OrgHierarchy", fields: [parentId], references: [id])
   children Organization[] @relation("OrgHierarchy")
 
-  users          User[]
-  datasets       Dataset[]
-  harvestSources HarvestSource[]
-  templates      DatasetTemplate[]
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  users                  User[]
+  datasets               Dataset[]
+  harvestSources         HarvestSource[]
+  templates              DatasetTemplate[]
+  customFieldDefinitions CustomFieldDefinition[]
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 }
 
 model Theme {
@@ -146,6 +147,7 @@ model Dataset {
   workflowTransitions WorkflowTransition[]
   versions            DatasetVersion[]
   comments            Comment[]
+  customFieldValues   DatasetCustomFieldValue[]
 
   @@index([status])
   @@index([publisherId])
@@ -395,4 +397,31 @@ model Comment {
   updatedAt   DateTime @updatedAt
 
   @@index([datasetId, approved])
+}
+
+model CustomFieldDefinition {
+  id             String  @id @default(uuid())
+  name           String  @unique
+  label          String
+  type           String  // text|number|date|url|select|multiselect|boolean
+  required       Boolean @default(false)
+  options        String? // JSON array for select/multiselect
+  sortOrder      Int     @default(0)
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  values         DatasetCustomFieldValue[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model DatasetCustomFieldValue {
+  id           String @id @default(uuid())
+  datasetId    String
+  dataset      Dataset @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  definitionId String
+  definition   CustomFieldDefinition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+  value        String
+  @@unique([datasetId, definitionId])
+  @@index([datasetId])
+  @@index([definitionId])
 }

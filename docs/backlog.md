@@ -6,36 +6,6 @@ Pending features and tasks for future implementation. See `docs/backlog-complete
 
 ## Admin UX
 
-### Custom Fields for Datasets
-
-**Priority:** Medium
-**Reason:** The dataset schema is fixed to DCAT-US v1.1 fields. Organizations often need domain-specific metadata (e.g., "Data Steward", "Update Frequency Detail", "Department Code", "Grant Number") that doesn't map to any DCAT-US property. Currently the only workaround is stuffing values into `references` or `describedBy`, which loses structure and searchability.
-
-#### Scope
-
-- **CustomFieldDefinition model:** Admin-defined field definitions with `name` (machine key), `label` (display), `type` (text, number, date, url, select, multiselect, boolean), `required`, `options` (JSON array for select/multiselect), `sortOrder`, optional `organizationId` (org-scoped vs global). Unique on `[name]` (or `[name, organizationId]` for scoped fields).
-- **DatasetCustomFieldValue model:** Per-dataset values linking `datasetId` + `customFieldDefinitionId` + `value` (stored as text). Cascade delete with dataset.
-- **Admin field management page:** `/admin/custom-fields` — CRUD for field definitions. Reorder, preview, set required/optional. Org-scoped fields only appear for datasets in that org.
-- **DatasetForm integration:** Render custom fields in a "Custom Fields" CollapsibleSection (after Additional Metadata). Dynamic form controls based on field type. Validate required fields on submit.
-- **Server action changes:** `createDataset()` / `updateDataset()` accept optional `customFields: Record<string, string>` and upsert `DatasetCustomFieldValue` records. `getDataset()` includes custom field values in response.
-- **Public display:** Custom fields rendered in a "Additional Information" section on the public dataset detail page as a key-value list.
-- **DCAT-US compatibility:** Custom fields do NOT appear in `/data.json` output (they're outside the DCAT-US spec). Optionally include them in the bulk JSON export under an `_extras` key (following CKAN's convention).
-- **Search integration:** Extend `buildSearchWhere()` to optionally search custom field values (text search across `DatasetCustomFieldValue.value`).
-- **Template support:** Extend `TemplateFields` to include default custom field values so templates can pre-fill org-specific fields.
-
-#### Key Files
-
-- `prisma/schema.prisma` — `CustomFieldDefinition` + `DatasetCustomFieldValue` models
-- `src/lib/schemas/custom-fields.ts` — Zod schemas for definition CRUD and value validation
-- `src/lib/actions/custom-fields.ts` — CRUD actions for field definitions
-- `src/lib/actions/datasets.ts` — extend `createDataset()` / `updateDataset()` / `getDataset()`
-- `src/app/admin/custom-fields/` — admin management pages (list, new, edit)
-- `src/components/datasets/DatasetForm.tsx` — dynamic custom field rendering
-- `src/components/datasets/CustomFieldsSection.tsx` — reusable custom fields form section
-- `src/app/datasets/[slug]/page.tsx` — public display of custom field values
-
----
-
 ### Bulk Actions on Admin Lists
 
 **Priority:** Medium
