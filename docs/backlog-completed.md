@@ -2,6 +2,7 @@
 
 Items completed from the backlog. See `docs/backlog.md` for pending items.
 
+- **API Token Management** — ApiToken model (SHA-256 hashed, `nkan_` prefix). Token service (generate/hash/validate). AsyncLocalStorage-based `tokenAuthContext` for propagating token auth through server actions. `resolveAuth()` checks bearer token then falls back to session. `requirePermission`/`requireOrgPermission` check token context first. `withTokenAuth` wrapper on dataset/org/upload API routes. `handleApiError` returns 401 for PermissionError. Self-management account page at `/admin/account`, admin management on user edit page. `ApiTokenSection` client component with create dialog (plaintext shown once), revoke AlertDialog. Activity logging on create/revoke. 35 new tests (892 total).
 - **Sample Seed Data** — 4 orgs, 4 users (all roles), 12 datasets with full DCAT-US metadata, 14 sample data files, datastore CSV import, mixed workflow states. See `prisma/seed.ts`.
 - **shadcn/ui Migration (Phase 1)** — Foundation layer: `components.json`, `cn()`, 12 shadcn components, Toaster, AdminHeader + AdminSidebar migrated.
 - **User Edit Functionality** — Edit page at `/admin/users/[id]/edit`, password reset, guard rails (self-role, last-admin), AlertDialog for delete, 17 unit tests.

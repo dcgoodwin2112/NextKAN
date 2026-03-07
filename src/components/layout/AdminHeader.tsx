@@ -1,7 +1,7 @@
 "use client";
 
 import { signOut } from "next-auth/react";
-import { User, LogOut, ArrowLeft } from "lucide-react";
+import { User, LogOut, ArrowLeft, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -40,6 +40,12 @@ export function AdminHeader({ user }: AdminHeaderProps) {
               )}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <a href="/admin/account">
+                <Key className="size-4" />
+                Account
+              </a>
+            </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <a href="/">
                 <ArrowLeft className="size-4" />

@@ -6,6 +6,7 @@ import { listOrganizations } from "@/lib/actions/organizations";
 import { UserEditForm } from "@/components/admin/UserEditForm";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
+import { ApiTokenSection } from "@/components/admin/ApiTokenSection";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -44,6 +45,9 @@ export default async function EditUserPage({ params }: Props) {
         organizations={organizations}
         isCurrentUser={currentUserId === user.id}
       />
+      <div className="mt-6">
+        <ApiTokenSection userId={user.id} />
+      </div>
     </div>
   );
 }

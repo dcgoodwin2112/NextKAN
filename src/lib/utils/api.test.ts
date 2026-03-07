@@ -20,6 +20,15 @@ describe("handleApiError", () => {
     expect(body.details).toBeDefined();
   });
 
+  it("returns 401 for PermissionError", async () => {
+    const error = new Error("Insufficient permissions: dataset:create required");
+    error.name = "PermissionError";
+    const response = handleApiError(error);
+    const body = await response.json();
+    expect(response.status).toBe(401);
+    expect(body.error).toContain("dataset:create");
+  });
+
   it("returns 500 for generic Error", async () => {
     const response = handleApiError(new Error("Something broke"));
     const body = await response.json();
