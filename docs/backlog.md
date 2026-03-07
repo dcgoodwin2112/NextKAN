@@ -6,31 +6,6 @@ Pending features and tasks for future implementation. See `docs/backlog-complete
 
 ## Admin UX
 
-### Bulk Actions on Admin Lists
-
-**Priority:** Medium
-**Reason:** Admin list pages (datasets, users, organizations, pages) only support one-at-a-time operations. Both CKAN and DKAN provide bulk operations — selecting multiple items and applying an action (publish, unpublish, delete, change organization). Managing catalogs with 100+ datasets requires batch operations.
-
-#### Scope
-
-- **Selectable rows:** Add checkbox column to admin dataset table/grid. "Select all" checkbox in header. Selected count indicator.
-- **Bulk action bar:** Sticky bar appears when items are selected, showing count and action buttons:
-  - **Datasets:** Publish, Unpublish (set to draft), Archive, Delete (soft delete), Change Organization
-  - **Users:** Change Role, Delete
-  - **Pages:** Publish, Unpublish, Delete
-- **Confirmation dialog:** AlertDialog before destructive bulk actions showing count and action description.
-- **Server actions:** New `bulkUpdateDatasets(ids: string[], update: Partial)` and `bulkDeleteDatasets(ids: string[])` actions. Single transaction for atomicity.
-- **Start with datasets:** The dataset list is the highest-value target. Extend pattern to other admin lists afterward.
-- **Requires dataset list search/filter first:** This builds on the Admin Dataset List item — bulk actions are most useful when you can filter to a subset then act on it.
-
-#### Key Files
-
-- `src/app/admin/datasets/page.tsx` — selectable grid/table, bulk action bar
-- `src/lib/actions/datasets.ts` — `bulkUpdateDatasets()`, `bulkDeleteDatasets()`
-- `src/components/admin/BulkActionBar.tsx` — reusable sticky bar component
-
----
-
 ### API Token Management
 
 **Priority:** Medium

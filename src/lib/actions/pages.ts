@@ -162,6 +162,70 @@ export async function listPublishedPagesByLocation(
   });
 }
 
+// Bulk actions
+
+export async function bulkUpdatePages(
+  ids: string[],
+  update: { published?: boolean }
+) {
+  const { bulkPageUpdateSchema } = await import("@/lib/schemas/bulk");
+  const validated = bulkPageUpdateSchema.parse({ ids, update });
+
+  const result = await prisma.page.updateMany({
+    where: { id: { in: validated.ids } },
+    data: validated.update,
+  });
+
+  const pages = await prisma.page.findMany({
+    where: { id: { in: validated.ids } },
+    select: { id: true, title: true },
+  });
+
+  for (const page of pages) {
+    logActivity({
+      action: "update",
+      entityType: "page",
+      entityId: page.id,
+      entityName: page.title,
+      details: { bulk: true, ...validated.update },
+    }).catch(() => {});
+  }
+
+  return { success: result.count, errors: [] as string[] };
+}
+
+export async function bulkDeletePages(ids: string[]) {
+  const { bulkIdsSchema } = await import("@/lib/schemas/bulk");
+  const validatedIds = bulkIdsSchema.parse(ids);
+
+  // Orphan children first
+  await prisma.page.updateMany({
+    where: { parentId: { in: validatedIds } },
+    data: { parentId: null },
+  });
+
+  const pages = await prisma.page.findMany({
+    where: { id: { in: validatedIds } },
+    select: { id: true, title: true },
+  });
+
+  const result = await prisma.page.deleteMany({
+    where: { id: { in: validatedIds } },
+  });
+
+  for (const page of pages) {
+    logActivity({
+      action: "delete",
+      entityType: "page",
+      entityId: page.id,
+      entityName: page.title,
+      details: { bulk: true },
+    }).catch(() => {});
+  }
+
+  return { success: result.count, errors: [] as string[] };
+}
+
 export async function reorderPages(id: string, direction: "up" | "down") {
   const page = await prisma.page.findUnique({ where: { id } });
   if (!page) throw new Error("Page not found");

@@ -2,8 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { listDatasets } from "@/lib/actions/datasets";
 import { listOrganizations } from "@/lib/actions/organizations";
-import { DatasetCard } from "@/components/datasets/DatasetCard";
-import { DatasetTable } from "@/components/datasets/DatasetTable";
+import { AdminDatasetListClient } from "./AdminDatasetListClient";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { ViewToggle } from "@/components/admin/ViewToggle";
 import { EmptyState } from "@/components/admin/EmptyState";
@@ -91,15 +90,11 @@ export default async function AdminDatasetsPage({
           />
         )
       ) : (
-        view === "list" ? (
-          <DatasetTable datasets={datasets} />
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {datasets.map((dataset) => (
-              <DatasetCard key={dataset.id} dataset={dataset} adminView />
-            ))}
-          </div>
-        )
+        <AdminDatasetListClient
+          datasets={datasets}
+          organizations={orgOptions}
+          view={view}
+        />
       )}
 
       <Suspense fallback={null}>

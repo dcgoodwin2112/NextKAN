@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const statusStyles: Record<string, string> = {
   draft: "bg-warning-subtle text-warning-text",
@@ -19,9 +20,18 @@ interface DatasetCardProps {
     distributions: { format?: string | null }[];
   };
   adminView?: boolean;
+  selectable?: boolean;
+  selected?: boolean;
+  onToggle?: (id: string) => void;
 }
 
-export function DatasetCard({ dataset, adminView = false }: DatasetCardProps) {
+export function DatasetCard({
+  dataset,
+  adminView = false,
+  selectable,
+  selected,
+  onToggle,
+}: DatasetCardProps) {
   const href = adminView
     ? `/admin/datasets/${dataset.id}/edit`
     : `/datasets/${dataset.slug}`;
@@ -40,7 +50,23 @@ export function DatasetCard({ dataset, adminView = false }: DatasetCardProps) {
   ];
 
   return (
-    <div className="rounded-lg border border-border p-4 hover:shadow-sm transition-shadow">
+    <div
+      className={`relative rounded-lg border p-4 hover:shadow-sm transition-shadow ${
+        selected ? "border-primary bg-primary-subtle/30" : "border-border"
+      }`}
+    >
+      {selectable && (
+        <div
+          className="absolute top-3 right-3 z-10"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Checkbox
+            checked={selected ?? false}
+            onCheckedChange={() => onToggle?.(dataset.id)}
+            aria-label={`Select ${dataset.title}`}
+          />
+        </div>
+      )}
       <Link href={href} className="block">
         <div className="flex items-center gap-2">
           <h3 className="font-semibold text-lg">{dataset.title}</h3>

@@ -273,5 +273,127 @@ export async function searchUsers(params?: {
   return { users, total };
 }
 
+// Bulk actions
+
+export async function bulkUpdateUsers(
+  ids: string[],
+  update: { role?: string }
+) {
+  const session = await requirePermission("user:manage");
+  const sessionUserId = (session.user as any)?.id as string;
+
+  const { bulkUserUpdateSchema } = await import("@/lib/schemas/bulk");
+  const validated = bulkUserUpdateSchema.parse({ ids, update });
+
+  let success = 0;
+  const errors: string[] = [];
+
+  await prisma.$transaction(async (tx) => {
+    for (const id of validated.ids) {
+      try {
+        if (validated.update.role !== undefined && sessionUserId === id) {
+          errors.push("Cannot change your own role");
+          continue;
+        }
+
+        const user = await tx.user.findUnique({
+          where: { id },
+          select: { id: true, email: true, role: true },
+        });
+        if (!user) {
+          errors.push(`User ${id} not found`);
+          continue;
+        }
+
+        if (
+          validated.update.role !== undefined &&
+          validated.update.role !== "admin" &&
+          user.role === "admin"
+        ) {
+          const adminCount = await tx.user.count({ where: { role: "admin" } });
+          if (adminCount <= 1) {
+            errors.push(`Cannot demote ${user.email} — last admin`);
+            continue;
+          }
+        }
+
+        await tx.user.update({
+          where: { id },
+          data: validated.update,
+        });
+        success++;
+
+        logActivity({
+          action: "update",
+          entityType: "user",
+          entityId: id,
+          entityName: user.email,
+          userId: sessionUserId,
+          details: { bulk: true, ...validated.update },
+        }).catch(() => {});
+      } catch (err) {
+        errors.push(`User ${id}: ${err instanceof Error ? err.message : "unknown error"}`);
+      }
+    }
+  });
+
+  return { success, errors };
+}
+
+export async function bulkDeleteUsers(ids: string[]) {
+  const session = await requirePermission("user:manage");
+  const sessionUserId = (session.user as any)?.id as string;
+
+  const { bulkIdsSchema } = await import("@/lib/schemas/bulk");
+  const validatedIds = bulkIdsSchema.parse(ids);
+
+  let success = 0;
+  const errors: string[] = [];
+
+  await prisma.$transaction(async (tx) => {
+    for (const id of validatedIds) {
+      try {
+        if (sessionUserId === id) {
+          errors.push("Cannot delete your own account");
+          continue;
+        }
+
+        const user = await tx.user.findUnique({
+          where: { id },
+          select: { id: true, email: true, role: true },
+        });
+        if (!user) {
+          errors.push(`User ${id} not found`);
+          continue;
+        }
+
+        if (user.role === "admin") {
+          const adminCount = await tx.user.count({ where: { role: "admin" } });
+          if (adminCount <= 1) {
+            errors.push(`Cannot delete ${user.email} — last admin`);
+            continue;
+          }
+        }
+
+        await tx.user.delete({ where: { id } });
+        success++;
+
+        logActivity({
+          action: "delete",
+          entityType: "user",
+          entityId: id,
+          entityName: user.email,
+          userId: sessionUserId,
+          details: { bulk: true },
+        }).catch(() => {});
+      } catch (err) {
+        errors.push(`User ${id}: ${err instanceof Error ? err.message : "unknown error"}`);
+      }
+    }
+  });
+
+  return { success, errors };
+}
+
 /** @deprecated Use updateUser() instead */
 export const updateUserRole = updateUser;

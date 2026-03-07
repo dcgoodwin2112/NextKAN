@@ -435,6 +435,88 @@ export async function purgeDataset(id: string) {
   }).catch(() => {});
 }
 
+// Bulk actions
+
+export async function bulkUpdateDatasets(
+  ids: string[],
+  update: { status?: string; publisherId?: string }
+) {
+  const { bulkDatasetUpdateSchema } = await import("@/lib/schemas/bulk");
+  const validated = bulkDatasetUpdateSchema.parse({ ids, update });
+
+  let success = 0;
+  const errors: string[] = [];
+
+  await prisma.$transaction(async (tx) => {
+    for (const id of validated.ids) {
+      try {
+        const dataset = await tx.dataset.findUnique({ where: { id } });
+        if (!dataset || dataset.deletedAt) {
+          errors.push(`Dataset ${id} not found or deleted`);
+          continue;
+        }
+        await tx.dataset.update({
+          where: { id },
+          data: { ...validated.update, modified: new Date() },
+        });
+        success++;
+
+        logActivity({
+          action: "dataset:updated",
+          entityType: "dataset",
+          entityId: id,
+          entityName: dataset.title,
+          details: { bulk: true, ...validated.update },
+        }).catch(() => {});
+
+        if (isPluginsEnabled()) {
+          hooks.run("dataset:afterUpdate", { ...dataset, ...validated.update }).catch(() => {});
+        }
+      } catch (err) {
+        errors.push(`Dataset ${id}: ${err instanceof Error ? err.message : "unknown error"}`);
+      }
+    }
+  });
+
+  return { success, errors };
+}
+
+export async function bulkDeleteDatasets(ids: string[]) {
+  const { bulkIdsSchema } = await import("@/lib/schemas/bulk");
+  const validatedIds = bulkIdsSchema.parse(ids);
+
+  const datasets = await prisma.dataset.findMany({
+    where: { id: { in: validatedIds }, deletedAt: null },
+    select: { id: true, title: true },
+  });
+
+  const result = await prisma.dataset.updateMany({
+    where: { id: { in: datasets.map((d) => d.id) } },
+    data: { deletedAt: new Date() },
+  });
+
+  for (const dataset of datasets) {
+    logActivity({
+      action: "dataset:deleted",
+      entityType: "dataset",
+      entityId: dataset.id,
+      entityName: dataset.title,
+      details: { bulk: true },
+    }).catch(() => {});
+
+    if (isPluginsEnabled()) {
+      hooks.run("dataset:afterDelete", dataset.id, dataset.title).catch(() => {});
+    }
+  }
+
+  return {
+    success: result.count,
+    errors: validatedIds.length > datasets.length
+      ? [`${validatedIds.length - datasets.length} dataset(s) were already deleted or not found`]
+      : [],
+  };
+}
+
 // Distribution actions
 
 export async function addDistribution(datasetId: string, input: DistributionInput) {
