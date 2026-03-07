@@ -4,7 +4,7 @@ import { siteConfig } from "@/lib/config";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const datasets = await prisma.dataset.findMany({
-    where: { status: "published" },
+    where: { status: "published", deletedAt: null },
     select: { slug: true, modified: true },
   });
 

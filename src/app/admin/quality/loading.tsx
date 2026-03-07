@@ -2,6 +2,19 @@ export default function QualityLoading() {
   return (
     <div className="animate-pulse">
       <div className="h-8 w-48 bg-muted rounded mb-6" />
+      <div className="space-y-4 mb-6">
+        <div className="max-w-xl">
+          <div className="flex gap-2">
+            <div className="h-9 flex-1 bg-muted rounded" />
+            <div className="h-9 w-20 bg-muted rounded" />
+          </div>
+        </div>
+        <div className="flex gap-4">
+          <div className="h-9 w-36 bg-muted rounded" />
+          <div className="h-9 w-40 bg-muted rounded" />
+          <div className="h-9 w-40 bg-muted rounded" />
+        </div>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         {[1, 2, 3].map((i) => (
           <div key={i} className="rounded border p-4">

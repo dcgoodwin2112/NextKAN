@@ -17,14 +17,22 @@ interface ConfirmDeleteButtonProps {
   entityName: string;
   onConfirm: () => void;
   size?: "default" | "sm" | "xs";
+  softDelete?: boolean;
 }
 
 export function ConfirmDeleteButton({
   entityName,
   onConfirm,
   size = "default",
+  softDelete = false,
 }: ConfirmDeleteButtonProps) {
   const [open, setOpen] = useState(false);
+
+  const description = softDelete
+    ? `This will move ${entityName} to the trash. You can restore it later from the Trash page.`
+    : `This will permanently delete ${entityName}. This action cannot be undone.`;
+
+  const actionLabel = softDelete ? "Move to Trash" : "Delete";
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
@@ -40,8 +48,7 @@ export function ConfirmDeleteButton({
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will permanently delete {entityName}. This action cannot be
-            undone.
+            {description}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -50,7 +57,7 @@ export function ConfirmDeleteButton({
             variant="destructive"
             onClick={() => onConfirm()}
           >
-            Delete
+            {actionLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -102,7 +102,7 @@ function getStats(
       where: { eventType: "download", createdAt: { gte: startOfMonth } },
     }),
     workflowEnabled
-      ? prisma.dataset.count({ where: { workflowStatus: "pending_review" } })
+      ? prisma.dataset.count({ where: { workflowStatus: "pending_review", deletedAt: null } })
       : Promise.resolve(null),
   ]).then(([downloadsThisMonth, pendingReviewCount]) => {
     let avgQualityScore = 0;
@@ -130,7 +130,7 @@ async function getActionItems(
   const [pendingReviewRaw, pendingCommentsRaw, failedHarvestsRaw] = await Promise.all([
     workflowEnabled
       ? prisma.dataset.findMany({
-          where: { workflowStatus: "pending_review" },
+          where: { workflowStatus: "pending_review", deletedAt: null },
           select: { id: true, title: true, submittedAt: true },
           orderBy: { submittedAt: "asc" },
           take: 5,
@@ -237,7 +237,7 @@ async function getCatalogHealth(
     prisma.dataDictionary.count(),
     prisma.distribution.count(),
     prisma.organization.findMany({
-      where: { datasets: { none: { status: "published" } } },
+      where: { datasets: { none: { status: "published", deletedAt: null } } },
       select: { id: true, name: true },
     }),
   ]);
@@ -354,6 +354,7 @@ export async function getDashboardData(): Promise<DashboardData> {
 
   // Fetch all datasets once with full relations (reused for quality, health, trends)
   const allDatasets = (await prisma.dataset.findMany({
+    where: { deletedAt: null },
     include: datasetIncludes,
     orderBy: { title: "asc" },
   })) as unknown as DatasetWithRelations[];

@@ -46,7 +46,7 @@ export async function getOrgDashboardData(orgId: string): Promise<OrgDashboardDa
       select: { id: true, name: true, email: true, role: true },
     }),
     prisma.dataset.findMany({
-      where: { publisherId: orgId },
+      where: { publisherId: orgId, deletedAt: null },
       include: datasetIncludes,
     }) as Promise<unknown> as Promise<DatasetWithRelations[]>,
   ]);

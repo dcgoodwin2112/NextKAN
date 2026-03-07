@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   const datasets = await prisma.dataset.findMany({
-    where: { status: "published" },
+    where: { status: "published", deletedAt: null },
     include: {
       publisher: { include: { parent: true } },
       distributions: true,

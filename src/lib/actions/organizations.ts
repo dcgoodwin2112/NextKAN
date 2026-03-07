@@ -62,7 +62,7 @@ export async function updateOrganization(
 
 export async function deleteOrganization(id: string) {
   const datasetCount = await prisma.dataset.count({
-    where: { publisherId: id },
+    where: { publisherId: id, deletedAt: null },
   });
 
   if (datasetCount > 0) {
@@ -98,7 +98,7 @@ export async function getOrganizationBySlug(slug: string) {
       parent: true,
       children: true,
       datasets: {
-        where: { status: "published" },
+        where: { status: "published", deletedAt: null },
         include: { keywords: true, distributions: true },
         orderBy: { modified: "desc" },
       },
@@ -113,4 +113,53 @@ export async function listOrganizations() {
     },
     orderBy: { name: "asc" },
   });
+}
+
+export async function searchOrganizations(params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  sort?: string;
+}) {
+  const page = params?.page ?? 1;
+  const limit = params?.limit ?? 20;
+  const skip = (page - 1) * limit;
+
+  const where: Record<string, unknown> = {};
+
+  if (params?.search?.trim()) {
+    const terms = params.search.trim().split(/\s+/);
+    where.AND = terms.map((term) => ({
+      OR: [
+        { name: { contains: term } },
+        { description: { contains: term } },
+      ],
+    }));
+  }
+
+  type OrgOrderBy = Record<string, string | Record<string, string>>;
+  const sortMap: Record<string, OrgOrderBy> = {
+    name_asc: { name: "asc" },
+    name_desc: { name: "desc" },
+    created_desc: { createdAt: "desc" },
+    created_asc: { createdAt: "asc" },
+    datasets_desc: { datasets: { _count: "desc" } },
+    datasets_asc: { datasets: { _count: "asc" } },
+  };
+  const orderBy = sortMap[params?.sort ?? ""] ?? { name: "asc" };
+
+  const [organizations, total] = await Promise.all([
+    prisma.organization.findMany({
+      where,
+      include: {
+        _count: { select: { datasets: true } },
+      },
+      orderBy,
+      skip,
+      take: limit,
+    }),
+    prisma.organization.count({ where }),
+  ]);
+
+  return { organizations, total };
 }

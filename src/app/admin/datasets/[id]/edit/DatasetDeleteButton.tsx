@@ -8,6 +8,6 @@ interface DatasetDeleteButtonProps {
 
 export function DatasetDeleteButton({ onDelete }: DatasetDeleteButtonProps) {
   return (
-    <ConfirmDeleteButton entityName="this dataset" onConfirm={onDelete} />
+    <ConfirmDeleteButton entityName="this dataset" onConfirm={onDelete} softDelete />
   );
 }

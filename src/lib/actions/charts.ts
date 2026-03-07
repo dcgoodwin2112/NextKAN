@@ -75,7 +75,12 @@ export async function listChartableDistributions() {
     include: {
       distribution: {
         include: {
-          dataset: { select: { title: true } },
+          dataset: {
+            select: {
+              title: true,
+              publisher: { select: { name: true } },
+            },
+          },
         },
       },
     },
@@ -83,7 +88,11 @@ export async function listChartableDistributions() {
 
   return tables.map((t) => ({
     distributionId: t.distributionId,
-    label: `${t.distribution.dataset.title} — ${t.distribution.title || t.distribution.format || "Distribution"}`,
+    datasetTitle: t.distribution.dataset.title,
+    distributionTitle:
+      t.distribution.title || t.distribution.format || "Distribution",
+    format: t.distribution.format || "",
+    organization: t.distribution.dataset.publisher?.name || "",
     rowCount: t.rowCount,
   }));
 }

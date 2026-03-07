@@ -89,7 +89,7 @@ export async function transitionWorkflow(
   note?: string
 ) {
   const dataset = await prisma.dataset.findUnique({ where: { id: datasetId } });
-  if (!dataset) {
+  if (!dataset || dataset.deletedAt) {
     throw new Error("Dataset not found");
   }
 

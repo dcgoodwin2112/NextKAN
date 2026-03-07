@@ -131,6 +131,7 @@ export async function runHarvest(sourceId: string): Promise<HarvestResult> {
           where: {
             harvestSourceId: sourceId,
             harvestIdentifier: identifier,
+            deletedAt: null,
           },
         });
 
@@ -194,6 +195,7 @@ export async function runHarvest(sourceId: string): Promise<HarvestResult> {
       where: {
         harvestSourceId: sourceId,
         status: { not: "archived" },
+        deletedAt: null,
       },
       select: { id: true, harvestIdentifier: true },
     });

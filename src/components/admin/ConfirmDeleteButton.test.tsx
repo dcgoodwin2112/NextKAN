@@ -41,4 +41,25 @@ describe("ConfirmDeleteButton", () => {
 
     expect(onConfirm).not.toHaveBeenCalled();
   });
+
+  it("shows soft delete wording when softDelete is true", async () => {
+    const user = userEvent.setup();
+    render(
+      <ConfirmDeleteButton entityName="this dataset" onConfirm={vi.fn()} softDelete />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+    expect(screen.getByText(/move this dataset to the trash/)).toBeDefined();
+    expect(screen.getByRole("button", { name: "Move to Trash" })).toBeDefined();
+  });
+
+  it("shows permanent delete wording by default", async () => {
+    const user = userEvent.setup();
+    render(
+      <ConfirmDeleteButton entityName="this item" onConfirm={vi.fn()} />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+    expect(screen.getByText(/permanently delete this item/)).toBeDefined();
+  });
 });

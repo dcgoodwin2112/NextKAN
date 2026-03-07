@@ -5,7 +5,7 @@ import type { CKANActionResponse } from "@/lib/schemas/ckan-compat";
 export async function GET() {
   try {
     const datasets = await prisma.dataset.findMany({
-      where: { status: "published" },
+      where: { status: "published", deletedAt: null },
       select: { slug: true },
       orderBy: { title: "asc" },
     });

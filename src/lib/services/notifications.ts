@@ -35,7 +35,7 @@ async function getReviewNotifications(): Promise<NotificationItem[]> {
   if (!isWorkflowEnabled()) return [];
 
   const pending = await prisma.dataset.findMany({
-    where: { workflowStatus: "pending_review" },
+    where: { workflowStatus: "pending_review", deletedAt: null },
     select: { id: true, title: true, submittedAt: true, updatedAt: true },
     orderBy: { submittedAt: "desc" },
   });

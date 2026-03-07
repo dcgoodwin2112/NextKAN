@@ -49,6 +49,7 @@ const navGroups: NavGroup[] = [
       { href: "/admin/comments", label: "Comments", requiredRole: "admin" },
       { href: "/admin/analytics", label: "Analytics", requiredRole: "admin" },
       { href: "/admin/activity", label: "Activity", requiredRole: "admin" },
+      { href: "/admin/trash", label: "Trash", requiredRole: "admin" },
       { href: "/admin/settings", label: "Settings", requiredRole: "admin" },
     ],
   },

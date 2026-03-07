@@ -2,10 +2,18 @@ import { describe, it, expect } from "vitest";
 import { buildSearchWhere } from "./search";
 
 describe("buildSearchWhere", () => {
-  it("returns empty object for empty query", () => {
-    expect(buildSearchWhere("")).toEqual({});
-    expect(buildSearchWhere("   ")).toEqual({});
-    expect(buildSearchWhere({})).toEqual({});
+  it("returns base filter with deletedAt: null for empty query", () => {
+    expect(buildSearchWhere("")).toEqual({ deletedAt: null });
+    expect(buildSearchWhere("   ")).toEqual({ deletedAt: null });
+    expect(buildSearchWhere({})).toEqual({ deletedAt: null });
+  });
+
+  it("always includes deletedAt: null", () => {
+    const result = buildSearchWhere({ query: "test" });
+    expect(result).toHaveProperty("deletedAt", null);
+
+    const result2 = buildSearchWhere({ organizationId: "org-1" });
+    expect(result2).toHaveProperty("deletedAt", null);
   });
 
   it("creates OR conditions across title, description, keywords", () => {
@@ -37,27 +45,27 @@ describe("buildSearchWhere", () => {
 
   it("filters by organizationId", () => {
     const result = buildSearchWhere({ organizationId: "org-1" });
-    expect(result).toEqual({ publisherId: "org-1" });
+    expect(result).toEqual({ publisherId: "org-1", deletedAt: null });
   });
 
   it("filters by keyword", () => {
     const result = buildSearchWhere({ keyword: "health" });
-    expect(result).toEqual({ keywords: { some: { keyword: "health" } } });
+    expect(result).toEqual({ keywords: { some: { keyword: "health" } }, deletedAt: null });
   });
 
   it("filters by format via distribution relation", () => {
     const result = buildSearchWhere({ format: "CSV" });
-    expect(result).toEqual({ distributions: { some: { format: "CSV" } } });
+    expect(result).toEqual({ distributions: { some: { format: "CSV" } }, deletedAt: null });
   });
 
   it("filters by theme via slug relation", () => {
     const result = buildSearchWhere({ theme: "health" });
-    expect(result).toEqual({ themes: { some: { theme: { slug: "health" } } } });
+    expect(result).toEqual({ themes: { some: { theme: { slug: "health" } } }, deletedAt: null });
   });
 
   it("filters by accessLevel", () => {
     const result = buildSearchWhere({ accessLevel: "public" });
-    expect(result).toEqual({ accessLevel: "public" });
+    expect(result).toEqual({ accessLevel: "public", deletedAt: null });
   });
 
   it("combines multiple filters with AND", () => {

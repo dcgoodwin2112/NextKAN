@@ -32,6 +32,9 @@ import {
   getDataset,
   getDatasetBySlug,
   listDatasets,
+  listDeletedDatasets,
+  restoreDataset,
+  purgeDataset,
 } from "./datasets";
 
 const validInput = {
@@ -70,6 +73,7 @@ const mockDataset = {
   references: null,
   systemOfRecords: null,
   status: "published",
+  deletedAt: null,
   createdById: null,
   modified: new Date(),
   createdAt: new Date(),
@@ -212,13 +216,24 @@ describe("updateDataset", () => {
 });
 
 describe("deleteDataset", () => {
-  it("calls Prisma delete", async () => {
+  it("soft-deletes by setting deletedAt via update", async () => {
     prismaMock.dataset.findUnique.mockResolvedValue(mockDataset as any);
-    prismaMock.dataset.delete.mockResolvedValue(mockDataset as any);
+    prismaMock.dataset.update.mockResolvedValue(mockDataset as any);
     await deleteDataset("ds-1");
-    expect(prismaMock.dataset.delete).toHaveBeenCalledWith({
+    expect(prismaMock.dataset.update).toHaveBeenCalledWith({
       where: { id: "ds-1" },
+      data: { deletedAt: expect.any(Date) },
     });
+    expect(prismaMock.dataset.delete).not.toHaveBeenCalled();
+  });
+
+  it("skips already-deleted datasets", async () => {
+    prismaMock.dataset.findUnique.mockResolvedValue({
+      ...mockDataset,
+      deletedAt: new Date(),
+    } as any);
+    await deleteDataset("ds-1");
+    expect(prismaMock.dataset.update).not.toHaveBeenCalled();
   });
 });
 
@@ -226,6 +241,15 @@ describe("getDataset", () => {
   it("returns null for non-existent ID", async () => {
     prismaMock.dataset.findUnique.mockResolvedValue(null);
     const result = await getDataset("nonexistent");
+    expect(result).toBeNull();
+  });
+
+  it("returns null for soft-deleted dataset", async () => {
+    prismaMock.dataset.findUnique.mockResolvedValue({
+      ...mockDataset,
+      deletedAt: new Date(),
+    } as any);
+    const result = await getDataset("ds-1");
     expect(result).toBeNull();
   });
 });
@@ -244,6 +268,15 @@ describe("getDatasetBySlug", () => {
         series: true,
       },
     });
+  });
+
+  it("returns null for soft-deleted dataset", async () => {
+    prismaMock.dataset.findUnique.mockResolvedValue({
+      ...mockDataset,
+      deletedAt: new Date(),
+    } as any);
+    const result = await getDatasetBySlug("test-dataset");
+    expect(result).toBeNull();
   });
 });
 
@@ -283,5 +316,128 @@ describe("listDatasets", () => {
     await listDatasets({ status: "draft" });
     const call = prismaMock.dataset.findMany.mock.calls[0][0];
     expect(call?.where).toHaveProperty("status", "draft");
+  });
+
+  it("applies sort parameter", async () => {
+    prismaMock.dataset.findMany.mockResolvedValue([]);
+    prismaMock.dataset.count.mockResolvedValue(0);
+
+    await listDatasets({ sort: "title_asc" });
+    const call = prismaMock.dataset.findMany.mock.calls[0][0];
+    expect(call?.orderBy).toEqual({ title: "asc" });
+  });
+
+  it("defaults to modified_desc when no sort provided", async () => {
+    prismaMock.dataset.findMany.mockResolvedValue([]);
+    prismaMock.dataset.count.mockResolvedValue(0);
+
+    await listDatasets();
+    const call = prismaMock.dataset.findMany.mock.calls[0][0];
+    expect(call?.orderBy).toEqual({ modified: "desc" });
+  });
+
+  it("always includes deletedAt: null filter", async () => {
+    prismaMock.dataset.findMany.mockResolvedValue([]);
+    prismaMock.dataset.count.mockResolvedValue(0);
+
+    await listDatasets();
+    const call = prismaMock.dataset.findMany.mock.calls[0][0];
+    expect(call?.where).toHaveProperty("deletedAt", null);
+  });
+});
+
+describe("listDeletedDatasets", () => {
+  it("returns only deleted datasets", async () => {
+    const deletedDataset = { ...mockDataset, deletedAt: new Date() };
+    prismaMock.dataset.findMany.mockResolvedValue([deletedDataset as any]);
+    prismaMock.dataset.count.mockResolvedValue(1);
+
+    const result = await listDeletedDatasets();
+    expect(result.total).toBe(1);
+    const call = prismaMock.dataset.findMany.mock.calls[0][0];
+    expect(call?.where).toHaveProperty("deletedAt", { not: null });
+  });
+
+  it("supports search parameter", async () => {
+    prismaMock.dataset.findMany.mockResolvedValue([]);
+    prismaMock.dataset.count.mockResolvedValue(0);
+
+    await listDeletedDatasets({ search: "test" });
+    const call = prismaMock.dataset.findMany.mock.calls[0][0];
+    expect(call?.where).toHaveProperty("AND");
+    expect(call?.where).toHaveProperty("deletedAt", { not: null });
+  });
+
+  it("supports pagination", async () => {
+    prismaMock.dataset.findMany.mockResolvedValue([]);
+    prismaMock.dataset.count.mockResolvedValue(0);
+
+    await listDeletedDatasets({ page: 2, limit: 10 });
+    const call = prismaMock.dataset.findMany.mock.calls[0][0];
+    expect(call?.skip).toBe(10);
+    expect(call?.take).toBe(10);
+  });
+});
+
+describe("restoreDataset", () => {
+  it("clears deletedAt", async () => {
+    prismaMock.dataset.findUnique.mockResolvedValue({
+      ...mockDataset,
+      deletedAt: new Date(),
+    } as any);
+    prismaMock.dataset.update.mockResolvedValue(mockDataset as any);
+
+    await restoreDataset("ds-1");
+    expect(prismaMock.dataset.update).toHaveBeenCalledWith({
+      where: { id: "ds-1" },
+      data: { deletedAt: null },
+    });
+  });
+
+  it("throws if dataset is not in trash", async () => {
+    prismaMock.dataset.findUnique.mockResolvedValue(mockDataset as any);
+    await expect(restoreDataset("ds-1")).rejects.toThrow("not in trash");
+  });
+
+  it("throws if dataset not found", async () => {
+    prismaMock.dataset.findUnique.mockResolvedValue(null);
+    await expect(restoreDataset("nonexistent")).rejects.toThrow("not found");
+  });
+});
+
+describe("purgeDataset", () => {
+  it("calls prisma.dataset.delete for trashed dataset", async () => {
+    prismaMock.dataset.findUnique.mockResolvedValue({
+      ...mockDataset,
+      deletedAt: new Date(),
+    } as any);
+    prismaMock.dataset.delete.mockResolvedValue(mockDataset as any);
+
+    await purgeDataset("ds-1");
+    expect(prismaMock.dataset.delete).toHaveBeenCalledWith({
+      where: { id: "ds-1" },
+    });
+  });
+
+  it("throws if dataset is not in trash", async () => {
+    prismaMock.dataset.findUnique.mockResolvedValue(mockDataset as any);
+    await expect(purgeDataset("ds-1")).rejects.toThrow("Cannot purge a live dataset");
+  });
+
+  it("throws if dataset not found", async () => {
+    prismaMock.dataset.findUnique.mockResolvedValue(null);
+    await expect(purgeDataset("nonexistent")).rejects.toThrow("not found");
+  });
+});
+
+describe("updateDataset", () => {
+  it("throws if dataset is soft-deleted", async () => {
+    prismaMock.dataset.findUnique.mockResolvedValue({
+      ...mockDataset,
+      deletedAt: new Date(),
+    } as any);
+    await expect(updateDataset("ds-1", { title: "New" })).rejects.toThrow(
+      "Cannot update a deleted dataset"
+    );
   });
 });

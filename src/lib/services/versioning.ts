@@ -26,7 +26,7 @@ export async function createVersion(
     },
   });
 
-  if (!dataset) {
+  if (!dataset || dataset.deletedAt) {
     throw new Error("Dataset not found");
   }
 
