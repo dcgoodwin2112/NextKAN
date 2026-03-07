@@ -3,16 +3,7 @@ import { listPages } from "@/lib/actions/pages";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { EmptyState } from "@/components/admin/EmptyState";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { PageReorderButtons } from "./PageReorderButtons";
+import { AdminPageListClient } from "./AdminPageListClient";
 
 export default async function AdminPagesPage() {
   const pages = await listPages();
@@ -70,69 +61,7 @@ export default async function AdminPagesPage() {
           actionHref="/admin/pages/new"
         />
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Slug</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Nav</TableHead>
-              <TableHead>Template</TableHead>
-              <TableHead>Order</TableHead>
-              <TableHead></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {orderedPages.map(({ page, isChild, isFirst, isLast }) => (
-              <TableRow key={page.id}>
-                <TableCell className="font-medium">
-                  {isChild && (
-                    <span className="text-text-muted mr-1">↳</span>
-                  )}
-                  <span className={isChild ? "pl-4" : ""}>
-                    {page.title}
-                  </span>
-                </TableCell>
-                <TableCell className="text-text-muted">
-                  /pages/{page.slug}
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant={page.published ? "default" : "secondary"}
-                    className={
-                      page.published
-                        ? "bg-success-subtle text-success-text hover:bg-success-subtle"
-                        : "bg-surface-alt text-text-tertiary hover:bg-surface-alt"
-                    }
-                  >
-                    {page.published ? "Published" : "Draft"}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-text-muted capitalize">
-                  {page.navLocation}
-                </TableCell>
-                <TableCell className="text-text-muted capitalize">
-                  {page.template}
-                </TableCell>
-                <TableCell>
-                  <PageReorderButtons
-                    pageId={page.id}
-                    isFirst={isFirst}
-                    isLast={isLast}
-                  />
-                </TableCell>
-                <TableCell>
-                  <Link
-                    href={`/admin/pages/${page.id}/edit`}
-                    className="text-primary hover:underline"
-                  >
-                    Edit
-                  </Link>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <AdminPageListClient orderedPages={orderedPages} />
       )}
     </div>
   );

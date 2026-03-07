@@ -4,9 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useSelection } from "@/hooks/useSelection";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { NativeSelect } from "@/components/ui/native-select";
 import {
   Table,
@@ -27,6 +29,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { BulkActionBar, type BulkAction } from "@/components/admin/BulkActionBar";
+import { bulkUpdateUsers, bulkDeleteUsers } from "@/lib/actions/users";
 
 interface User {
   id: string;
@@ -50,6 +54,8 @@ interface UserListProps {
 
 export function UserList({ users, organizations }: UserListProps) {
   const router = useRouter();
+  const allIds = users.map((u) => u.id);
+  const selection = useSelection(allIds);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -58,6 +64,8 @@ export function UserList({ users, organizations }: UserListProps) {
   const [orgId, setOrgId] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [roleDialogOpen, setRoleDialogOpen] = useState(false);
+  const [selectedRole, setSelectedRole] = useState("");
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -110,6 +118,43 @@ export function UserList({ users, organizations }: UserListProps) {
       toast.error(err instanceof Error ? err.message : "Failed to delete user");
     }
   }
+
+  async function handleBulkDelete() {
+    const result = await bulkDeleteUsers(selection.ids);
+    if (result.errors.length > 0) {
+      toast.error(`${result.success} deleted. Errors: ${result.errors.join("; ")}`);
+    } else {
+      toast.success(`${result.success} user${result.success !== 1 ? "s" : ""} deleted`);
+    }
+    selection.clear();
+    router.refresh();
+  }
+
+  async function handleBulkRoleChange() {
+    if (!selectedRole) return;
+    const result = await bulkUpdateUsers(selection.ids, { role: selectedRole });
+    if (result.errors.length > 0) {
+      toast.error(`${result.success} updated. Errors: ${result.errors.join("; ")}`);
+    } else {
+      toast.success(`${result.success} user${result.success !== 1 ? "s" : ""} updated`);
+    }
+    setRoleDialogOpen(false);
+    setSelectedRole("");
+    selection.clear();
+    router.refresh();
+  }
+
+  const bulkActions: BulkAction[] = [
+    { label: "Change Role", onClick: () => setRoleDialogOpen(true) },
+    {
+      label: "Delete",
+      onClick: handleBulkDelete,
+      variant: "destructive",
+      requiresConfirmation: true,
+      confirmTitle: "Delete users?",
+      confirmDescription: `This will permanently delete ${selection.count} user${selection.count !== 1 ? "s" : ""}. This cannot be undone.`,
+    },
+  ];
 
   return (
     <div>
@@ -194,6 +239,13 @@ export function UserList({ users, organizations }: UserListProps) {
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead className="w-10">
+              <Checkbox
+                checked={selection.isIndeterminate ? "indeterminate" : selection.isAllSelected}
+                onCheckedChange={() => selection.toggleAll()}
+                aria-label="Select all users"
+              />
+            </TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Role</TableHead>
@@ -204,6 +256,13 @@ export function UserList({ users, organizations }: UserListProps) {
         <TableBody>
           {users.map((user) => (
             <TableRow key={user.id}>
+              <TableCell>
+                <Checkbox
+                  checked={selection.isSelected(user.id)}
+                  onCheckedChange={() => selection.toggle(user.id)}
+                  aria-label={`Select ${user.email}`}
+                />
+              </TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.name || "-"}</TableCell>
               <TableCell>{user.role}</TableCell>
@@ -246,6 +305,44 @@ export function UserList({ users, organizations }: UserListProps) {
           ))}
         </TableBody>
       </Table>
+
+      <BulkActionBar
+        selectedCount={selection.count}
+        onClear={selection.clear}
+        actions={bulkActions}
+        entityName="user"
+      />
+
+      <AlertDialog open={roleDialogOpen} onOpenChange={setRoleDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Change Role</AlertDialogTitle>
+            <AlertDialogDescription>
+              Select the role for {selection.count} user{selection.count !== 1 ? "s" : ""}.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-4 space-y-2">
+            <Label htmlFor="bulk-role-select">Role</Label>
+            <NativeSelect
+              id="bulk-role-select"
+              value={selectedRole}
+              onChange={(e) => setSelectedRole(e.target.value)}
+            >
+              <option value="">Select role...</option>
+              <option value="admin">Admin</option>
+              <option value="orgAdmin">Org Admin</option>
+              <option value="editor">Editor</option>
+              <option value="viewer">Viewer</option>
+            </NativeSelect>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleBulkRoleChange} disabled={!selectedRole}>
+              Update
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

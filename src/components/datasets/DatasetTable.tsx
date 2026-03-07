@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -23,13 +24,36 @@ interface DatasetTableProps {
     publisher: { name: string };
     distributions: { format?: string | null }[];
   }[];
+  selectable?: boolean;
+  selectedIds?: Set<string>;
+  onToggle?: (id: string) => void;
+  onSelectAll?: () => void;
+  isAllSelected?: boolean;
+  isIndeterminate?: boolean;
 }
 
-export function DatasetTable({ datasets }: DatasetTableProps) {
+export function DatasetTable({
+  datasets,
+  selectable,
+  selectedIds,
+  onToggle,
+  onSelectAll,
+  isAllSelected,
+  isIndeterminate,
+}: DatasetTableProps) {
   return (
     <Table>
       <TableHeader>
         <TableRow>
+          {selectable && (
+            <TableHead className="w-10">
+              <Checkbox
+                checked={isIndeterminate ? "indeterminate" : isAllSelected}
+                onCheckedChange={() => onSelectAll?.()}
+                aria-label="Select all datasets"
+              />
+            </TableHead>
+          )}
           <TableHead>Title</TableHead>
           <TableHead>Organization</TableHead>
           <TableHead>Status</TableHead>
@@ -48,6 +72,15 @@ export function DatasetTable({ datasets }: DatasetTableProps) {
           ];
           return (
             <TableRow key={dataset.id}>
+              {selectable && (
+                <TableCell>
+                  <Checkbox
+                    checked={selectedIds?.has(dataset.id) ?? false}
+                    onCheckedChange={() => onToggle?.(dataset.id)}
+                    aria-label={`Select ${dataset.title}`}
+                  />
+                </TableCell>
+              )}
               <TableCell className="font-medium">
                 <Link
                   href={`/admin/datasets/${dataset.id}/edit`}
