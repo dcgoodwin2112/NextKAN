@@ -40,6 +40,9 @@ export const templateFieldsSchema = z.object({
   versionNotes: z.string().max(1000).optional(),
   seriesId: z.string().uuid().optional().or(z.literal("")),
   previousVersion: z.string().max(255).optional(),
+
+  // Custom fields
+  customFields: z.record(z.string(), z.string()).optional(),
 });
 
 export type TemplateFields = z.infer<typeof templateFieldsSchema>;

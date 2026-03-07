@@ -15,6 +15,7 @@ import { siteConfig } from "@/lib/config";
 import { prisma } from "@/lib/db";
 import { getVersionHistory } from "@/lib/services/versioning";
 import { isCommentsEnabled } from "@/lib/services/comments";
+import { getCustomFieldsForDataset } from "@/lib/actions/custom-fields";
 
 interface DatasetDetailProps {
   params: Promise<{ slug: string }>;
@@ -62,6 +63,15 @@ export default async function DatasetDetailPage({
 
   const versions = await getVersionHistory(dataset.id);
   const commentsEnabled = isCommentsEnabled();
+
+  // Load custom field values with definitions
+  const customFieldValues = await getCustomFieldsForDataset(dataset.id);
+  const customFieldDefs = Object.keys(customFieldValues).length > 0
+    ? await prisma.customFieldDefinition.findMany({
+        where: { name: { in: Object.keys(customFieldValues) } },
+        orderBy: { sortOrder: "asc" },
+      })
+    : [];
 
   // Load data dictionaries and datastore tables for each distribution
   const distributionExtras = await Promise.all(
@@ -241,6 +251,42 @@ export default async function DatasetDetailPage({
           </div>
         </dl>
       </section>
+
+      {customFieldDefs.length > 0 && (
+        <section className="border-t pt-6 mt-6">
+          <h2 className="text-lg font-semibold mb-4">Additional Information</h2>
+          <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
+            {customFieldDefs.map((def) => {
+              const value = customFieldValues[def.name];
+              if (!value) return null;
+
+              let displayValue: React.ReactNode = value;
+              if (def.type === "boolean") {
+                displayValue = value === "true" ? "Yes" : "No";
+              } else if (def.type === "multiselect") {
+                try {
+                  displayValue = JSON.parse(value).join(", ");
+                } catch {
+                  displayValue = value;
+                }
+              } else if (def.type === "url") {
+                displayValue = (
+                  <a href={value} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
+                    {value}
+                  </a>
+                );
+              }
+
+              return (
+                <div key={def.id}>
+                  <dt className="font-medium text-text-muted">{def.label}</dt>
+                  <dd>{displayValue}</dd>
+                </div>
+              );
+            })}
+          </dl>
+        </section>
+      )}
 
       {versions.length > 0 && (
         <section className="border-t pt-6 mt-6">

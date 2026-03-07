@@ -28,6 +28,7 @@ const navGroups: NavGroup[] = [
     items: [
       { href: "/admin/datasets", label: "Datasets" },
       { href: "/admin/templates", label: "Templates" },
+      { href: "/admin/custom-fields", label: "Custom Fields", requiredRole: "admin" },
       { href: "/admin/series", label: "Series" },
       { href: "/admin/organizations", label: "Organizations" },
       { href: "/admin/pages", label: "Pages", requiredRole: "admin" },

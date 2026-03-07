@@ -266,6 +266,7 @@ describe("getDatasetBySlug", () => {
         keywords: true,
         themes: { include: { theme: true } },
         series: true,
+        customFieldValues: { include: { definition: true } },
       },
     });
   });
