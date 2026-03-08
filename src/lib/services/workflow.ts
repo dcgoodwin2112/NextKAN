@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { logActivity } from "@/lib/services/activity";
 import { getSetting } from "@/lib/services/settings";
+import { silentCatch } from "@/lib/utils/log";
 
 export const WORKFLOW_STATUSES = [
   "draft",
@@ -149,7 +150,7 @@ export async function transitionWorkflow(
   });
 
   // Fire-and-forget: activity log
-  logActivity({
+  silentCatch(logActivity({
     action: `workflow:${toStatus}`,
     entityType: "dataset",
     entityId: datasetId,
@@ -157,7 +158,7 @@ export async function transitionWorkflow(
     userId,
     userName,
     details: { fromStatus, toStatus, note },
-  }).catch(() => {});
+  }), "activity");
 
   return result;
 }

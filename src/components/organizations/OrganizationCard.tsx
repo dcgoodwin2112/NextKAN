@@ -6,6 +6,7 @@ interface OrganizationCardProps {
     name: string;
     slug: string;
     description?: string | null;
+    parent?: { id: string; name: string; slug: string } | null;
     _count?: { datasets: number };
   };
   adminView?: boolean;
@@ -23,6 +24,11 @@ export function OrganizationCard({
     <div className="rounded-lg border border-border p-4 hover:shadow-sm transition-shadow">
       <Link href={href} className="block">
         <h3 className="font-semibold text-lg">{organization.name}</h3>
+        {organization.parent && (
+          <p className="text-xs text-text-muted mt-0.5">
+            Sub-organization of {organization.parent.name}
+          </p>
+        )}
         {organization.description && (
           <p className="text-sm text-text-tertiary mt-1">
             {organization.description}

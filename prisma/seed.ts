@@ -5,6 +5,7 @@ import Papa from "papaparse";
 import { readFile } from "fs/promises";
 import Database from "better-sqlite3";
 import path from "path";
+import { seedLicenses } from "./seeds/licenses";
 
 const adapter = new PrismaBetterSqlite3({
   url: process.env.DATABASE_URL ?? "file:./dev.db",
@@ -934,6 +935,9 @@ async function main() {
 
   // --- Import CSV data into datastore ---
   await importSeedCsvs();
+
+  // --- Licenses ---
+  await seedLicenses(prisma);
 
   console.log("Seed complete!");
 }

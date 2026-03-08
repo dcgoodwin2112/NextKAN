@@ -36,7 +36,7 @@ export default async function OrgDashboardPage({ params }: Props) {
   try {
     await requireOrgPermission("org:view", id);
   } catch (e) {
-    if (e instanceof PermissionError) redirect("/login");
+    if (e instanceof PermissionError) redirect("/admin");
     throw e;
   }
 
@@ -93,6 +93,9 @@ export default async function OrgDashboardPage({ params }: Props) {
         <div className="flex items-center gap-2 mb-3">
           <h2 className="text-lg font-semibold">Members</h2>
           <Badge variant="secondary">{members.length}</Badge>
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/admin/organizations/${id}/members`}>Manage Members</Link>
+          </Button>
         </div>
         {members.length === 0 ? (
           <EmptyState title="No members" description="No users are assigned to this organization." />

@@ -1,7 +1,10 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { listHarvestSources } from "@/lib/actions/harvest";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { EmptyState } from "@/components/admin/EmptyState";
+import { SearchBar } from "@/components/ui/SearchBar";
+import { Pagination } from "@/components/ui/Pagination";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -13,8 +16,24 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export default async function AdminHarvestPage() {
-  const sources = await listHarvestSources();
+const PAGE_SIZE = 20;
+
+export default async function AdminHarvestPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
+  const params = await searchParams;
+  const search = params.search || "";
+  const page = Math.max(1, parseInt(params.page || "1", 10) || 1);
+
+  const { items: sources, total } = await listHarvestSources({
+    search: search || undefined,
+    page,
+    limit: PAGE_SIZE,
+  });
+
+  const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
     <div>
@@ -24,13 +43,36 @@ export default async function AdminHarvestPage() {
         </Button>
       </AdminPageHeader>
 
+      <div className="space-y-4 mb-6">
+        <div className="max-w-xl">
+          <Suspense fallback={null}>
+            <SearchBar action="/admin/harvest" placeholder="Search harvest sources..." />
+          </Suspense>
+        </div>
+      </div>
+
+      {total > 0 && (
+        <p className="text-sm text-text-muted mb-4">
+          Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} of {total} source{total !== 1 ? "s" : ""}
+        </p>
+      )}
+
       {sources.length === 0 ? (
-        <EmptyState
-          title="No harvest sources configured"
-          description="Create one to start harvesting datasets from external catalogs."
-          actionLabel="New Source"
-          actionHref="/admin/harvest/new"
-        />
+        search ? (
+          <EmptyState
+            title="No sources match your search"
+            description="Try adjusting your search term."
+            actionLabel="Clear search"
+            actionHref="/admin/harvest"
+          />
+        ) : (
+          <EmptyState
+            title="No harvest sources configured"
+            description="Create one to start harvesting datasets from external catalogs."
+            actionLabel="New Source"
+            actionHref="/admin/harvest/new"
+          />
+        )
       ) : (
         <Table>
           <TableHeader>
@@ -102,6 +144,14 @@ export default async function AdminHarvestPage() {
           </TableBody>
         </Table>
       )}
+
+      <Suspense fallback={null}>
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          basePath="/admin/harvest"
+        />
+      </Suspense>
     </div>
   );
 }

@@ -8,6 +8,7 @@ import {
 } from "@/lib/schemas/dcat-us";
 import { logActivity } from "@/lib/services/activity";
 import { updateDataset } from "@/lib/actions/datasets";
+import { silentCatch } from "@/lib/utils/log";
 
 /** Creates a versioned snapshot of a dataset's current metadata. */
 export async function createVersion(
@@ -46,14 +47,14 @@ export async function createVersion(
   });
 
   // Fire-and-forget activity logging
-  logActivity({
+  silentCatch(logActivity({
     action: "version_created",
     entityType: "dataset",
     entityId: datasetId,
     entityName: dataset.title,
     userId,
     details: { version, changelog },
-  }).catch(() => {});
+  }), "activity");
 
   return record;
 }
@@ -180,12 +181,12 @@ export async function revertToVersion(
   );
 
   // Log activity
-  logActivity({
+  silentCatch(logActivity({
     action: "version_reverted",
     entityType: "dataset",
     entityId: datasetId,
     entityName: snapshot.title,
     userId,
     details: { revertedToVersion: version.version },
-  }).catch(() => {});
+  }), "activity");
 }

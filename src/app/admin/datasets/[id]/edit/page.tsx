@@ -9,6 +9,7 @@ import {
 import { listOrganizations } from "@/lib/actions/organizations";
 import { listThemes } from "@/lib/actions/themes";
 import { listSeries } from "@/lib/actions/series";
+import { listLicenses } from "@/lib/actions/licenses";
 import { DatasetForm } from "@/components/datasets/DatasetForm";
 import { DataDictionaryEditor } from "@/components/datasets/DataDictionaryEditor";
 import { ActivityFeed } from "@/components/admin/ActivityFeed";
@@ -29,6 +30,7 @@ import { isWorkflowEnabled, getAvailableTransitions, getWorkflowHistory, transit
 import { calculateQualityScore } from "@/lib/services/data-quality";
 import { createVersion, getVersionHistory } from "@/lib/services/versioning";
 import { auth } from "@/lib/auth";
+import { requireDatasetPermission, PermissionError } from "@/lib/auth/check-permission";
 import type { DatasetCreateInput } from "@/lib/schemas/dataset";
 import type { DatasetWithRelations } from "@/lib/schemas/dcat-us";
 
@@ -38,7 +40,15 @@ interface Props {
 
 export default async function EditDatasetPage({ params }: Props) {
   const { id } = await params;
-  const [dataset, organizations, themes, allSeries, activities, session, versions, allCustomFields, customFieldValues] = await Promise.all([
+
+  try {
+    await requireDatasetPermission("dataset:update", id);
+  } catch (e) {
+    if (e instanceof PermissionError) redirect("/admin");
+    throw e;
+  }
+
+  const [dataset, organizations, themes, seriesResult, activities, session, versions, allCustomFields, customFieldValues, licenses] = await Promise.all([
     getDataset(id),
     listOrganizations(),
     listThemes(),
@@ -52,6 +62,7 @@ export default async function EditDatasetPage({ params }: Props) {
     getVersionHistory(id),
     listCustomFieldDefinitions(),
     getCustomFieldsForDataset(id),
+    listLicenses(),
   ]);
 
   if (!dataset) notFound();
@@ -236,7 +247,8 @@ export default async function EditDatasetPage({ params }: Props) {
         initialData={dataset}
         organizations={organizations}
         themes={themes}
-        series={allSeries.map((s) => ({ id: s.id, title: s.title }))}
+        series={seriesResult.items.map((s) => ({ id: s.id, title: s.title }))}
+        licenses={licenses}
         customFieldDefinitions={customFieldDefs}
         initialCustomFieldValues={customFieldValues}
         onSubmit={handleUpdate}

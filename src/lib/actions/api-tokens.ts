@@ -4,6 +4,7 @@ import { generateToken } from "@/lib/services/api-tokens";
 import { createTokenSchema, type CreateTokenInput } from "@/lib/schemas/api-token";
 import { hasPermission } from "@/lib/auth/roles";
 import { logActivity } from "@/lib/services/activity";
+import { silentCatch } from "@/lib/utils/log";
 
 async function requireTokenPermission(userId: string) {
   const session = await auth();
@@ -35,14 +36,14 @@ export async function createToken(userId: string, input: CreateTokenInput) {
     },
   });
 
-  logActivity({
+  silentCatch(logActivity({
     action: "created",
     entityType: "api_token",
     entityId: token.id,
     entityName: validated.name,
     userId: (session.user as any).id,
     userName: session.user.name,
-  }).catch(() => {});
+  }), "activity");
 
   return {
     id: token.id,
@@ -81,12 +82,12 @@ export async function revokeToken(tokenId: string) {
 
   await prisma.apiToken.delete({ where: { id: tokenId } });
 
-  logActivity({
+  silentCatch(logActivity({
     action: "revoked",
     entityType: "api_token",
     entityId: tokenId,
     entityName: token.name,
     userId: (session.user as any).id,
     userName: session.user.name,
-  }).catch(() => {});
+  }), "activity");
 }

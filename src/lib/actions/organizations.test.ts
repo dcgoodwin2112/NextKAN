@@ -9,6 +9,11 @@ vi.mock("@/lib/services/activity", () => ({
   logActivity: vi.fn().mockResolvedValue(undefined),
 }));
 
+vi.mock("@/lib/auth/check-permission", () => ({
+  requireOrgPermission: vi.fn().mockResolvedValue({ user: { id: "user-1", role: "admin" } }),
+  PermissionError: class PermissionError extends Error {},
+}));
+
 import {
   createOrganization,
   updateOrganization,

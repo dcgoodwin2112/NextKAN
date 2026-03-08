@@ -8,6 +8,7 @@ import {
   type CustomFieldDefinitionUpdateInput,
 } from "@/lib/schemas/custom-field";
 import { logActivity } from "@/lib/services/activity";
+import { silentCatch } from "@/lib/utils/log";
 
 export async function createCustomFieldDefinition(input: CustomFieldDefinitionCreateInput) {
   const data = customFieldDefinitionCreateSchema.parse(input);
@@ -24,12 +25,12 @@ export async function createCustomFieldDefinition(input: CustomFieldDefinitionCr
     },
   });
 
-  logActivity({
+  silentCatch(logActivity({
     action: "custom_field:created",
     entityType: "custom_field",
     entityId: definition.id,
     entityName: definition.label,
-  }).catch(() => {});
+  }), "activity");
 
   return definition;
 }
@@ -51,12 +52,12 @@ export async function updateCustomFieldDefinition(id: string, input: CustomField
     data: updateData,
   });
 
-  logActivity({
+  silentCatch(logActivity({
     action: "custom_field:updated",
     entityType: "custom_field",
     entityId: definition.id,
     entityName: definition.label,
-  }).catch(() => {});
+  }), "activity");
 
   return definition;
 }
@@ -67,12 +68,12 @@ export async function deleteCustomFieldDefinition(id: string) {
 
   await prisma.customFieldDefinition.delete({ where: { id } });
 
-  logActivity({
+  silentCatch(logActivity({
     action: "custom_field:deleted",
     entityType: "custom_field",
     entityId: id,
     entityName: definition.label,
-  }).catch(() => {});
+  }), "activity");
 }
 
 export async function getCustomFieldDefinition(id: string) {

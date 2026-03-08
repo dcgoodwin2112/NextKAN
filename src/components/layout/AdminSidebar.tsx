@@ -30,6 +30,7 @@ const navGroups: NavGroup[] = [
       { href: "/admin/templates", label: "Templates" },
       { href: "/admin/custom-fields", label: "Custom Fields", requiredRole: "admin" },
       { href: "/admin/series", label: "Series" },
+      { href: "/admin/licenses", label: "Licenses" },
       { href: "/admin/organizations", label: "Organizations" },
       { href: "/admin/pages", label: "Pages", requiredRole: "admin" },
       { href: "/admin/charts", label: "Charts" },
@@ -41,6 +42,7 @@ const navGroups: NavGroup[] = [
       { href: "/admin/harvest", label: "Harvest", requiredRole: "admin" },
       { href: "/admin/import", label: "Import" },
       { href: "/admin/quality", label: "Quality" },
+      { href: "/admin/link-check", label: "Link Checker", requiredRole: "admin" },
     ],
   },
   {
@@ -51,6 +53,7 @@ const navGroups: NavGroup[] = [
       { href: "/admin/analytics", label: "Analytics", requiredRole: "admin" },
       { href: "/admin/activity", label: "Activity", requiredRole: "admin" },
       { href: "/admin/trash", label: "Trash", requiredRole: "admin" },
+      { href: "/admin/system", label: "System", requiredRole: "admin" },
       { href: "/admin/settings", label: "Settings", requiredRole: "admin" },
     ],
   },

@@ -3,6 +3,8 @@ import { listOrganizations } from "@/lib/actions/organizations";
 import { listThemes } from "@/lib/actions/themes";
 import { listAvailableTemplates } from "@/lib/actions/templates";
 import { listCustomFieldDefinitions } from "@/lib/actions/custom-fields";
+import { listSeries } from "@/lib/actions/series";
+import { listLicenses } from "@/lib/actions/licenses";
 import { auth } from "@/lib/auth";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
@@ -10,12 +12,15 @@ import { NewDatasetPageClient } from "./NewDatasetPageClient";
 import type { DatasetCreateInput } from "@/lib/schemas/dataset";
 
 export default async function NewDatasetPage() {
-  const [organizations, themes, session, allCustomFields] = await Promise.all([
+  const [organizations, themes, session, allCustomFields, seriesResult, licenses] = await Promise.all([
     listOrganizations(),
     listThemes(),
     auth(),
     listCustomFieldDefinitions(),
+    listSeries(),
+    listLicenses(),
   ]);
+  const series = seriesResult.items;
 
   const userOrgId = (session?.user as any)?.organizationId as string | undefined;
   const templates = await listAvailableTemplates(userOrgId);
@@ -73,7 +78,9 @@ export default async function NewDatasetPage() {
         organizations={organizations}
         themes={themes}
         templates={templates}
+        licenses={licenses}
         customFieldDefinitions={customFieldDefs}
+        series={series}
         onSubmit={handleCreate}
       />
     </div>

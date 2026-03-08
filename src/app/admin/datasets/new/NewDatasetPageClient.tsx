@@ -32,6 +32,11 @@ interface TemplateOption {
   organization: { name: string } | null;
 }
 
+interface SeriesOption {
+  id: string;
+  title: string;
+}
+
 interface CustomFieldDef {
   id: string;
   name: string;
@@ -42,11 +47,19 @@ interface CustomFieldDef {
   sortOrder: number;
 }
 
+interface LicenseOption {
+  id: string;
+  name: string;
+  url: string | null;
+}
+
 interface NewDatasetPageClientProps {
   organizations: Organization[];
   themes: ThemeOption[];
   templates: TemplateOption[];
+  licenses?: LicenseOption[];
   customFieldDefinitions?: CustomFieldDef[];
+  series?: SeriesOption[];
   onSubmit: (data: DatasetCreateInput & { distributions?: Distribution[]; customFields?: Record<string, string> }) => Promise<void>;
 }
 
@@ -54,7 +67,9 @@ export function NewDatasetPageClient({
   organizations,
   themes,
   templates,
+  licenses,
   customFieldDefinitions,
+  series,
   onSubmit,
 }: NewDatasetPageClientProps) {
   const [templateFields, setTemplateFields] = useState<Partial<TemplateFields> | null>(null);
@@ -77,7 +92,9 @@ export function NewDatasetPageClient({
         defaultValues={templateFields || undefined}
         organizations={organizations}
         themes={themes}
+        licenses={licenses}
         customFieldDefinitions={customFieldDefinitions}
+        series={series}
         onSubmit={onSubmit}
       />
     </div>

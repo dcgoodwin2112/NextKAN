@@ -262,7 +262,7 @@ describe("getDatasetBySlug", () => {
       where: { slug: "test-dataset" },
       include: {
         publisher: { include: { parent: true } },
-        distributions: true,
+        distributions: { orderBy: { sortOrder: "asc" } },
         keywords: true,
         themes: { include: { theme: true } },
         series: true,

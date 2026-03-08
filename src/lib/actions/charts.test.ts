@@ -45,21 +45,24 @@ describe("charts actions", () => {
         },
       ];
       (prismaMock.savedChart.findMany as any).mockResolvedValue(mockCharts);
+      (prismaMock.savedChart.count as any).mockResolvedValue(1);
 
       const result = await listCharts();
 
-      expect(result).toHaveLength(1);
-      expect(result[0].distribution.dataset.title).toBe("Dataset One");
-      expect(prismaMock.savedChart.findMany).toHaveBeenCalledWith({
-        orderBy: { createdAt: "desc" },
-        include: expect.objectContaining({
-          distribution: expect.objectContaining({
-            include: expect.objectContaining({
-              dataset: expect.any(Object),
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].distribution.dataset.title).toBe("Dataset One");
+      expect(prismaMock.savedChart.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          orderBy: { createdAt: "desc" },
+          include: expect.objectContaining({
+            distribution: expect.objectContaining({
+              include: expect.objectContaining({
+                dataset: expect.any(Object),
+              }),
             }),
           }),
-        }),
-      });
+        })
+      );
     });
   });
 

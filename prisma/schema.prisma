@@ -25,6 +25,8 @@ model User {
   reviewedDatasets   Dataset[] @relation("DatasetReviewer")
   apiTokens          ApiToken[]
   emailVerifications EmailVerification[]
+
+  @@index([organizationId])
 }
 
 model EmailVerification {
@@ -166,6 +168,7 @@ model Dataset {
 
   @@index([status])
   @@index([publisherId])
+  @@index([createdById])
   @@index([harvestSourceId, harvestIdentifier])
   @@index([workflowStatus])
   @@index([deletedAt])
@@ -185,9 +188,10 @@ model Distribution {
   describedBy String? // URL to schema
 
   // Internal fields
-  fileName String? // original uploaded filename
-  filePath String? // server-side path to uploaded file
-  fileSize Int?    // bytes
+  fileName  String? // original uploaded filename
+  filePath  String? // server-side path to uploaded file
+  fileSize  Int?    // bytes
+  sortOrder Int     @default(0)
 
   datasetId String
   dataset   Dataset @relation(fields: [datasetId], references: [id], onDelete: Cascade)
@@ -352,6 +356,7 @@ model DatasetVersion {
   createdAt   DateTime @default(now())
 
   @@index([datasetId])
+  @@index([createdAt])
   @@unique([datasetId, version])
 }
 
@@ -441,6 +446,7 @@ model ApiToken {
   createdAt  DateTime  @default(now())
 
   @@index([userId])
+  @@index([expiresAt])
 }
 
 model DatasetCustomFieldValue {
@@ -453,4 +459,17 @@ model DatasetCustomFieldValue {
   @@unique([datasetId, definitionId])
   @@index([datasetId])
   @@index([definitionId])
+}
+
+model License {
+  id          String   @id @default(uuid())
+  name        String
+  url         String?
+  description String?
+  isDefault   Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([name])
 }

@@ -84,12 +84,35 @@ describe("listSeries", () => {
     prismaMock.datasetSeries.findMany.mockResolvedValue([
       { ...mockSeries, _count: { datasets: 3 } },
     ] as any);
+    prismaMock.datasetSeries.count.mockResolvedValue(1);
     const result = await listSeries();
-    expect(result).toHaveLength(1);
+    expect(result.items).toHaveLength(1);
+    expect(result.total).toBe(1);
     expect(prismaMock.datasetSeries.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         include: { _count: { select: { datasets: true } } },
       })
+    );
+  });
+
+  it("supports search filtering", async () => {
+    prismaMock.datasetSeries.findMany.mockResolvedValue([]);
+    prismaMock.datasetSeries.count.mockResolvedValue(0);
+    await listSeries({ search: "climate" });
+    expect(prismaMock.datasetSeries.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { title: { contains: "climate" } },
+      })
+    );
+  });
+
+  it("supports pagination", async () => {
+    prismaMock.datasetSeries.findMany.mockResolvedValue([]);
+    prismaMock.datasetSeries.count.mockResolvedValue(25);
+    const result = await listSeries({ page: 2, limit: 10 });
+    expect(result.total).toBe(25);
+    expect(prismaMock.datasetSeries.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 10, take: 10 })
     );
   });
 });

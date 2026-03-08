@@ -9,6 +9,7 @@ import {
 } from "@/lib/schemas/page";
 import { generateSlug } from "@/lib/utils/slug";
 import { logActivity } from "@/lib/services/activity";
+import { silentCatch } from "@/lib/utils/log";
 
 export async function createPage(
   input: PageCreateInput,
@@ -34,13 +35,13 @@ export async function createPage(
     },
   });
 
-  logActivity({
+  silentCatch(logActivity({
     action: "create",
     entityType: "page",
     entityId: page.id,
     entityName: page.title,
     userId: createdById,
-  }).catch(() => {});
+  }), "activity");
 
   return page;
 }
@@ -68,12 +69,12 @@ export async function updatePage(id: string, input: PageUpdateInput) {
 
   const page = await prisma.page.update({ where: { id }, data: updateData });
 
-  logActivity({
+  silentCatch(logActivity({
     action: "update",
     entityType: "page",
     entityId: page.id,
     entityName: page.title,
-  }).catch(() => {});
+  }), "activity");
 
   return page;
 }
@@ -87,12 +88,12 @@ export async function deletePage(id: string) {
 
   const page = await prisma.page.delete({ where: { id } });
 
-  logActivity({
+  silentCatch(logActivity({
     action: "delete",
     entityType: "page",
     entityId: id,
     entityName: page.title,
-  }).catch(() => {});
+  }), "activity");
 
   return page;
 }
@@ -182,13 +183,13 @@ export async function bulkUpdatePages(
   });
 
   for (const page of pages) {
-    logActivity({
+    silentCatch(logActivity({
       action: "update",
       entityType: "page",
       entityId: page.id,
       entityName: page.title,
       details: { bulk: true, ...validated.update },
-    }).catch(() => {});
+    }), "activity");
   }
 
   return { success: result.count, errors: [] as string[] };
@@ -214,13 +215,13 @@ export async function bulkDeletePages(ids: string[]) {
   });
 
   for (const page of pages) {
-    logActivity({
+    silentCatch(logActivity({
       action: "delete",
       entityType: "page",
       entityId: page.id,
       entityName: page.title,
       details: { bulk: true },
-    }).catch(() => {});
+    }), "activity");
   }
 
   return { success: result.count, errors: [] as string[] };

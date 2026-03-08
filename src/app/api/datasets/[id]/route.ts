@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import {
   getDataset,
   updateDataset,
   deleteDataset,
 } from "@/lib/actions/datasets";
-import { handleApiError, unauthorized, notFound } from "@/lib/utils/api";
+import { requireDatasetPermission } from "@/lib/auth/check-permission";
+import { handleApiError, notFound } from "@/lib/utils/api";
 import { withTokenAuth } from "@/lib/utils/with-token-auth";
 
 export async function GET(
@@ -30,12 +30,8 @@ export async function PUT(
 ) {
   return withTokenAuth(request, async () => {
     try {
-      const session = await auth();
-      if (!session?.user) {
-        return unauthorized();
-      }
-
       const { id } = await params;
+      await requireDatasetPermission("dataset:update", id);
       const body = await request.json();
       const dataset = await updateDataset(id, body);
       return NextResponse.json(dataset);
@@ -51,12 +47,8 @@ export async function DELETE(
 ) {
   return withTokenAuth(request, async () => {
     try {
-      const session = await auth();
-      if (!session?.user) {
-        return unauthorized();
-      }
-
       const { id } = await params;
+      await requireDatasetPermission("dataset:update", id);
       await deleteDataset(id);
       return new NextResponse(null, { status: 204 });
     } catch (error) {

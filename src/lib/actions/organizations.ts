@@ -4,6 +4,8 @@ import { prisma } from "@/lib/db";
 import { organizationSchema, type OrganizationInput } from "@/lib/schemas/organization";
 import { generateSlug } from "@/lib/utils/slug";
 import { logActivity } from "@/lib/services/activity";
+import { requireOrgPermission } from "@/lib/auth/check-permission";
+import { silentCatch } from "@/lib/utils/log";
 
 export async function createOrganization(input: OrganizationInput) {
   const data = organizationSchema.parse(input);
@@ -19,12 +21,12 @@ export async function createOrganization(input: OrganizationInput) {
     },
   });
 
-  logActivity({
+  silentCatch(logActivity({
     action: "organization:created",
     entityType: "organization",
     entityId: result.id,
     entityName: result.name,
-  }).catch(() => {});
+  }), "activity");
 
   return result;
 }
@@ -33,6 +35,7 @@ export async function updateOrganization(
   id: string,
   input: Partial<OrganizationInput>
 ) {
+  await requireOrgPermission("org:edit", id);
   const data = organizationSchema.partial().parse(input);
   const updateData: Record<string, unknown> = {};
 
@@ -50,17 +53,18 @@ export async function updateOrganization(
     data: updateData,
   });
 
-  logActivity({
+  silentCatch(logActivity({
     action: "organization:updated",
     entityType: "organization",
     entityId: id,
     entityName: result.name,
-  }).catch(() => {});
+  }), "activity");
 
   return result;
 }
 
 export async function deleteOrganization(id: string) {
+  await requireOrgPermission("org:delete", id);
   const datasetCount = await prisma.dataset.count({
     where: { publisherId: id, deletedAt: null },
   });
@@ -75,12 +79,12 @@ export async function deleteOrganization(id: string) {
   await prisma.organization.delete({ where: { id } });
 
   if (org) {
-    logActivity({
+    silentCatch(logActivity({
       action: "organization:deleted",
       entityType: "organization",
       entityId: id,
       entityName: org.name,
-    }).catch(() => {});
+    }), "activity");
   }
 }
 
@@ -106,12 +110,69 @@ export async function getOrganizationBySlug(slug: string) {
   });
 }
 
-export async function listOrganizations() {
+export async function listOrgMembers(orgId: string) {
+  return prisma.user.findMany({
+    where: { organizationId: orgId },
+    select: { id: true, name: true, email: true, role: true },
+    orderBy: { name: "asc" },
+  });
+}
+
+export async function addMember(orgId: string, userId: string) {
+  await requireOrgPermission("org:update", orgId);
+
+  const org = await prisma.organization.findUnique({ where: { id: orgId }, select: { name: true } });
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: { organizationId: orgId },
+  });
+
+  silentCatch(logActivity({
+    action: "organization:member_added",
+    entityType: "organization",
+    entityId: orgId,
+    entityName: org?.name ?? orgId,
+    details: { userId, userName: user.name, userEmail: user.email },
+  }), "activity");
+
+  return user;
+}
+
+export async function removeMember(orgId: string, userId: string) {
+  await requireOrgPermission("org:update", orgId);
+
+  const org = await prisma.organization.findUnique({ where: { id: orgId }, select: { name: true } });
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: { organizationId: null },
+  });
+
+  silentCatch(logActivity({
+    action: "organization:member_removed",
+    entityType: "organization",
+    entityId: orgId,
+    entityName: org?.name ?? orgId,
+    details: { userId, userName: user.name, userEmail: user.email },
+  }), "activity");
+
+  return user;
+}
+
+export async function listAvailableUsers() {
+  return prisma.user.findMany({
+    where: { organizationId: null, status: "active" },
+    select: { id: true, name: true, email: true, role: true },
+    orderBy: { name: "asc" },
+  });
+}
+
+export async function listOrganizations(options?: { limit?: number }) {
   return prisma.organization.findMany({
     include: {
       _count: { select: { datasets: true } },
     },
     orderBy: { name: "asc" },
+    take: options?.limit ?? 100,
   });
 }
 
@@ -153,6 +214,7 @@ export async function searchOrganizations(params?: {
       where,
       include: {
         _count: { select: { datasets: true } },
+        parent: true,
       },
       orderBy,
       skip,

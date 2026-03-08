@@ -9,6 +9,7 @@ import {
   type TemplateFields,
 } from "@/lib/schemas/template";
 import { logActivity } from "@/lib/services/activity";
+import { silentCatch } from "@/lib/utils/log";
 
 export async function createTemplate(
   input: TemplateCreateInput,
@@ -26,13 +27,13 @@ export async function createTemplate(
     },
   });
 
-  logActivity({
+  silentCatch(logActivity({
     action: "create",
     entityType: "template",
     entityId: template.id,
     entityName: template.name,
     userId: createdById,
-  }).catch(() => {});
+  }), "activity");
 
   return template;
 }
@@ -53,12 +54,12 @@ export async function updateTemplate(id: string, input: TemplateUpdateInput) {
     data: updateData,
   });
 
-  logActivity({
+  silentCatch(logActivity({
     action: "update",
     entityType: "template",
     entityId: template.id,
     entityName: template.name,
-  }).catch(() => {});
+  }), "activity");
 
   return template;
 }
@@ -66,12 +67,12 @@ export async function updateTemplate(id: string, input: TemplateUpdateInput) {
 export async function deleteTemplate(id: string) {
   const template = await prisma.datasetTemplate.delete({ where: { id } });
 
-  logActivity({
+  silentCatch(logActivity({
     action: "delete",
     entityType: "template",
     entityId: id,
     entityName: template.name,
-  }).catch(() => {});
+  }), "activity");
 
   return template;
 }
