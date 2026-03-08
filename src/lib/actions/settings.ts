@@ -2,6 +2,7 @@
 
 import { requirePermission } from "@/lib/auth/check-permission";
 import { logActivity } from "@/lib/services/activity";
+import { silentCatch } from "@/lib/utils/log";
 import {
   getAllSettings,
   setSettings,
@@ -33,7 +34,7 @@ export async function updateSettings(
   if (Object.keys(toSave).length > 0) {
     await setSettings(toSave);
 
-    logActivity({
+    silentCatch(logActivity({
       action: "update",
       entityType: "settings",
       entityId: "site-settings",
@@ -41,7 +42,7 @@ export async function updateSettings(
       userId: (session.user as any)?.id,
       userName: session.user?.name,
       details: { keys: Object.keys(toSave) },
-    }).catch(() => {});
+    }), "activity");
   }
 
   return getAllSettings();

@@ -7,7 +7,7 @@ import {
   type DatasetCreateInput,
   type DatasetUpdateInput,
 } from "@/lib/schemas/dataset";
-import { generateSlug } from "@/lib/utils/slug";
+import { generateSlug, ensureUniqueSlug } from "@/lib/utils/slug";
 import { buildSearchWhere, type SearchParams } from "@/lib/utils/search";
 import { distributionSchema, type DistributionInput } from "@/lib/schemas/distribution";
 import { logActivity, computeDiff } from "@/lib/services/activity";
@@ -16,10 +16,11 @@ import { datasetCreatedEmail } from "@/lib/email-templates/dataset-created";
 import { hooks } from "@/lib/plugins/hooks";
 import { isPluginsEnabled } from "@/lib/plugins/loader";
 import { validateCustomFieldValue } from "@/lib/schemas/custom-field";
+import { silentCatch } from "@/lib/utils/log";
 
 const datasetIncludes = {
   publisher: { include: { parent: true } },
-  distributions: true,
+  distributions: { orderBy: { sortOrder: "asc" as const } },
   keywords: true,
   themes: { include: { theme: true } },
   series: true,
@@ -32,10 +33,10 @@ export async function createDataset(
   customFields?: Record<string, string>
 ) {
   const data = datasetCreateSchema.parse(input);
-  const slug = generateSlug(data.title);
+  const slug = await ensureUniqueSlug(generateSlug(data.title));
 
   if (isPluginsEnabled()) {
-    hooks.run("dataset:beforeCreate", data).catch(() => {});
+    silentCatch(hooks.run("dataset:beforeCreate", data), "hooks:dataset:beforeCreate");
   }
 
   const result = await prisma.$transaction(async (tx) => {
@@ -118,16 +119,16 @@ export async function createDataset(
   });
 
   // Fire-and-forget: activity log + email notification
-  logActivity({
+  silentCatch(logActivity({
     action: "dataset:created",
     entityType: "dataset",
     entityId: result.id,
     entityName: result.title,
     userId: createdById,
-  }).catch(() => {});
+  }), "activity");
 
   if (isPluginsEnabled()) {
-    hooks.run("dataset:afterCreate", result).catch(() => {});
+    silentCatch(hooks.run("dataset:afterCreate", result), "hooks:dataset:afterCreate");
   }
 
   if (result.status === "published") {
@@ -137,10 +138,10 @@ export async function createDataset(
       datasetUrl: `${siteUrl}/datasets/${result.slug}`,
       publisherName: result.publisher.name,
     });
-    getEmailService().send({
+    silentCatch(getEmailService().send({
       to: result.contactEmail || "admin@example.com",
       ...email,
-    }).catch(() => {});
+    }), "email");
   }
 
   return result;
@@ -152,7 +153,7 @@ export async function updateDataset(id: string, input: DatasetUpdateInput, custo
 
   if (data.title !== undefined) {
     updateData.title = data.title;
-    updateData.slug = generateSlug(data.title);
+    updateData.slug = await ensureUniqueSlug(generateSlug(data.title), id);
   }
   if (data.description !== undefined) updateData.description = data.description;
   if (data.accessLevel !== undefined) updateData.accessLevel = data.accessLevel;
@@ -182,7 +183,7 @@ export async function updateDataset(id: string, input: DatasetUpdateInput, custo
   if (data.previousVersion !== undefined) updateData.previousVersion = data.previousVersion || null;
 
   if (isPluginsEnabled()) {
-    hooks.run("dataset:beforeUpdate", id, data).catch(() => {});
+    silentCatch(hooks.run("dataset:beforeUpdate", id, data), "hooks:dataset:beforeUpdate");
   }
 
   // Fetch before-state for diff
@@ -249,7 +250,7 @@ export async function updateDataset(id: string, input: DatasetUpdateInput, custo
   });
 
   if (isPluginsEnabled()) {
-    hooks.run("dataset:afterUpdate", result).catch(() => {});
+    silentCatch(hooks.run("dataset:afterUpdate", result), "hooks:dataset:afterUpdate");
   }
 
   // Fire-and-forget: activity log
@@ -258,13 +259,13 @@ export async function updateDataset(id: string, input: DatasetUpdateInput, custo
       before as unknown as Record<string, unknown>,
       result as unknown as Record<string, unknown>
     );
-    logActivity({
+    silentCatch(logActivity({
       action: "dataset:updated",
       entityType: "dataset",
       entityId: id,
       entityName: result.title,
       details: diff,
-    }).catch(() => {});
+    }), "activity");
   }
 
   return result;
@@ -275,7 +276,7 @@ export async function deleteDataset(id: string) {
   if (!dataset || dataset.deletedAt) return;
 
   if (isPluginsEnabled()) {
-    hooks.run("dataset:beforeDelete", id).catch(() => {});
+    silentCatch(hooks.run("dataset:beforeDelete", id), "hooks:dataset:beforeDelete");
   }
 
   await prisma.dataset.update({
@@ -283,15 +284,15 @@ export async function deleteDataset(id: string) {
     data: { deletedAt: new Date() },
   });
 
-  logActivity({
+  silentCatch(logActivity({
     action: "dataset:deleted",
     entityType: "dataset",
     entityId: id,
     entityName: dataset.title,
-  }).catch(() => {});
+  }), "activity");
 
   if (isPluginsEnabled()) {
-    hooks.run("dataset:afterDelete", id, dataset.title).catch(() => {});
+    silentCatch(hooks.run("dataset:afterDelete", id, dataset.title), "hooks:dataset:afterDelete");
   }
 }
 
@@ -412,12 +413,12 @@ export async function restoreDataset(id: string) {
     data: { deletedAt: null },
   });
 
-  logActivity({
+  silentCatch(logActivity({
     action: "dataset:restored",
     entityType: "dataset",
     entityId: id,
     entityName: dataset.title,
-  }).catch(() => {});
+  }), "activity");
 }
 
 export async function purgeDataset(id: string) {
@@ -427,12 +428,12 @@ export async function purgeDataset(id: string) {
 
   await prisma.dataset.delete({ where: { id } });
 
-  logActivity({
+  silentCatch(logActivity({
     action: "dataset:purged",
     entityType: "dataset",
     entityId: id,
     entityName: dataset.title,
-  }).catch(() => {});
+  }), "activity");
 }
 
 // Bulk actions
@@ -461,16 +462,16 @@ export async function bulkUpdateDatasets(
         });
         success++;
 
-        logActivity({
+        silentCatch(logActivity({
           action: "dataset:updated",
           entityType: "dataset",
           entityId: id,
           entityName: dataset.title,
           details: { bulk: true, ...validated.update },
-        }).catch(() => {});
+        }), "activity");
 
         if (isPluginsEnabled()) {
-          hooks.run("dataset:afterUpdate", { ...dataset, ...validated.update }).catch(() => {});
+          silentCatch(hooks.run("dataset:afterUpdate", { ...dataset, ...validated.update }), "hooks:dataset:afterUpdate");
         }
       } catch (err) {
         errors.push(`Dataset ${id}: ${err instanceof Error ? err.message : "unknown error"}`);
@@ -496,16 +497,16 @@ export async function bulkDeleteDatasets(ids: string[]) {
   });
 
   for (const dataset of datasets) {
-    logActivity({
+    silentCatch(logActivity({
       action: "dataset:deleted",
       entityType: "dataset",
       entityId: dataset.id,
       entityName: dataset.title,
       details: { bulk: true },
-    }).catch(() => {});
+    }), "activity");
 
     if (isPluginsEnabled()) {
-      hooks.run("dataset:afterDelete", dataset.id, dataset.title).catch(() => {});
+      silentCatch(hooks.run("dataset:afterDelete", dataset.id, dataset.title), "hooks:dataset:afterDelete");
     }
   }
 
@@ -565,4 +566,15 @@ export async function removeDistribution(id: string) {
   }
 
   await prisma.distribution.delete({ where: { id } });
+}
+
+export async function reorderDistributions(datasetId: string, distributionIds: string[]) {
+  await prisma.$transaction(
+    distributionIds.map((id, index) =>
+      prisma.distribution.update({
+        where: { id },
+        data: { sortOrder: index },
+      })
+    )
+  );
 }

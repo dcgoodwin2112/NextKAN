@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { prisma } from "@/lib/db";
+import { silentCatch } from "@/lib/utils/log";
 
 const TOKEN_PREFIX = "nkan_";
 
@@ -45,12 +46,11 @@ export async function validateTokenFromHeader(
   if (token.expiresAt && token.expiresAt < new Date()) return null;
 
   // Update lastUsedAt (fire-and-forget)
-  prisma.apiToken
+  silentCatch(prisma.apiToken
     .update({
       where: { id: token.id },
       data: { lastUsedAt: new Date() },
-    })
-    .catch(() => {});
+    }), "api-token:lastUsedAt");
 
   return {
     id: token.user.id,

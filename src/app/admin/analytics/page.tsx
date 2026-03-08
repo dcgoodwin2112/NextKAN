@@ -20,7 +20,7 @@ interface Props {
 export default async function AnalyticsDashboardPage({ searchParams }: Props) {
   const session = await auth();
   if (!session?.user || (session.user as any).role !== "admin") {
-    redirect("/login");
+    redirect("/admin");
   }
 
   const params = await searchParams;

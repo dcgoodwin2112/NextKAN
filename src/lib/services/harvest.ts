@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { silentCatch } from "@/lib/utils/log";
 import {
   reverseDCATUSToDatasetInput,
   type DCATUSCatalog,
@@ -254,9 +255,8 @@ export async function runHarvest(sourceId: string): Promise<HarvestResult> {
         deleted: result.datasetsDeleted,
         errors: result.errors.length,
       });
-      getEmailService()
-        .send({ to: "admin@example.com", ...email })
-        .catch(() => {});
+      silentCatch(getEmailService()
+        .send({ to: "admin@example.com", ...email }), "email");
     } catch {
       // Non-fatal
     }

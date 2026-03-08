@@ -20,6 +20,7 @@ import { getEmailService } from "@/lib/services/email";
 import { registrationVerifyEmail } from "@/lib/email-templates/registration-verify";
 import { registrationPendingEmail } from "@/lib/email-templates/registration-pending";
 import { logActivity } from "@/lib/services/activity";
+import { silentCatch } from "@/lib/utils/log";
 
 export async function registerUser(
   input: RegisterUserInput
@@ -59,9 +60,8 @@ export async function registerUser(
   const siteUrl = getSetting("SITE_URL", "http://localhost:3000");
   const verifyUrl = `${siteUrl}/verify-email?token=${token}`;
   const emailContent = registrationVerifyEmail({ verifyUrl });
-  getEmailService()
-    .send({ to: user.email, ...emailContent })
-    .catch(() => {});
+  silentCatch(getEmailService()
+    .send({ to: user.email, ...emailContent }), "email");
 
   // If approval mode, notify admin users
   if (mode === "approval") {
@@ -76,21 +76,20 @@ export async function registerUser(
         userEmail: user.email,
         adminUrl,
       });
-      getEmailService()
+      silentCatch(getEmailService()
         .send({
           to: admins.map((a) => a.email),
           ...pendingEmail,
-        })
-        .catch(() => {});
+        }), "email");
     }
   }
 
-  logActivity({
+  silentCatch(logActivity({
     action: "register",
     entityType: "user",
     entityId: user.id,
     entityName: user.email,
-  }).catch(() => {});
+  }), "activity");
 
   return { success: true };
 }
@@ -101,12 +100,12 @@ export async function verifyEmailAction(
   const result = await verifyEmail(token);
 
   if (result.success && result.userId) {
-    logActivity({
+    silentCatch(logActivity({
       action: "verify_email",
       entityType: "user",
       entityId: result.userId,
       entityName: "",
-    }).catch(() => {});
+    }), "activity");
   }
 
   return { success: result.success, mode: result.mode };
@@ -121,9 +120,8 @@ export async function resendVerificationAction(
     const siteUrl = getSetting("SITE_URL", "http://localhost:3000");
     const verifyUrl = `${siteUrl}/verify-email?token=${result.token}`;
     const emailContent = registrationVerifyEmail({ verifyUrl });
-    getEmailService()
-      .send({ to: email, ...emailContent })
-      .catch(() => {});
+    silentCatch(getEmailService()
+      .send({ to: email, ...emailContent }), "email");
   }
 
   // Always return success to prevent email enumeration

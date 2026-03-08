@@ -45,9 +45,16 @@ describe("OrganizationTable", () => {
     expect(link).toHaveAttribute("href", "/admin/organizations/org-1");
   });
 
-  it("shows dash for missing description", () => {
+  it("shows dash for missing description and parent", () => {
     render(<OrganizationTable organizations={organizations} />);
-    expect(screen.getByText("—")).toBeInTheDocument();
+    const dashes = screen.getAllByText("—");
+    // Both orgs have no parent (2 dashes) + org-2 has null description (1 dash)
+    expect(dashes.length).toBe(3);
+  });
+
+  it("renders Parent column header", () => {
+    render(<OrganizationTable organizations={organizations} />);
+    expect(screen.getByText("Parent")).toBeInTheDocument();
   });
 
   it("truncates long descriptions", () => {

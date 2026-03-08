@@ -1,6 +1,7 @@
 import cron from "node-cron";
 import { prisma } from "@/lib/db";
 import { runHarvest } from "./harvest";
+import { silentCatch } from "@/lib/utils/log";
 
 let schedulerStarted = false;
 
@@ -25,7 +26,7 @@ export function startHarvestScheduler() {
 
           // Parse cron to get minimum interval (simplified)
           if (minutesSinceLastRun >= 60) {
-            runHarvest(source.id).catch(() => {});
+            silentCatch(runHarvest(source.id), "harvest");
           }
         }
       }

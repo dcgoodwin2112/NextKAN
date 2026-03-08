@@ -34,11 +34,18 @@ interface TemplateData {
   fields: TemplateFields;
 }
 
+interface LicenseOption {
+  id: string;
+  name: string;
+  url: string | null;
+}
+
 interface TemplateFormProps {
   initialData?: TemplateData;
   organizations: Organization[];
   themes?: ThemeOption[];
   series?: SeriesOption[];
+  licenses?: LicenseOption[];
   onSubmit: (data: TemplateCreateInput) => Promise<void>;
 }
 
@@ -47,10 +54,17 @@ export function TemplateForm({
   organizations,
   themes: availableThemes = [],
   series: availableSeries = [],
+  licenses: dbLicenses,
   onSubmit,
 }: TemplateFormProps) {
   const router = useRouter();
   const fields = initialData?.fields || {};
+
+  // Use DB licenses if provided, otherwise fall back to hardcoded list
+  const activeLicenses = dbLicenses && dbLicenses.length > 0
+    ? dbLicenses.map((l) => ({ id: l.id, name: l.name, url: l.url || "" }))
+    : LICENSES;
+  const findLicenseByUrl = (url: string) => activeLicenses.find((l) => l.url === url);
 
   // Template info
   const [name, setName] = useState(initialData?.name || "");
@@ -75,7 +89,7 @@ export function TemplateForm({
   const [programCode, setProgramCode] = useState(fields.programCode || "");
 
   // License
-  const initialLicenseMatch = fields.license ? getLicenseByUrl(fields.license) : undefined;
+  const initialLicenseMatch = fields.license ? findLicenseByUrl(fields.license) : undefined;
   const [licenseId, setLicenseId] = useState(initialLicenseMatch?.id || (fields.license ? "other" : ""));
   const [customLicenseUrl, setCustomLicenseUrl] = useState(
     initialLicenseMatch ? "" : (fields.license || "")
@@ -131,7 +145,7 @@ export function TemplateForm({
     if (accessLevel) f.accessLevel = accessLevel as TemplateFields["accessLevel"];
     if (bureauCode) f.bureauCode = bureauCode;
     if (programCode) f.programCode = programCode;
-    const licenseUrl = licenseId === "other" ? customLicenseUrl : (LICENSES.find(l => l.id === licenseId)?.url || "");
+    const licenseUrl = licenseId === "other" ? customLicenseUrl : (activeLicenses.find(l => l.id === licenseId)?.url || "");
     if (licenseUrl) f.license = licenseUrl;
     if (rights) f.rights = rights;
     if (landingPage) f.landingPage = landingPage;
@@ -369,7 +383,7 @@ export function TemplateForm({
               onChange={(e) => setLicenseId(e.target.value)}
             >
               <option value="">No default</option>
-              {LICENSES.map((l) => (
+              {activeLicenses.map((l) => (
                 <option key={l.id} value={l.id}>{l.name}</option>
               ))}
             </NativeSelect>

@@ -68,9 +68,28 @@ export async function getSeriesBySlug(slug: string) {
   });
 }
 
-export async function listSeries() {
-  return prisma.datasetSeries.findMany({
-    include: { _count: { select: { datasets: true } } },
-    orderBy: { title: "asc" },
-  });
+export interface ListSeriesOptions {
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+export async function listSeries(options: ListSeriesOptions = {}) {
+  const { search, page = 1, limit = 0 } = options;
+
+  const where = search
+    ? { title: { contains: search } }
+    : {};
+
+  const [items, total] = await Promise.all([
+    prisma.datasetSeries.findMany({
+      where,
+      include: { _count: { select: { datasets: true } } },
+      orderBy: { title: "asc" },
+      ...(limit > 0 ? { skip: (page - 1) * limit, take: limit } : {}),
+    }),
+    prisma.datasetSeries.count({ where }),
+  ]);
+
+  return { items, total };
 }

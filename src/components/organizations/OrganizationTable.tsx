@@ -13,6 +13,8 @@ interface OrganizationTableProps {
     id: string;
     name: string;
     description?: string | null;
+    parentId?: string | null;
+    parent?: { id: string; name: string } | null;
     _count?: { datasets: number };
   }[];
 }
@@ -23,6 +25,7 @@ export function OrganizationTable({ organizations }: OrganizationTableProps) {
       <TableHeader>
         <TableRow>
           <TableHead>Name</TableHead>
+          <TableHead>Parent</TableHead>
           <TableHead>Description</TableHead>
           <TableHead>Datasets</TableHead>
         </TableRow>
@@ -35,8 +38,21 @@ export function OrganizationTable({ organizations }: OrganizationTableProps) {
                 href={`/admin/organizations/${org.id}`}
                 className="hover:underline"
               >
+                {org.parentId ? "└─ " : ""}
                 {org.name}
               </Link>
+            </TableCell>
+            <TableCell className="text-text-muted text-sm">
+              {org.parent ? (
+                <Link
+                  href={`/admin/organizations/${org.parent.id}`}
+                  className="hover:underline"
+                >
+                  {org.parent.name}
+                </Link>
+              ) : (
+                "—"
+              )}
             </TableCell>
             <TableCell className="text-text-muted text-sm">
               {org.description

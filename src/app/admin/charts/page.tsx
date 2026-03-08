@@ -1,7 +1,10 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { listCharts } from "@/lib/actions/charts";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { EmptyState } from "@/components/admin/EmptyState";
+import { SearchBar } from "@/components/ui/SearchBar";
+import { Pagination } from "@/components/ui/Pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,8 +17,27 @@ import {
 } from "@/components/ui/table";
 import { ChartDeleteButton } from "./ChartDeleteButton";
 
-export default async function AdminChartsPage() {
-  const charts = await listCharts();
+const PAGE_SIZE = 20;
+
+export default async function AdminChartsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
+  const params = await searchParams;
+  const search = params.search || "";
+  const datasetId = params.dataset || undefined;
+  const page = Math.max(1, parseInt(params.page || "1", 10) || 1);
+
+  const { items: charts, total } = await listCharts({
+    search: search || undefined,
+    datasetId,
+    page,
+    limit: PAGE_SIZE,
+  });
+
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const hasActiveFilters = !!(search || datasetId);
 
   return (
     <div>
@@ -25,13 +47,36 @@ export default async function AdminChartsPage() {
         </Button>
       </AdminPageHeader>
 
+      <div className="space-y-4 mb-6">
+        <div className="max-w-xl">
+          <Suspense fallback={null}>
+            <SearchBar action="/admin/charts" placeholder="Search charts..." />
+          </Suspense>
+        </div>
+      </div>
+
+      {total > 0 && (
+        <p className="text-sm text-text-muted mb-4">
+          Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} of {total} chart{total !== 1 ? "s" : ""}
+        </p>
+      )}
+
       {charts.length === 0 ? (
-        <EmptyState
-          title="No charts yet"
-          description="Create a chart from a distribution with datastore data."
-          actionLabel="New Chart"
-          actionHref="/admin/charts/new"
-        />
+        hasActiveFilters ? (
+          <EmptyState
+            title="No charts match your search"
+            description="Try adjusting your search or filter criteria."
+            actionLabel="Clear filters"
+            actionHref="/admin/charts"
+          />
+        ) : (
+          <EmptyState
+            title="No charts yet"
+            description="Create a chart from a distribution with datastore data."
+            actionLabel="New Chart"
+            actionHref="/admin/charts/new"
+          />
+        )
       ) : (
         <Table>
           <TableHeader>
@@ -77,6 +122,14 @@ export default async function AdminChartsPage() {
           </TableBody>
         </Table>
       )}
+
+      <Suspense fallback={null}>
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          basePath="/admin/charts"
+        />
+      </Suspense>
     </div>
   );
 }

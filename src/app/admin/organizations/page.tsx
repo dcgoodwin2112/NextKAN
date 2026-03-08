@@ -11,6 +11,38 @@ import { Pagination } from "@/components/ui/Pagination";
 import { OrgFilterBar } from "@/components/admin/OrgFilterBar";
 import { Button } from "@/components/ui/button";
 
+/** Sort organizations so children appear immediately after their parent. */
+function sortTreeOrder<
+  T extends { id: string; parentId?: string | null; name: string },
+>(orgs: T[]): T[] {
+  const byParent = new Map<string | null, T[]>();
+  for (const org of orgs) {
+    const key = org.parentId ?? null;
+    const list = byParent.get(key) ?? [];
+    list.push(org);
+    byParent.set(key, list);
+  }
+
+  const result: T[] = [];
+  function addChildren(parentId: string | null) {
+    const children = byParent.get(parentId) ?? [];
+    for (const child of children) {
+      result.push(child);
+      addChildren(child.id);
+    }
+  }
+  addChildren(null);
+
+  // Append any orgs whose parent wasn't in the result set (e.g., filtered out)
+  for (const org of orgs) {
+    if (!result.includes(org)) {
+      result.push(org);
+    }
+  }
+
+  return result;
+}
+
 export default async function AdminOrganizationsPage({
   searchParams,
 }: {
@@ -30,6 +62,7 @@ export default async function AdminOrganizationsPage({
     limit,
   });
 
+  const sortedOrgs = sortTreeOrder(organizations);
   const totalPages = Math.ceil(total / limit);
   const start = (page - 1) * limit + 1;
   const end = Math.min(page * limit, total);
@@ -83,10 +116,10 @@ export default async function AdminOrganizationsPage({
         )
       ) : (
         view === "list" ? (
-          <OrganizationTable organizations={organizations} />
+          <OrganizationTable organizations={sortedOrgs} />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {organizations.map((org) => (
+            {sortedOrgs.map((org) => (
               <OrganizationCard key={org.id} organization={org} adminView />
             ))}
           </div>

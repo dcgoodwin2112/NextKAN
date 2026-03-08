@@ -5,6 +5,12 @@ import { useRouter } from "next/navigation";
 import { DistributionForm } from "./DistributionForm";
 import { DistributionList } from "./DistributionList";
 import { LICENSES, getLicenseByUrl } from "@/lib/data/licenses";
+
+interface LicenseOption {
+  id: string;
+  name: string;
+  url: string | null;
+}
 import { MetadataCompleteness } from "./MetadataCompleteness";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -91,6 +97,7 @@ interface DatasetFormProps {
   organizations: Organization[];
   themes?: ThemeOption[];
   series?: SeriesOption[];
+  licenses?: LicenseOption[];
   customFieldDefinitions?: CustomFieldDef[];
   initialCustomFieldValues?: Record<string, string>;
   onSubmit: (data: DatasetCreateInput & { distributions?: Distribution[]; customFields?: Record<string, string> }) => Promise<void>;
@@ -102,6 +109,7 @@ export function DatasetForm({
   organizations,
   themes: availableThemes = [],
   series: availableSeries = [],
+  licenses: dbLicenses,
   customFieldDefinitions: cfDefs = [],
   initialCustomFieldValues,
   onSubmit,
@@ -109,8 +117,14 @@ export function DatasetForm({
   const router = useRouter();
   const dv = defaultValues || {};
 
+  // Use DB licenses if provided, otherwise fall back to hardcoded list
+  const activeLicenses = dbLicenses && dbLicenses.length > 0
+    ? dbLicenses.map((l) => ({ id: l.id, name: l.name, url: l.url || "" }))
+    : LICENSES;
+  const findLicenseByUrl = (url: string) => activeLicenses.find((l) => l.url === url);
+
   // Resolve license from defaultValues
-  const dvLicenseMatch = dv.license ? getLicenseByUrl(dv.license) : undefined;
+  const dvLicenseMatch = dv.license ? findLicenseByUrl(dv.license) : undefined;
 
   // Basic Info
   const [title, setTitle] = useState(initialData?.title || "");
@@ -138,7 +152,7 @@ export function DatasetForm({
   const [programCode, setProgramCode] = useState(initialData?.programCode || dv.programCode || "");
 
   // Access & License
-  const initialLicenseMatch = initialData?.license ? getLicenseByUrl(initialData.license) : undefined;
+  const initialLicenseMatch = initialData?.license ? findLicenseByUrl(initialData.license) : undefined;
   const [licenseId, setLicenseId] = useState(
     initialLicenseMatch?.id || (initialData?.license ? "other" : "")
     || dvLicenseMatch?.id || (dv.license ? "other" : "")
@@ -211,6 +225,22 @@ export function DatasetForm({
     setDistributions(distributions.filter((_, i) => i !== index));
   }
 
+  function moveDistribution(index: number, direction: "up" | "down") {
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= distributions.length) return;
+    const updated = [...distributions];
+    [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+    setDistributions(updated);
+
+    // Persist order if all distributions have IDs (i.e., already saved)
+    const ids = updated.map((d) => d.id).filter(Boolean) as string[];
+    if (ids.length === updated.length) {
+      import("@/lib/actions/datasets").then(({ reorderDistributions }) => {
+        reorderDistributions(initialData!.id, ids).catch(() => {});
+      });
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -255,7 +285,7 @@ export function DatasetForm({
         themeIds: selectedThemeIds.length > 0 ? selectedThemeIds : undefined,
         bureauCode: bureauCode || undefined,
         programCode: programCode || undefined,
-        license: licenseId === "other" ? (customLicenseUrl || undefined) : (LICENSES.find(l => l.id === licenseId)?.url || undefined),
+        license: licenseId === "other" ? (customLicenseUrl || undefined) : (activeLicenses.find(l => l.id === licenseId)?.url || undefined),
         rights: rights || undefined,
         spatial: spatial || undefined,
         temporal: temporal || undefined,
@@ -300,7 +330,7 @@ export function DatasetForm({
           contactName,
           contactEmail,
           accessLevel,
-          license: licenseId === "other" ? customLicenseUrl : (LICENSES.find(l => l.id === licenseId)?.url || ""),
+          license: licenseId === "other" ? customLicenseUrl : (activeLicenses.find(l => l.id === licenseId)?.url || ""),
           rights,
           spatial,
           temporal,
@@ -396,18 +426,11 @@ export function DatasetForm({
             </div>
           </div>
         )}
-        <div className="space-y-2">
-          <Label htmlFor="accessLevel">Access Level</Label>
-          <NativeSelect
-            id="accessLevel"
-            value={accessLevel}
-            onChange={(e) => setAccessLevel(e.target.value)}
-          >
-            <option value="public">Public</option>
-            <option value="restricted public">Restricted Public</option>
-            <option value="non-public">Non-Public</option>
-          </NativeSelect>
-        </div>
+      </fieldset>
+
+      {/* Publishing */}
+      <fieldset className="space-y-4">
+        <legend className="text-lg font-semibold">Publishing</legend>
         <div className="space-y-2">
           <Label htmlFor="status">Status</Label>
           <NativeSelect
@@ -420,11 +443,18 @@ export function DatasetForm({
             <option value="archived">Archived</option>
           </NativeSelect>
         </div>
-      </fieldset>
-
-      {/* Publisher & Contact */}
-      <fieldset className="space-y-4">
-        <legend className="text-lg font-semibold">Publisher & Contact</legend>
+        <div className="space-y-2">
+          <Label htmlFor="accessLevel">Access Level</Label>
+          <NativeSelect
+            id="accessLevel"
+            value={accessLevel}
+            onChange={(e) => setAccessLevel(e.target.value)}
+          >
+            <option value="public">Public</option>
+            <option value="restricted public">Restricted Public</option>
+            <option value="non-public">Non-Public</option>
+          </NativeSelect>
+        </div>
         <div className="space-y-2">
           <Label htmlFor="publisherId">Publisher *</Label>
           <NativeSelect
@@ -456,6 +486,25 @@ export function DatasetForm({
             type="email"
             value={contactEmail}
             onChange={(e) => setContactEmail(e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="issued">Issued Date</Label>
+          <Input
+            id="issued"
+            type="date"
+            value={issued}
+            onChange={(e) => setIssued(e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="accrualPeriodicity">Accrual Periodicity</Label>
+          <Input
+            id="accrualPeriodicity"
+            type="text"
+            value={accrualPeriodicity}
+            onChange={(e) => setAccrualPeriodicity(e.target.value)}
+            placeholder="R/P1Y"
           />
         </div>
       </fieldset>
@@ -497,7 +546,7 @@ export function DatasetForm({
               onChange={(e) => setLicenseId(e.target.value)}
             >
               <option value="">No license selected</option>
-              {LICENSES.map((l) => (
+              {activeLicenses.map((l) => (
                 <option key={l.id} value={l.id}>{l.name}</option>
               ))}
             </NativeSelect>
@@ -561,25 +610,6 @@ export function DatasetForm({
       {/* Additional Metadata */}
       <CollapsibleSection title="Additional Metadata" defaultOpen={false} headingLevel="h3">
         <fieldset className="space-y-4 pl-4">
-          <div className="space-y-2">
-            <Label htmlFor="issued">Issued Date</Label>
-            <Input
-              id="issued"
-              type="date"
-              value={issued}
-              onChange={(e) => setIssued(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="accrualPeriodicity">Accrual Periodicity</Label>
-            <Input
-              id="accrualPeriodicity"
-              type="text"
-              value={accrualPeriodicity}
-              onChange={(e) => setAccrualPeriodicity(e.target.value)}
-              placeholder="R/P1Y"
-            />
-          </div>
           <div className="space-y-2">
             <Label htmlFor="conformsTo">Conforms To</Label>
             <Input
@@ -779,6 +809,8 @@ export function DatasetForm({
         <DistributionList
           distributions={distributions}
           onRemove={removeDistribution}
+          onMoveUp={(i) => moveDistribution(i, "up")}
+          onMoveDown={(i) => moveDistribution(i, "down")}
           editable
         />
         {showDistForm ? (

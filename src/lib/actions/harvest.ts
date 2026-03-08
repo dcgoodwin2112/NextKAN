@@ -47,11 +47,30 @@ export async function getHarvestSource(id: string) {
   });
 }
 
-export async function listHarvestSources() {
-  return prisma.harvestSource.findMany({
-    include: { organization: true },
-    orderBy: { createdAt: "desc" },
-  });
+export interface ListHarvestSourcesOptions {
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+export async function listHarvestSources(options: ListHarvestSourcesOptions = {}) {
+  const { search, page = 1, limit = 0 } = options;
+
+  const where = search
+    ? { name: { contains: search } }
+    : {};
+
+  const [items, total] = await Promise.all([
+    prisma.harvestSource.findMany({
+      where,
+      include: { organization: true },
+      orderBy: { createdAt: "desc" },
+      ...(limit > 0 ? { skip: (page - 1) * limit, take: limit } : {}),
+    }),
+    prisma.harvestSource.count({ where }),
+  ]);
+
+  return { items, total };
 }
 
 export async function listHarvestJobs(sourceId: string) {

@@ -24,11 +24,35 @@ const chartIncludes = {
   },
 } as const;
 
-export async function listCharts() {
-  return prisma.savedChart.findMany({
-    orderBy: { createdAt: "desc" },
-    include: chartIncludes,
-  });
+export interface ListChartsOptions {
+  search?: string;
+  datasetId?: string;
+  page?: number;
+  limit?: number;
+}
+
+export async function listCharts(options: ListChartsOptions = {}) {
+  const { search, datasetId, page = 1, limit = 0 } = options;
+
+  const where: Record<string, unknown> = {};
+  if (search) {
+    where.title = { contains: search };
+  }
+  if (datasetId) {
+    where.distribution = { dataset: { id: datasetId } };
+  }
+
+  const [items, total] = await Promise.all([
+    prisma.savedChart.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      include: chartIncludes,
+      ...(limit > 0 ? { skip: (page - 1) * limit, take: limit } : {}),
+    }),
+    prisma.savedChart.count({ where }),
+  ]);
+
+  return { items, total };
 }
 
 export async function getChart(id: string) {

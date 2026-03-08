@@ -6,6 +6,7 @@ const mockGetDataset = vi.fn();
 const mockUpdateDataset = vi.fn();
 const mockDeleteDataset = vi.fn();
 const mockAuth = vi.fn();
+const mockRequireDatasetPermission = vi.fn();
 
 vi.mock("@/lib/actions/datasets", () => ({
   getDataset: (...args: unknown[]) => mockGetDataset(...args),
@@ -16,6 +17,16 @@ vi.mock("@/lib/actions/datasets", () => ({
 vi.mock("@/lib/auth", () => ({
   auth: () => mockAuth(),
 }));
+
+vi.mock("@/lib/auth/check-permission", async () => {
+  class PermissionError extends Error {
+    constructor(p: string) { super(`Insufficient permissions: ${p} required`); this.name = "PermissionError"; }
+  }
+  return {
+    requireDatasetPermission: (...args: unknown[]) => mockRequireDatasetPermission(...args),
+    PermissionError,
+  };
+});
 
 const testId = "a1b2c3d4-e5f6-1234-a567-123456789abc";
 
@@ -64,7 +75,7 @@ describe("PUT /api/datasets/[id]", () => {
   });
 
   it("updates and returns 200 with auth", async () => {
-    mockAuth.mockResolvedValue({ user: { id: "1", role: "admin" } });
+    mockRequireDatasetPermission.mockResolvedValue({ user: { id: "1", role: "admin" } });
     const updated = { id: testId, title: "Updated" };
     mockUpdateDataset.mockResolvedValue(updated);
 
@@ -83,7 +94,8 @@ describe("PUT /api/datasets/[id]", () => {
   });
 
   it("returns 401 without auth", async () => {
-    mockAuth.mockResolvedValue(null);
+    const { PermissionError } = await import("@/lib/auth/check-permission");
+    mockRequireDatasetPermission.mockRejectedValue(new PermissionError("dataset:update"));
 
     const response = await PUT(
       makeRequest(`http://localhost/api/datasets/${testId}`, {
@@ -104,7 +116,7 @@ describe("DELETE /api/datasets/[id]", () => {
   });
 
   it("returns 204 with auth", async () => {
-    mockAuth.mockResolvedValue({ user: { id: "1", role: "admin" } });
+    mockRequireDatasetPermission.mockResolvedValue({ user: { id: "1", role: "admin" } });
     mockDeleteDataset.mockResolvedValue(undefined);
 
     const response = await DELETE(
@@ -118,7 +130,8 @@ describe("DELETE /api/datasets/[id]", () => {
   });
 
   it("returns 401 without auth", async () => {
-    mockAuth.mockResolvedValue(null);
+    const { PermissionError } = await import("@/lib/auth/check-permission");
+    mockRequireDatasetPermission.mockRejectedValue(new PermissionError("dataset:update"));
 
     const response = await DELETE(
       makeRequest(`http://localhost/api/datasets/${testId}`, {

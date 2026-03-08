@@ -2,6 +2,7 @@ import Link from "next/link";
 import { listCustomFieldDefinitions, deleteCustomFieldDefinition } from "@/lib/actions/custom-fields";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
+import { EmptyState } from "@/components/admin/EmptyState";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -32,13 +33,18 @@ export default async function CustomFieldsPage() {
         ]}
       />
       <AdminPageHeader title="Custom Fields">
-        <Link href="/admin/custom-fields/new">
-          <Button>New Custom Field</Button>
-        </Link>
+        <Button asChild>
+          <Link href="/admin/custom-fields/new">New Custom Field</Link>
+        </Button>
       </AdminPageHeader>
 
       {definitions.length === 0 ? (
-        <p className="text-text-muted">No custom fields defined yet.</p>
+        <EmptyState
+          title="No custom fields defined yet"
+          description="Create custom fields to add extra metadata to your datasets."
+          actionLabel="New Custom Field"
+          actionHref="/admin/custom-fields/new"
+        />
       ) : (
         <Table>
           <TableHeader>
@@ -63,9 +69,9 @@ export default async function CustomFieldsPage() {
                 <TableCell>{def.organizationId ? "Org-scoped" : "Global"}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <Link href={`/admin/custom-fields/${def.id}/edit`}>
-                      <Button variant="outline" size="sm">Edit</Button>
-                    </Link>
+                    <Button asChild variant="outline" size="sm">
+                      <Link href={`/admin/custom-fields/${def.id}/edit`}>Edit</Link>
+                    </Button>
                     <CustomFieldDeleteButton
                       id={def.id}
                       label={def.label}

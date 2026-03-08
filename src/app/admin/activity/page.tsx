@@ -9,7 +9,7 @@ export default async function ActivityLogPage() {
   const role = (session?.user as any)?.role;
 
   if (!session?.user || !hasPermission(role, "admin:access")) {
-    redirect("/login");
+    redirect("/admin");
   }
 
   return (

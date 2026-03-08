@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/db";
 import { requirePermission } from "@/lib/auth/check-permission";
 import { logActivity } from "@/lib/services/activity";
+import { silentCatch } from "@/lib/utils/log";
 import bcrypt from "bcryptjs";
 import {
   createUserSchema,
@@ -70,14 +71,14 @@ export async function createUser(input: CreateUserInput) {
   });
 
   const session = await requirePermission("user:manage");
-  logActivity({
+  silentCatch(logActivity({
     action: "create",
     entityType: "user",
     entityId: user.id,
     entityName: user.email,
     userId: (session.user as any)?.id,
     userName: session.user?.name,
-  }).catch(() => {});
+  }), "activity");
 
   return user;
 }
@@ -136,14 +137,14 @@ export async function updateUser(id: string, input: UpdateUserInput) {
     },
   });
 
-  logActivity({
+  silentCatch(logActivity({
     action: "update",
     entityType: "user",
     entityId: user.id,
     entityName: user.email,
     userId: sessionUserId,
     userName: session.user?.name,
-  }).catch(() => {});
+  }), "activity");
 
   return user;
 }
@@ -159,7 +160,7 @@ export async function resetPassword(id: string, input: ResetPasswordInput) {
   });
 
   const session = await requirePermission("user:manage");
-  logActivity({
+  silentCatch(logActivity({
     action: "update",
     entityType: "user",
     entityId: id,
@@ -167,7 +168,7 @@ export async function resetPassword(id: string, input: ResetPasswordInput) {
     userId: (session.user as any)?.id,
     userName: session.user?.name,
     details: { field: "password" },
-  }).catch(() => {});
+  }), "activity");
 }
 
 export async function deleteUser(id: string) {
@@ -196,14 +197,14 @@ export async function deleteUser(id: string) {
 
   await prisma.user.delete({ where: { id } });
 
-  logActivity({
+  silentCatch(logActivity({
     action: "delete",
     entityType: "user",
     entityId: id,
     entityName: targetUser?.email || id,
     userId: sessionUserId,
     userName: session.user?.name,
-  }).catch(() => {});
+  }), "activity");
 }
 
 export async function searchUsers(params?: {
@@ -331,14 +332,14 @@ export async function bulkUpdateUsers(
         });
         success++;
 
-        logActivity({
+        silentCatch(logActivity({
           action: "update",
           entityType: "user",
           entityId: id,
           entityName: user.email,
           userId: sessionUserId,
           details: { bulk: true, ...validated.update },
-        }).catch(() => {});
+        }), "activity");
       } catch (err) {
         errors.push(`User ${id}: ${err instanceof Error ? err.message : "unknown error"}`);
       }
@@ -386,14 +387,14 @@ export async function bulkDeleteUsers(ids: string[]) {
         await tx.user.delete({ where: { id } });
         success++;
 
-        logActivity({
+        silentCatch(logActivity({
           action: "delete",
           entityType: "user",
           entityId: id,
           entityName: user.email,
           userId: sessionUserId,
           details: { bulk: true },
-        }).catch(() => {});
+        }), "activity");
       } catch (err) {
         errors.push(`User ${id}: ${err instanceof Error ? err.message : "unknown error"}`);
       }
@@ -419,18 +420,17 @@ export async function approveUser(id: string) {
   const { getSetting } = await import("@/lib/services/settings");
   const siteUrl = getSetting("SITE_URL", "http://localhost:3000");
   const email = registrationApprovedEmail({ loginUrl: `${siteUrl}/login` });
-  getEmailService()
-    .send({ to: user.email, ...email })
-    .catch(() => {});
+  silentCatch(getEmailService()
+    .send({ to: user.email, ...email }), "email");
 
-  logActivity({
+  silentCatch(logActivity({
     action: "approve",
     entityType: "user",
     entityId: user.id,
     entityName: user.email,
     userId: (session.user as any)?.id,
     userName: session.user?.name,
-  }).catch(() => {});
+  }), "activity");
 
   return user;
 }
@@ -443,14 +443,14 @@ export async function rejectUser(id: string) {
   });
   await prisma.user.delete({ where: { id } });
 
-  logActivity({
+  silentCatch(logActivity({
     action: "reject",
     entityType: "user",
     entityId: id,
     entityName: user?.email || id,
     userId: (session.user as any)?.id,
     userName: session.user?.name,
-  }).catch(() => {});
+  }), "activity");
 }
 
 export async function bulkApproveUsers(ids: string[]) {
@@ -496,18 +496,17 @@ export async function bulkApproveUsers(ids: string[]) {
         });
         success++;
 
-        emailService
-          .send({ to: user.email, ...emailContent })
-          .catch(() => {});
+        silentCatch(emailService
+          .send({ to: user.email, ...emailContent }), "email");
 
-        logActivity({
+        silentCatch(logActivity({
           action: "approve",
           entityType: "user",
           entityId: id,
           entityName: user.email,
           userId: sessionUserId,
           details: { bulk: true },
-        }).catch(() => {});
+        }), "activity");
       } catch (err) {
         errors.push(
           `User ${id}: ${err instanceof Error ? err.message : "unknown error"}`

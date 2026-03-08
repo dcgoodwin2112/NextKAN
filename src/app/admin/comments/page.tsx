@@ -25,7 +25,7 @@ export default async function CommentsPage({
 }) {
   const session = await auth();
   if (!session?.user || (session.user as any).role !== "admin") {
-    redirect("/login");
+    redirect("/admin");
   }
 
   const params = await searchParams;

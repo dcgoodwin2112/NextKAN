@@ -3,6 +3,7 @@ import { getTemplate, updateTemplate, deleteTemplate } from "@/lib/actions/templ
 import { listOrganizations } from "@/lib/actions/organizations";
 import { listThemes } from "@/lib/actions/themes";
 import { listSeries } from "@/lib/actions/series";
+import { listLicenses } from "@/lib/actions/licenses";
 import { TemplateForm } from "@/components/admin/TemplateForm";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
@@ -15,12 +16,14 @@ interface Props {
 
 export default async function EditTemplatePage({ params }: Props) {
   const { id } = await params;
-  const [template, organizations, themes, allSeries] = await Promise.all([
+  const [template, organizations, themes, seriesResult, licenses] = await Promise.all([
     getTemplate(id),
     listOrganizations(),
     listThemes(),
     listSeries(),
+    listLicenses(),
   ]);
+  const allSeries = seriesResult.items;
 
   if (!template) notFound();
 
@@ -52,6 +55,7 @@ export default async function EditTemplatePage({ params }: Props) {
         organizations={organizations}
         themes={themes}
         series={allSeries.map((s) => ({ id: s.id, title: s.title }))}
+        licenses={licenses}
         onSubmit={handleUpdate}
       />
     </div>

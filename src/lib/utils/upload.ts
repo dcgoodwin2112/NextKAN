@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import { getStorageProvider } from "@/lib/storage/factory";
 import { hooks } from "@/lib/plugins/hooks";
 import { isPluginsEnabled } from "@/lib/plugins/loader";
+import { silentCatch } from "@/lib/utils/log";
 
 export const ALLOWED_TYPES = [
   "text/csv",
@@ -46,7 +47,7 @@ export async function saveUploadedFile(file: File): Promise<UploadResult> {
   const buffer = Buffer.from(await file.arrayBuffer());
 
   if (isPluginsEnabled()) {
-    hooks.run("upload:beforeSave", { fileName: file.name, key, fileType: file.type }).catch(() => {});
+    silentCatch(hooks.run("upload:beforeSave", { fileName: file.name, key, fileType: file.type }), "hooks:upload:beforeSave");
   }
 
   const storage = getStorageProvider();
@@ -61,7 +62,7 @@ export async function saveUploadedFile(file: File): Promise<UploadResult> {
   };
 
   if (isPluginsEnabled()) {
-    hooks.run("upload:afterSave", result).catch(() => {});
+    silentCatch(hooks.run("upload:afterSave", result), "hooks:upload:afterSave");
   }
 
   return result;

@@ -7,6 +7,7 @@ import { useSelection } from "@/hooks/useSelection";
 import { DatasetTable } from "@/components/datasets/DatasetTable";
 import { DatasetCard } from "@/components/datasets/DatasetCard";
 import { BulkActionBar, type BulkAction } from "@/components/admin/BulkActionBar";
+import { Checkbox } from "@/components/ui/checkbox";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -114,17 +115,27 @@ export function AdminDatasetListClient({
           isIndeterminate={selection.isIndeterminate}
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {datasets.map((dataset) => (
-            <DatasetCard
-              key={dataset.id}
-              dataset={dataset}
-              adminView
-              selectable
-              selected={selection.isSelected(dataset.id)}
-              onToggle={selection.toggle}
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <Checkbox
+              checked={selection.isAllSelected ? true : selection.isIndeterminate ? "indeterminate" : false}
+              onCheckedChange={() => selection.toggleAll()}
+              aria-label="Select all datasets"
             />
-          ))}
+            <span className="text-sm text-text-muted">Select all</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {datasets.map((dataset) => (
+              <DatasetCard
+                key={dataset.id}
+                dataset={dataset}
+                adminView
+                selectable
+                selected={selection.isSelected(dataset.id)}
+                onToggle={selection.toggle}
+              />
+            ))}
+          </div>
         </div>
       )}
 

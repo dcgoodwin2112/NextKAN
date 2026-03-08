@@ -49,15 +49,63 @@ export function DatasetCard({
     ),
   ];
 
-  return (
-    <div
-      className={`relative rounded-lg border p-4 hover:shadow-sm transition-shadow ${
-        selected ? "border-primary bg-primary-subtle/30" : "border-border"
-      }`}
-    >
-      {selectable && (
-        <div
-          className="absolute top-3 right-3 z-10"
+  const cardContent = (
+    <>
+      <div className="flex items-center gap-2">
+        <h3 className="font-semibold text-lg">{dataset.title}</h3>
+        {adminView && (
+          <span
+            className={`rounded px-2 py-0.5 text-xs font-medium ${statusStyles[dataset.status] || "bg-surface-alt text-text-tertiary"}`}
+          >
+            {dataset.status}
+          </span>
+        )}
+      </div>
+      <p className="text-sm text-text-tertiary mt-1">{truncated}</p>
+      <p className="text-xs text-text-muted mt-1">{dataset.publisher.name}</p>
+      {dataset.keywords.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-2">
+          {dataset.keywords.map((k) => (
+            <span
+              key={k.keyword}
+              className="rounded bg-surface-alt px-2 py-0.5 text-xs text-text-tertiary"
+            >
+              {k.keyword}
+            </span>
+          ))}
+        </div>
+      )}
+      {formats.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-2">
+          {formats.map((f) => (
+            <span
+              key={f}
+              className="rounded bg-primary-subtle px-2 py-0.5 text-xs text-primary-subtle-text"
+            >
+              {f}
+            </span>
+          ))}
+        </div>
+      )}
+      <p className="text-xs text-text-muted mt-2">
+        Modified: {new Date(dataset.modified).toLocaleDateString()}
+      </p>
+    </>
+  );
+
+  if (selectable) {
+    return (
+      <div
+        className={`flex rounded-lg border overflow-hidden hover:shadow-sm transition-shadow ${
+          selected ? "border-primary bg-primary-subtle/30" : "border-border"
+        }`}
+      >
+        <label
+          className={`w-8 shrink-0 flex items-center justify-center border-r cursor-pointer ${
+            selected
+              ? "border-primary/30 bg-primary-subtle/50"
+              : "border-border"
+          }`}
           onClick={(e) => e.stopPropagation()}
         >
           <Checkbox
@@ -65,48 +113,18 @@ export function DatasetCard({
             onCheckedChange={() => onToggle?.(dataset.id)}
             aria-label={`Select ${dataset.title}`}
           />
-        </div>
-      )}
+        </label>
+        <Link href={href} className="block flex-1 min-w-0 p-4">
+          {cardContent}
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-lg border border-border p-4 hover:shadow-sm transition-shadow">
       <Link href={href} className="block">
-        <div className="flex items-center gap-2">
-          <h3 className="font-semibold text-lg">{dataset.title}</h3>
-          {adminView && (
-            <span
-              className={`rounded px-2 py-0.5 text-xs font-medium ${statusStyles[dataset.status] || "bg-surface-alt text-text-tertiary"}`}
-            >
-              {dataset.status}
-            </span>
-          )}
-        </div>
-        <p className="text-sm text-text-tertiary mt-1">{truncated}</p>
-        <p className="text-xs text-text-muted mt-1">{dataset.publisher.name}</p>
-        {dataset.keywords.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {dataset.keywords.map((k) => (
-              <span
-                key={k.keyword}
-                className="rounded bg-surface-alt px-2 py-0.5 text-xs text-text-tertiary"
-              >
-                {k.keyword}
-              </span>
-            ))}
-          </div>
-        )}
-        {formats.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {formats.map((f) => (
-              <span
-                key={f}
-                className="rounded bg-primary-subtle px-2 py-0.5 text-xs text-primary-subtle-text"
-              >
-                {f}
-              </span>
-            ))}
-          </div>
-        )}
-        <p className="text-xs text-text-muted mt-2">
-          Modified: {new Date(dataset.modified).toLocaleDateString()}
-        </p>
+        {cardContent}
       </Link>
     </div>
   );
