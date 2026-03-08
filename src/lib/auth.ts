@@ -26,6 +26,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         );
         if (!isValid) return null;
 
+        if (user.status !== "active") return null;
+
         return {
           id: user.id,
           email: user.email,

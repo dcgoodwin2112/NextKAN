@@ -13,6 +13,8 @@ export const settingsUpdateSchema = z.object({
   ENABLE_PLUGINS: z.enum(["true", "false"]).optional(),
   DCAT_US_VERSION: z.enum(["v1.1", "v3.0"]).optional(),
   HARVEST_API_KEY: z.string().max(500).optional(),
+  USER_REGISTRATION_MODE: z.enum(["disabled", "approval", "open"]).optional(),
+  USER_DEFAULT_ROLE: z.enum(["viewer", "editor"]).optional(),
 });
 
 export type SettingsUpdateInput = z.infer<typeof settingsUpdateSchema>;

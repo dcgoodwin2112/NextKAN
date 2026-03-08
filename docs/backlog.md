@@ -4,36 +4,6 @@ Pending features and tasks for future implementation. See `docs/backlog-complete
 
 ---
 
-## Admin UX
-
-### User Self-Registration
-
-**Priority:** Low
-**Reason:** NextKAN only supports admin-created user accounts. Both CKAN and DKAN offer configurable registration modes — open registration, registration with admin approval, or admin-only. Organizations that want community contributors or inter-agency collaboration need a self-service signup flow.
-
-#### Scope
-
-- **Registration modes** (via admin setting `USER_REGISTRATION_MODE`):
-  - `disabled` (default, current behavior) — admin-only account creation
-  - `approval` — users register, account is inactive until admin approves
-  - `open` — users register and immediately get access with a configurable default role
-- **Registration page:** `/register` — public form with name, email, password, optional organization request. Only rendered when mode is not `disabled`.
-- **Approval workflow:** New `User.status` field (`active`, `pending`, `disabled`). Admin users page shows pending accounts with approve/reject actions. Email notification to admins on new registration. Email notification to user on approval.
-- **Default role:** `USER_DEFAULT_ROLE` setting (default: `viewer`). Applied on registration or approval.
-- **Anti-abuse:** Rate limiting on registration endpoint. Optional CAPTCHA integration (e.g. hCaptcha/Turnstile) via env var.
-- **Email verification (optional):** Send verification link on registration. Account not active until email confirmed.
-
-#### Key Files
-
-- `prisma/schema.prisma` — add `status` field to User model
-- `src/app/(public)/register/page.tsx` — registration form page
-- `src/lib/actions/users.ts` — `registerUser()`, `approveUser()`, `rejectUser()`
-- `src/lib/services/settings.ts` — `getUserRegistrationMode()`, `getUserDefaultRole()`
-- `src/app/admin/users/page.tsx` — pending user approval UI
-- `src/lib/services/email.ts` — registration + approval email templates
-
----
-
 ## Public UI/UX
 
 ### Public Page UX Polish

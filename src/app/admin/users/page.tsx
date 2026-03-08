@@ -9,6 +9,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { UserFilterBar } from "@/components/admin/UserFilterBar";
 import { UserList } from "./UserList";
 import { searchUsers } from "@/lib/actions/users";
+import { prisma } from "@/lib/db";
 import { listOrganizations } from "@/lib/actions/organizations";
 
 export default async function UsersPage({
@@ -27,23 +28,31 @@ export default async function UsersPage({
   const search = params.search || "";
   const page = Math.max(1, parseInt(params.page || "1", 10) || 1);
   const roleFilter = params.role || undefined;
+  const statusFilter = params.status || undefined;
   const org = params.org || undefined;
   const sort = params.sort || undefined;
   const limit = 20;
 
-  const [{ users, total }, organizations] = await Promise.all([
-    searchUsers({ search: search || undefined, role: roleFilter, organizationId: org, sort, page, limit }),
+  const [{ users, total }, organizations, pendingCount] = await Promise.all([
+    searchUsers({ search: search || undefined, role: roleFilter, status: statusFilter, organizationId: org, sort, page, limit }),
     listOrganizations(),
+    prisma.user.count({ where: { status: "pending" } }),
   ]);
 
   const totalPages = Math.ceil(total / limit);
   const start = (page - 1) * limit + 1;
   const end = Math.min(page * limit, total);
-  const hasActiveFilters = !!(search || roleFilter || org || sort);
+  const hasActiveFilters = !!(search || roleFilter || statusFilter || org || sort);
 
   return (
     <div>
-      <AdminPageHeader title="User Management" />
+      <AdminPageHeader
+        title={
+          pendingCount > 0
+            ? `User Management (${pendingCount} pending)`
+            : "User Management"
+        }
+      />
 
       <div className="space-y-4 mb-6">
         <div className="max-w-xl">
