@@ -55,26 +55,70 @@ export async function checkDistributionLinks(
   return results;
 }
 
+function resolveUrl(url: string): string {
+  // Relative URLs (e.g. /uploads/file.csv) need a base
+  if (url.startsWith("/")) {
+    const base = process.env.SITE_URL || "http://localhost:3000";
+    return `${base}${url}`;
+  }
+  return url;
+}
+
 async function checkUrl(
   distributionId: string,
-  url: string,
+  rawUrl: string,
   datasetTitle: string,
   distributionTitle: string
 ): Promise<LinkCheckResult> {
+  const url = resolveUrl(rawUrl);
+
+  // Skip URLs that can't be fetched
+  try {
+    new URL(url);
+  } catch {
+    return {
+      distributionId,
+      url: rawUrl,
+      status: "error",
+      ok: false,
+      error: "Invalid URL",
+      datasetTitle,
+      distributionTitle,
+    };
+  }
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10_000);
 
   try {
-    const res = await fetch(url, {
+    // Try HEAD first, fall back to GET if HEAD is rejected (405/403)
+    let res = await fetch(url, {
       method: "HEAD",
       signal: controller.signal,
       redirect: "follow",
     });
+
+    if (res.status === 405 || res.status === 403) {
+      clearTimeout(timeout);
+      const controller2 = new AbortController();
+      const timeout2 = setTimeout(() => controller2.abort(), 10_000);
+      try {
+        res = await fetch(url, {
+          method: "GET",
+          signal: controller2.signal,
+          redirect: "follow",
+          headers: { Range: "bytes=0-0" },
+        });
+      } finally {
+        clearTimeout(timeout2);
+      }
+    }
+
     return {
       distributionId,
-      url,
+      url: rawUrl,
       status: res.status,
-      ok: res.ok,
+      ok: res.ok || res.status === 206,
       datasetTitle,
       distributionTitle,
     };
@@ -87,7 +131,7 @@ async function checkUrl(
         : "Unknown error";
     return {
       distributionId,
-      url,
+      url: rawUrl,
       status: "error",
       ok: false,
       error: message,
