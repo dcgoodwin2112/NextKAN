@@ -14,11 +14,12 @@ export function UserFilterBar({ organizations }: UserFilterBarProps) {
   const searchParams = useSearchParams();
 
   const role = searchParams.get("role") ?? "";
+  const status = searchParams.get("status") ?? "";
   const org = searchParams.get("org") ?? "";
   const sort = searchParams.get("sort") ?? "";
   const search = searchParams.get("search") ?? "";
 
-  const hasActiveFilters = !!(role || org || sort || search);
+  const hasActiveFilters = !!(role || status || org || sort || search);
 
   function updateParam(key: string, value: string) {
     const params = new URLSearchParams(searchParams.toString());
@@ -50,6 +51,20 @@ export function UserFilterBar({ organizations }: UserFilterBarProps) {
           <option value="orgAdmin">Org Admin</option>
           <option value="editor">Editor</option>
           <option value="viewer">Viewer</option>
+        </NativeSelect>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <Label htmlFor="filter-status">Status</Label>
+        <NativeSelect
+          id="filter-status"
+          value={status}
+          onChange={(e) => updateParam("status", e.target.value)}
+        >
+          <option value="">All</option>
+          <option value="active">Active</option>
+          <option value="pending">Pending</option>
+          <option value="disabled">Disabled</option>
         </NativeSelect>
       </div>
 

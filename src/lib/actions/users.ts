@@ -21,6 +21,7 @@ export async function listUsers() {
       email: true,
       name: true,
       role: true,
+      status: true,
       organizationId: true,
       organization: { select: { name: true } },
       createdAt: true,
@@ -38,6 +39,7 @@ export async function getUser(id: string) {
       email: true,
       name: true,
       role: true,
+      status: true,
       organizationId: true,
       organization: { select: { id: true, name: true } },
       createdAt: true,
@@ -209,6 +211,7 @@ export async function searchUsers(params?: {
   limit?: number;
   search?: string;
   role?: string;
+  status?: string;
   organizationId?: string;
   sort?: string;
 }) {
@@ -232,6 +235,10 @@ export async function searchUsers(params?: {
 
   if (params?.role) {
     where.role = params.role;
+  }
+
+  if (params?.status) {
+    where.status = params.status;
   }
 
   if (params?.organizationId) {
@@ -259,6 +266,7 @@ export async function searchUsers(params?: {
         email: true,
         name: true,
         role: true,
+        status: true,
         organizationId: true,
         organization: { select: { name: true } },
         createdAt: true,
@@ -388,6 +396,122 @@ export async function bulkDeleteUsers(ids: string[]) {
         }).catch(() => {});
       } catch (err) {
         errors.push(`User ${id}: ${err instanceof Error ? err.message : "unknown error"}`);
+      }
+    }
+  });
+
+  return { success, errors };
+}
+
+export async function approveUser(id: string) {
+  const session = await requirePermission("user:manage");
+  const user = await prisma.user.update({
+    where: { id },
+    data: { status: "active" },
+    select: { id: true, email: true, name: true },
+  });
+
+  // Send approval email (fire-and-forget)
+  const { getEmailService } = await import("@/lib/services/email");
+  const { registrationApprovedEmail } = await import(
+    "@/lib/email-templates/registration-approved"
+  );
+  const { getSetting } = await import("@/lib/services/settings");
+  const siteUrl = getSetting("SITE_URL", "http://localhost:3000");
+  const email = registrationApprovedEmail({ loginUrl: `${siteUrl}/login` });
+  getEmailService()
+    .send({ to: user.email, ...email })
+    .catch(() => {});
+
+  logActivity({
+    action: "approve",
+    entityType: "user",
+    entityId: user.id,
+    entityName: user.email,
+    userId: (session.user as any)?.id,
+    userName: session.user?.name,
+  }).catch(() => {});
+
+  return user;
+}
+
+export async function rejectUser(id: string) {
+  const session = await requirePermission("user:manage");
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: { id: true, email: true },
+  });
+  await prisma.user.delete({ where: { id } });
+
+  logActivity({
+    action: "reject",
+    entityType: "user",
+    entityId: id,
+    entityName: user?.email || id,
+    userId: (session.user as any)?.id,
+    userName: session.user?.name,
+  }).catch(() => {});
+}
+
+export async function bulkApproveUsers(ids: string[]) {
+  const session = await requirePermission("user:manage");
+  const sessionUserId = (session.user as any)?.id as string;
+
+  const { bulkIdsSchema } = await import("@/lib/schemas/bulk");
+  const validatedIds = bulkIdsSchema.parse(ids);
+
+  let success = 0;
+  const errors: string[] = [];
+
+  const { getEmailService } = await import("@/lib/services/email");
+  const { registrationApprovedEmail } = await import(
+    "@/lib/email-templates/registration-approved"
+  );
+  const { getSetting } = await import("@/lib/services/settings");
+  const siteUrl = getSetting("SITE_URL", "http://localhost:3000");
+  const emailService = getEmailService();
+  const emailContent = registrationApprovedEmail({
+    loginUrl: `${siteUrl}/login`,
+  });
+
+  await prisma.$transaction(async (tx) => {
+    for (const id of validatedIds) {
+      try {
+        const user = await tx.user.findUnique({
+          where: { id },
+          select: { id: true, email: true, status: true },
+        });
+        if (!user) {
+          errors.push(`User ${id} not found`);
+          continue;
+        }
+        if (user.status !== "pending") {
+          errors.push(`${user.email} is not pending`);
+          continue;
+        }
+
+        await tx.user.update({
+          where: { id },
+          data: { status: "active" },
+        });
+        success++;
+
+        emailService
+          .send({ to: user.email, ...emailContent })
+          .catch(() => {});
+
+        logActivity({
+          action: "approve",
+          entityType: "user",
+          entityId: id,
+          entityName: user.email,
+          userId: sessionUserId,
+          details: { bulk: true },
+        }).catch(() => {});
+      } catch (err) {
+        errors.push(
+          `User ${id}: ${err instanceof Error ? err.message : "unknown error"}`
+        );
       }
     }
   });

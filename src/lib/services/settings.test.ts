@@ -13,6 +13,8 @@ import {
   initSettingsCache,
   resetSettingsCache,
   SETTING_KEYS,
+  getUserRegistrationMode,
+  getUserDefaultRole,
 } from "./settings";
 
 describe("settings service", () => {
@@ -25,6 +27,8 @@ describe("settings service", () => {
     resetSettingsCache();
     delete process.env.SITE_NAME;
     delete process.env.ENABLE_COMMENTS;
+    delete process.env.USER_REGISTRATION_MODE;
+    delete process.env.USER_DEFAULT_ROLE;
   });
 
   describe("getSetting", () => {
@@ -130,6 +134,28 @@ describe("settings service", () => {
 
       resetSettingsCache();
       expect(getSetting("SITE_NAME")).toBe("NextKAN");
+    });
+  });
+
+  describe("getUserRegistrationMode", () => {
+    it("returns disabled by default", () => {
+      expect(getUserRegistrationMode()).toBe("disabled");
+    });
+
+    it("returns env var when set", () => {
+      process.env.USER_REGISTRATION_MODE = "open";
+      expect(getUserRegistrationMode()).toBe("open");
+    });
+  });
+
+  describe("getUserDefaultRole", () => {
+    it("returns viewer by default", () => {
+      expect(getUserDefaultRole()).toBe("viewer");
+    });
+
+    it("returns env var when set", () => {
+      process.env.USER_DEFAULT_ROLE = "editor";
+      expect(getUserDefaultRole()).toBe("editor");
     });
   });
 });

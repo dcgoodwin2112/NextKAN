@@ -5,6 +5,7 @@ const mockPrisma = vi.hoisted(() => ({
   dataset: { findMany: vi.fn() },
   comment: { count: vi.fn(), findFirst: vi.fn() },
   harvestJob: { findMany: vi.fn() },
+  user: { count: vi.fn(), findFirst: vi.fn() },
 }));
 
 const mockSettings = vi.hoisted(() => ({
@@ -30,6 +31,8 @@ beforeEach(() => {
   mockPrisma.comment.count.mockResolvedValue(0);
   mockPrisma.comment.findFirst.mockResolvedValue(null);
   mockPrisma.harvestJob.findMany.mockResolvedValue([]);
+  mockPrisma.user.count.mockResolvedValue(0);
+  mockPrisma.user.findFirst.mockResolvedValue(null);
 });
 
 describe("getNotificationItems", () => {
@@ -96,6 +99,21 @@ describe("getNotificationItems", () => {
     expect(result.totalCount).toBe(2);
     expect(result.items.map((i) => i.id)).toContain("harvest:s1");
     expect(result.items.map((i) => i.id)).toContain("harvest:s2");
+  });
+
+  it("returns registration notification when pending users exist", async () => {
+    const oldest = new Date("2025-01-15");
+    mockPrisma.user.count.mockResolvedValue(3);
+    mockPrisma.user.findFirst.mockResolvedValue({ createdAt: oldest });
+
+    const result = await getNotificationItems();
+    expect(result.totalCount).toBe(1);
+    expect(result.items[0]).toMatchObject({
+      id: "registration:pending",
+      type: "registration",
+      title: "3 pending registrations",
+      href: "/admin/users?status=pending",
+    });
   });
 
   it("sorts all items by timestamp descending", async () => {

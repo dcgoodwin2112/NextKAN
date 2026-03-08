@@ -29,14 +29,16 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { BulkActionBar, type BulkAction } from "@/components/admin/BulkActionBar";
-import { bulkUpdateUsers, bulkDeleteUsers } from "@/lib/actions/users";
+import { bulkUpdateUsers, bulkDeleteUsers, approveUser, rejectUser, bulkApproveUsers } from "@/lib/actions/users";
 
 interface User {
   id: string;
   email: string;
   name: string | null;
   role: string;
+  status: string;
   organizationId: string | null;
   organization?: { name: string } | null;
   createdAt: Date;
@@ -144,7 +146,45 @@ export function UserList({ users, organizations }: UserListProps) {
     router.refresh();
   }
 
+  async function handleApprove(userId: string) {
+    try {
+      await approveUser(userId);
+      toast.success("User approved");
+      router.refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to approve user");
+    }
+  }
+
+  async function handleReject(userId: string) {
+    try {
+      await rejectUser(userId);
+      toast.success("User rejected and deleted");
+      router.refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to reject user");
+    }
+  }
+
+  async function handleBulkApprove() {
+    const result = await bulkApproveUsers(selection.ids);
+    if (result.errors.length > 0) {
+      toast.error(`${result.success} approved. Errors: ${result.errors.join("; ")}`);
+    } else {
+      toast.success(`${result.success} user${result.success !== 1 ? "s" : ""} approved`);
+    }
+    selection.clear();
+    router.refresh();
+  }
+
+  const hasPendingSelected = users.some(
+    (u) => selection.isSelected(u.id) && u.status === "pending"
+  );
+
   const bulkActions: BulkAction[] = [
+    ...(hasPendingSelected
+      ? [{ label: "Approve", onClick: handleBulkApprove } as BulkAction]
+      : []),
     { label: "Change Role", onClick: () => setRoleDialogOpen(true) },
     {
       label: "Delete",
@@ -249,6 +289,7 @@ export function UserList({ users, organizations }: UserListProps) {
             <TableHead>Email</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Role</TableHead>
+            <TableHead>Status</TableHead>
             <TableHead>Organization</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
@@ -266,9 +307,57 @@ export function UserList({ users, organizations }: UserListProps) {
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.name || "-"}</TableCell>
               <TableCell>{user.role}</TableCell>
+              <TableCell>
+                <Badge
+                  variant={
+                    user.status === "active"
+                      ? "default"
+                      : user.status === "pending"
+                        ? "secondary"
+                        : "outline"
+                  }
+                >
+                  {user.status}
+                </Badge>
+              </TableCell>
               <TableCell>{user.organization?.name || "-"}</TableCell>
               <TableCell>
                 <div className="flex gap-2">
+                  {user.status === "pending" && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="xs"
+                        onClick={() => handleApprove(user.id)}
+                      >
+                        Approve
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="xs" className="text-destructive hover:text-destructive">
+                            Reject
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Reject User</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to reject {user.email}? This will delete the account.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              variant="destructive"
+                              onClick={() => handleReject(user.id)}
+                            >
+                              Reject
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </>
+                  )}
                   <Button variant="ghost" size="xs" asChild>
                     <Link href={`/admin/users/${user.id}/edit`}>Edit</Link>
                   </Button>

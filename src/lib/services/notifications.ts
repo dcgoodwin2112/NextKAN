@@ -4,7 +4,7 @@ import { isCommentsEnabled } from "@/lib/services/comments";
 
 export interface NotificationItem {
   id: string;
-  type: "review" | "comment" | "harvest";
+  type: "review" | "comment" | "harvest" | "registration";
   title: string;
   description: string;
   href: string;
@@ -18,13 +18,20 @@ export interface NotificationData {
 
 /** Lightweight notification queries — no quality scoring or heavy joins. */
 export async function getNotificationItems(): Promise<NotificationData> {
-  const [reviewItems, commentItems, harvestItems] = await Promise.all([
-    getReviewNotifications(),
-    getCommentNotifications(),
-    getHarvestNotifications(),
-  ]);
+  const [reviewItems, commentItems, harvestItems, registrationItems] =
+    await Promise.all([
+      getReviewNotifications(),
+      getCommentNotifications(),
+      getHarvestNotifications(),
+      getRegistrationNotifications(),
+    ]);
 
-  const items = [...reviewItems, ...commentItems, ...harvestItems].sort(
+  const items = [
+    ...reviewItems,
+    ...commentItems,
+    ...harvestItems,
+    ...registrationItems,
+  ].sort(
     (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
   );
 
@@ -107,6 +114,30 @@ async function getHarvestNotifications(): Promise<NotificationItem[]> {
   }
 
   return items;
+}
+
+async function getRegistrationNotifications(): Promise<NotificationItem[]> {
+  const [count, oldest] = await Promise.all([
+    prisma.user.count({ where: { status: "pending" } }),
+    prisma.user.findFirst({
+      where: { status: "pending" },
+      orderBy: { createdAt: "asc" },
+      select: { createdAt: true },
+    }),
+  ]);
+
+  if (count === 0) return [];
+
+  return [
+    {
+      id: "registration:pending",
+      type: "registration" as const,
+      title: `${count} pending registration${count === 1 ? "" : "s"}`,
+      description: "Awaiting approval",
+      href: "/admin/users?status=pending",
+      timestamp: oldest!.createdAt,
+    },
+  ];
 }
 
 /** Format a date relative to now. */

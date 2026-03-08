@@ -14,6 +14,8 @@ const SETTING_DEFAULTS: Record<string, string> = {
   ENABLE_PLUGINS: "false",
   DCAT_US_VERSION: "v1.1",
   HARVEST_API_KEY: "",
+  USER_REGISTRATION_MODE: "disabled",
+  USER_DEFAULT_ROLE: "viewer",
 };
 
 export const SETTING_KEYS = Object.keys(SETTING_DEFAULTS);
@@ -90,6 +92,14 @@ async function refreshCache(): Promise<void> {
     cache.set(row.key, row.value);
   }
   cacheTimestamp = Date.now();
+}
+
+export function getUserRegistrationMode(): "disabled" | "approval" | "open" {
+  return getSetting("USER_REGISTRATION_MODE", "disabled") as "disabled" | "approval" | "open";
+}
+
+export function getUserDefaultRole(): string {
+  return getSetting("USER_DEFAULT_ROLE", "viewer");
 }
 
 function invalidateCache(): void {
