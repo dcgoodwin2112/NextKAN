@@ -166,8 +166,8 @@ export function calculateQualityScore(dataset: DatasetWithRelations): QualitySco
 }
 
 export function getQualityTier(score: number): { label: string; color: string } {
-  if (score >= 80) return { label: "Gold", color: "text-yellow-600" };
-  if (score >= 60) return { label: "Silver", color: "text-gray-500" };
-  if (score >= 40) return { label: "Bronze", color: "text-amber-700" };
-  return { label: "Needs Improvement", color: "text-red-600" };
+  if (score >= 80) return { label: "Gold", color: "text-warning-text" };
+  if (score >= 60) return { label: "Silver", color: "text-text-secondary" };
+  if (score >= 40) return { label: "Bronze", color: "text-warning-text" };
+  return { label: "Needs Improvement", color: "text-danger-text" };
 }

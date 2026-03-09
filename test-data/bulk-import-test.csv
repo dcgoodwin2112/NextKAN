@@ -1,0 +1,9 @@
+title,description,keywords,accessLevel,contactName,contactEmail,license,spatial,temporal
+City Parks Inventory,"Comprehensive inventory of all city-managed parks, playgrounds, and green spaces including amenities and accessibility features.",parks;recreation;outdoors;green-spaces,public,Jane Smith,jane.smith@example.gov,https://creativecommons.org/publicdomain/zero/1.0/,"{'type': 'Polygon', 'coordinates': [[[-77.5, 38.8], [-77.0, 38.8], [-77.0, 39.0], [-77.5, 39.0], [-77.5, 38.8]]]}",2020-01-01/2025-12-31
+Annual Budget Report,Annual fiscal year budget allocations by department and program.,budget;finance;fiscal,public,Budget Office,budget@example.gov,https://opendatacommons.org/licenses/pddl/1-0/,,2024-01-01/2024-12-31
+Water Quality Measurements,Monthly water quality testing results from municipal treatment facilities.,water;quality;environment;testing;health,public,Water Dept,water@example.gov,,,"2023-06-01/2025-06-01"
+Building Permits — Q1 2025,"Building permit applications, approvals, and denials for Q1 2025.",permits;construction;buildings,restricted public,Permits Office,permits@example.gov,,,,
+Employee Directory,Non-public employee contact directory for internal use only.,employees;directory;hr,non-public,HR Department,hr@example.gov,,,,
+Transit Ridership Data,Daily ridership counts across all bus and rail lines.,transit;transportation;ridership,public,,,,,"2024-01-01/2024-12-31"
+Street Light Locations,Locations and status of all municipally-owned street lights with maintenance records.,infrastructure;lighting;streets;maintenance,public,Public Works,pw@example.gov,https://creativecommons.org/licenses/by/4.0/,,
+"O'Brien's Special Characters & ""Quoted"" Dataset","A dataset title with apostrophes, ampersands, and embedded quotes to test CSV edge cases.",special-characters;testing;edge-cases,public,Test User,test@example.gov,,,,

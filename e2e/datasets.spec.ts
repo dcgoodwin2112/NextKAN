@@ -43,10 +43,18 @@ test.describe("Dataset admin workflow", () => {
     await page.getByRole("button", { name: /create/i }).click();
     await expect(page).toHaveURL(/\/admin\/datasets/, { timeout: 10000 });
 
-    // Navigate to admin datasets and edit the created dataset
+    // Navigate to the edit page via the dataset's slug
     await page.goto("/admin/datasets");
     await page.waitForLoadState("networkidle");
-    await page.getByText("E2E Edit Target").first().click();
+    // The newly created dataset uses slug "e2e-edit-target"
+    // Find it on the page — it should be on page 1 sorted by modified desc
+    const datasetLink = page.getByText("E2E Edit Target").first();
+    // If not visible on page 1, try page 2
+    if (!(await datasetLink.isVisible({ timeout: 3000 }).catch(() => false))) {
+      await page.getByRole("button", { name: "Next" }).click();
+      await page.waitForLoadState("networkidle");
+    }
+    await datasetLink.click();
     await expect(page).toHaveURL(/\/admin\/datasets\/.*\/edit/, {
       timeout: 10000,
     });
@@ -74,10 +82,15 @@ test.describe("Dataset admin workflow", () => {
     await page.getByRole("button", { name: /create/i }).click();
     await expect(page).toHaveURL(/\/admin\/datasets/, { timeout: 10000 });
 
-    // Navigate to datasets list and click into the dataset to edit
+    // Navigate to datasets list and find the dataset
     await page.goto("/admin/datasets");
     await page.waitForLoadState("networkidle");
-    await page.getByText("E2E Delete Target").first().click();
+    const datasetLink = page.getByText("E2E Delete Target").first();
+    if (!(await datasetLink.isVisible({ timeout: 3000 }).catch(() => false))) {
+      await page.getByRole("button", { name: "Next" }).click();
+      await page.waitForLoadState("networkidle");
+    }
+    await datasetLink.click();
     await expect(page).toHaveURL(/\/admin\/datasets\/.*\/edit/, {
       timeout: 10000,
     });
@@ -85,9 +98,9 @@ test.describe("Dataset admin workflow", () => {
     // Delete — click opens confirmation dialog, then confirm
     await page.getByRole("button", { name: "Delete", exact: true }).first().click();
     await expect(page.getByText("Are you sure?")).toBeVisible();
-    // Click the confirm Delete button inside the dialog
+    // Click the confirm button inside the dialog (soft delete uses "Move to Trash")
     const dialog = page.getByRole("alertdialog");
-    await dialog.getByRole("button", { name: "Delete" }).click();
+    await dialog.getByRole("button", { name: /move to trash|delete/i }).click();
     await expect(page).toHaveURL(/\/admin\/datasets$/, { timeout: 10000 });
     // Verify the dataset is actually gone
     await expect(page.getByText("E2E Delete Target")).not.toBeVisible();

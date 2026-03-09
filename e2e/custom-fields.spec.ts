@@ -20,7 +20,8 @@ test.describe.serial("Custom Fields", () => {
     await expect(page.getByText("grant_number")).toBeVisible();
 
     // Edit — navigate directly to the edit page via the table link
-    const editLink = page.getByRole("link", { name: /edit/i }).first();
+    const row = page.getByRole("row", { name: /grant_number/ });
+    const editLink = row.getByRole("link", { name: /edit/i });
     const editHref = await editLink.getAttribute("href");
     await page.goto(editHref!);
     await page.waitForLoadState("networkidle");
@@ -30,11 +31,12 @@ test.describe.serial("Custom Fields", () => {
     await page.getByRole("button", { name: /^update$/i }).click();
     await expect(page.getByText("Grant ID")).toBeVisible({ timeout: 15000 });
 
-    // Delete
-    await page.getByRole("button", { name: /^delete$/i }).click();
+    // Delete — scope to the row for this specific field
+    const grantRow = page.getByRole("row", { name: /grant_number/ });
+    await grantRow.getByRole("button", { name: /^delete$/i }).click();
     // Wait for confirmation dialog
     await expect(page.getByText("Are you sure?")).toBeVisible();
-    await page.getByRole("button", { name: /^delete$/i }).click();
+    await page.getByRole("alertdialog").getByRole("button", { name: /^delete$/i }).click();
     await page.waitForLoadState("networkidle");
     await expect(page.getByText("grant_number")).not.toBeVisible({ timeout: 5000 });
   });
@@ -57,9 +59,10 @@ test.describe.serial("Custom Fields", () => {
     await page.getByRole("button", { name: /^create$/i }).click();
     await expect(page.getByText("Priority Level")).toBeVisible({ timeout: 15000 });
 
-    // Clean up
-    await page.getByRole("button", { name: /^delete$/i }).first().click();
-    await page.getByRole("button", { name: /^delete$/i }).last().click();
+    // Clean up — scope to the specific row
+    const priorityRow = page.getByRole("row", { name: /priority_level/ });
+    await priorityRow.getByRole("button", { name: /^delete$/i }).click();
+    await page.getByRole("alertdialog").getByRole("button", { name: /^delete$/i }).click();
   });
 
   test("custom fields appear on dataset form and values show on public page", async ({ page }) => {
@@ -88,7 +91,8 @@ test.describe.serial("Custom Fields", () => {
     await page.getByLabel("Department Code").fill("DEPT-42");
 
     await page.getByRole("button", { name: /^create$/i }).click();
-    await expect(page).toHaveURL(/\/admin\/datasets/, { timeout: 15000 });
+    // Wait for navigation away from /new
+    await page.waitForURL(/\/admin\/datasets(?!\/new)/, { timeout: 15000 });
 
     // Check public page
     await page.goto("/datasets/cf-test-dataset");
@@ -97,7 +101,8 @@ test.describe.serial("Custom Fields", () => {
 
     // Clean up: delete the custom field definition
     await page.goto("/admin/custom-fields");
-    await page.getByRole("button", { name: /^delete$/i }).first().click();
-    await page.getByRole("button", { name: /^delete$/i }).last().click();
+    const deptRow = page.getByRole("row", { name: /dept_code/ });
+    await deptRow.getByRole("button", { name: /^delete$/i }).click();
+    await page.getByRole("alertdialog").getByRole("button", { name: /^delete$/i }).click();
   });
 });

@@ -244,7 +244,11 @@ export function reverseDCATUSToDatasetInput(
     rights: dcatDataset.rights || undefined,
     spatial: dcatDataset.spatial || undefined,
     temporal: dcatDataset.temporal || undefined,
-    issued: dcatDataset.issued || undefined,
+    issued: dcatDataset.issued
+      ? dcatDataset.issued.includes("T")
+        ? dcatDataset.issued
+        : `${dcatDataset.issued}T00:00:00Z`
+      : undefined,
     accrualPeriodicity: dcatDataset.accrualPeriodicity || undefined,
     conformsTo: dcatDataset.conformsTo || undefined,
     dataQuality: dcatDataset.dataQuality,

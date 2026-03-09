@@ -6,6 +6,16 @@ import { readFile } from "fs/promises";
 import Database from "better-sqlite3";
 import path from "path";
 import { seedLicenses } from "./seeds/licenses";
+import { seedSeries } from "./seeds/series";
+import { seedTemplates } from "./seeds/templates";
+import { seedPages } from "./seeds/pages";
+import { seedComments } from "./seeds/comments";
+import { seedCharts } from "./seeds/charts";
+import { seedCustomFields } from "./seeds/custom-fields";
+import { seedAnalytics } from "./seeds/analytics";
+import { seedActivity } from "./seeds/activity";
+import { seedHarvest } from "./seeds/harvest";
+import { seedVersions } from "./seeds/versions";
 
 const adapter = new PrismaBetterSqlite3({
   url: process.env.DATABASE_URL ?? "file:./dev.db",
@@ -364,6 +374,9 @@ async function main() {
 
   console.log("Seed: 4 organizations + 4 users created");
 
+  // --- Series (before datasets so we can reference seriesId) ---
+  const series = await seedSeries(prisma);
+
   // --- Fetch theme IDs ---
   const themes = await prisma.theme.findMany();
   const themeMap = new Map(themes.map((t) => [t.slug, t.id]));
@@ -388,6 +401,10 @@ async function main() {
     landingPage?: string;
     issued?: Date;
     language?: string;
+    seriesId?: string;
+    version?: string;
+    versionNotes?: string;
+    deletedAt?: Date;
     keywords: string[];
     themeSlugs: string[];
     distributions: {
@@ -872,6 +889,278 @@ async function main() {
         },
       ],
     },
+    // --- 8 new datasets (13–20) ---
+    {
+      slug: "crop-yield-statistics",
+      title: "Crop Yield Statistics by County",
+      description:
+        "Annual crop yield data by county including wheat, corn, soybeans, and cotton. Includes acreage planted, harvested, and production volumes.",
+      publisherId: springfield.id,
+      contactName: "Jane Mitchell",
+      contactEmail: "agriculture@springfield.gov",
+      status: "published",
+      workflowStatus: "published",
+      accessLevel: "public",
+      license: "https://creativecommons.org/publicdomain/zero/1.0/",
+      temporal: "2018-01-01/2024-12-31",
+      accrualPeriodicity: "R/P1Y",
+      issued: new Date("2018-09-01"),
+      language: "en",
+      keywords: ["agriculture", "crops", "yield", "farming", "county"],
+      themeSlugs: ["agriculture"],
+      distributions: [
+        {
+          title: "Crop Yield Data (CSV)",
+          downloadURL: "https://example.com/data/crop-yields.csv",
+          mediaType: "text/csv",
+          format: "CSV",
+        },
+      ],
+    },
+    {
+      slug: "manufacturing-output-index",
+      title: "Manufacturing Output Index",
+      description:
+        "Monthly manufacturing output index tracking industrial production across major sectors including automotive, electronics, and food processing.",
+      publisherId: springfield.id,
+      contactName: "Jane Mitchell",
+      contactEmail: "economic-dev@springfield.gov",
+      status: "published",
+      workflowStatus: "published",
+      accessLevel: "public",
+      license: "https://creativecommons.org/publicdomain/zero/1.0/",
+      temporal: "2020-01-01/2024-12-31",
+      accrualPeriodicity: "R/P1M",
+      issued: new Date("2020-02-01"),
+      language: "en",
+      keywords: [
+        "manufacturing",
+        "industry",
+        "production",
+        "economic indicators",
+      ],
+      themeSlugs: ["manufacturing", "business"],
+      distributions: [
+        {
+          title: "Manufacturing Index (CSV)",
+          downloadURL: "https://example.com/data/manufacturing-index.csv",
+          mediaType: "text/csv",
+          format: "CSV",
+        },
+        {
+          title: "Manufacturing Index (JSON)",
+          downloadURL: "https://example.com/data/manufacturing-index.json",
+          mediaType: "application/json",
+          format: "JSON",
+        },
+      ],
+    },
+    {
+      slug: "port-vessel-traffic",
+      title: "Port Vessel Traffic Records",
+      description:
+        "Daily vessel traffic records at the Springfield port facility including vessel type, cargo category, tonnage, and berth assignments.",
+      publisherId: springfieldDot.id,
+      contactName: "Carlos Rivera",
+      contactEmail: "port@springfield-dot.gov",
+      status: "published",
+      workflowStatus: "published",
+      accessLevel: "public",
+      license: "https://creativecommons.org/licenses/by/4.0/",
+      temporal: "2021-01-01/2024-12-31",
+      accrualPeriodicity: "R/P1D",
+      spatial: '{"type":"Point","coordinates":[-89.65,39.78]}',
+      issued: new Date("2021-04-15"),
+      language: "en",
+      keywords: ["maritime", "vessels", "port", "shipping", "cargo"],
+      themeSlugs: ["maritime", "transportation"],
+      distributions: [
+        {
+          title: "Vessel Traffic (CSV)",
+          downloadURL: "https://example.com/data/vessel-traffic.csv",
+          mediaType: "text/csv",
+          format: "CSV",
+        },
+      ],
+    },
+    {
+      slug: "consumer-price-index-local",
+      title: "Consumer Price Index — Springfield Metro",
+      description:
+        "Monthly consumer price index data for the Springfield metropolitan area, tracking price changes across food, housing, transportation, and healthcare categories.",
+      publisherId: springfield.id,
+      contactName: "Jane Mitchell",
+      contactEmail: "economics@springfield.gov",
+      status: "published",
+      workflowStatus: "published",
+      accessLevel: "public",
+      license: "https://creativecommons.org/publicdomain/zero/1.0/",
+      temporal: "2019-01-01/2024-12-31",
+      accrualPeriodicity: "R/P1M",
+      issued: new Date("2019-03-01"),
+      language: "en",
+      keywords: [
+        "consumer",
+        "prices",
+        "CPI",
+        "inflation",
+        "cost of living",
+      ],
+      themeSlugs: ["consumer", "finance"],
+      distributions: [
+        {
+          title: "CPI Data (CSV)",
+          downloadURL: "https://example.com/data/cpi-springfield.csv",
+          mediaType: "text/csv",
+          format: "CSV",
+        },
+      ],
+    },
+    {
+      slug: "building-permits-issued",
+      title: "Building Permits Issued",
+      description:
+        "Monthly building permit records including permit type, valuation, square footage, and location for all construction activity within city limits.",
+      publisherId: springfield.id,
+      contactName: "Jane Mitchell",
+      contactEmail: "planning@springfield.gov",
+      status: "published",
+      workflowStatus: "published",
+      accessLevel: "public",
+      license: "https://creativecommons.org/publicdomain/zero/1.0/",
+      temporal: "2020-01-01/2024-12-31",
+      accrualPeriodicity: "R/P1M",
+      spatial:
+        '{"type":"Polygon","coordinates":[[[-89.75,39.70],[-89.55,39.70],[-89.55,39.85],[-89.75,39.85],[-89.75,39.70]]]}',
+      issued: new Date("2020-05-01"),
+      language: "en",
+      keywords: [
+        "permits",
+        "construction",
+        "building",
+        "zoning",
+        "development",
+      ],
+      themeSlugs: ["local-government"],
+      distributions: [
+        {
+          title: "Building Permits (CSV)",
+          downloadURL: "https://example.com/data/building-permits.csv",
+          mediaType: "text/csv",
+          format: "CSV",
+        },
+        {
+          title: "Building Permits (GeoJSON)",
+          downloadURL: "https://example.com/data/building-permits.geojson",
+          mediaType: "application/geo+json",
+          format: "GeoJSON",
+        },
+      ],
+    },
+    {
+      slug: "environmental-emissions-inventory",
+      title: "Environmental Emissions Inventory",
+      description:
+        "Annual greenhouse gas and criteria pollutant emissions inventory by facility and sector, including CO2, methane, NOx, and particulate matter.",
+      publisherId: envAgency.id,
+      contactName: "Priya Sharma",
+      contactEmail: "emissions@state-env.gov",
+      status: "published",
+      workflowStatus: "published",
+      accessLevel: "public",
+      license: "https://creativecommons.org/licenses/by/4.0/",
+      temporal: "2016-01-01/2024-12-31",
+      accrualPeriodicity: "R/P1Y",
+      issued: new Date("2016-11-01"),
+      language: "en",
+      seriesId: series.envReports.id,
+      version: "8.0",
+      versionNotes: "2024 annual release with updated facility data",
+      keywords: [
+        "emissions",
+        "greenhouse gas",
+        "pollution",
+        "air quality",
+        "climate",
+      ],
+      themeSlugs: ["climate", "ecosystems"],
+      distributions: [
+        {
+          title: "Emissions Inventory (CSV)",
+          downloadURL: "https://example.com/data/emissions-inventory.csv",
+          mediaType: "text/csv",
+          format: "CSV",
+        },
+      ],
+    },
+    {
+      slug: "vaccination-coverage-rates",
+      title: "Vaccination Coverage Rates",
+      description:
+        "Annual vaccination coverage rates by age group, vaccine type, and geographic area. Includes childhood immunization schedules and adult booster data.",
+      publisherId: healthInstitute.id,
+      contactName: "David Chen",
+      contactEmail: "immunization@nih.gov",
+      status: "archived",
+      workflowStatus: "archived",
+      accessLevel: "public",
+      license: "https://creativecommons.org/publicdomain/zero/1.0/",
+      accrualPeriodicity: "R/P1Y",
+      bureauCode: "009:00",
+      programCode: "009:076",
+      issued: new Date("2019-08-01"),
+      language: "en",
+      seriesId: series.healthData.id,
+      version: "5.0",
+      versionNotes: "Final release — dataset superseded by new reporting format",
+      keywords: [
+        "vaccination",
+        "immunization",
+        "public health",
+        "coverage rates",
+      ],
+      themeSlugs: ["health"],
+      distributions: [
+        {
+          title: "Vaccination Data (CSV)",
+          downloadURL: "https://example.com/data/vaccination-rates.csv",
+          mediaType: "text/csv",
+          format: "CSV",
+        },
+      ],
+    },
+    {
+      slug: "municipal-fleet-inventory",
+      title: "Municipal Fleet Vehicle Inventory",
+      description:
+        "Inventory of all city-owned vehicles including type, fuel type, mileage, maintenance costs, and acquisition date. Scheduled for deletion.",
+      publisherId: springfield.id,
+      contactName: "Jane Mitchell",
+      contactEmail: "fleet@springfield.gov",
+      status: "published",
+      workflowStatus: "published",
+      accessLevel: "public",
+      license: "https://creativecommons.org/publicdomain/zero/1.0/",
+      issued: new Date("2022-01-15"),
+      language: "en",
+      deletedAt: new Date("2025-12-01"),
+      keywords: [
+        "fleet",
+        "vehicles",
+        "municipal",
+        "maintenance",
+        "transportation",
+      ],
+      themeSlugs: ["local-government", "transportation"],
+      distributions: [
+        {
+          title: "Fleet Inventory (CSV)",
+          downloadURL: "https://example.com/data/fleet-inventory.csv",
+          mediaType: "text/csv",
+          format: "CSV",
+        },
+      ],
+    },
   ];
 
   // --- Create datasets with nested keywords + distributions ---
@@ -898,6 +1187,10 @@ async function main() {
         landingPage: ds.landingPage,
         issued: ds.issued,
         language: ds.language,
+        seriesId: ds.seriesId,
+        version: ds.version,
+        versionNotes: ds.versionNotes,
+        deletedAt: ds.deletedAt,
         keywords: {
           create: ds.keywords.map((kw) => ({ keyword: kw })),
         },
@@ -931,13 +1224,69 @@ async function main() {
     }
   }
 
-  console.log("Seed: 12 datasets with keywords, distributions, and themes created");
+  console.log("Seed: 20 datasets with keywords, distributions, and themes created");
+
+  // --- Link existing datasets to series ---
+  // Air quality + water quality + energy consumption → Environmental Reports
+  for (const slug of [
+    "air-quality-monitoring",
+    "water-quality-testing-results",
+    "energy-consumption-by-sector",
+  ]) {
+    await prisma.dataset.update({
+      where: { slug },
+      data: { seriesId: series.envReports.id },
+    });
+  }
+  // Hospital readmission + chronic disease → Public Health Data
+  for (const slug of [
+    "hospital-readmission-rates",
+    "chronic-disease-statistics",
+  ]) {
+    await prisma.dataset.update({
+      where: { slug },
+      data: { seriesId: series.healthData.id },
+    });
+  }
 
   // --- Import CSV data into datastore ---
   await importSeedCsvs();
 
   // --- Licenses ---
   await seedLicenses(prisma);
+
+  // --- Templates ---
+  await seedTemplates(prisma, {
+    envAgencyId: envAgency.id,
+    springfieldId: springfield.id,
+  });
+
+  // --- Pages ---
+  await seedPages(prisma);
+
+  // --- Custom fields + values ---
+  await seedCustomFields(prisma);
+
+  // --- Comments ---
+  await seedComments(prisma);
+
+  // --- Charts ---
+  await seedCharts(prisma);
+
+  // --- Analytics events ---
+  await seedAnalytics(prisma);
+
+  // --- Activity log ---
+  await seedActivity(prisma);
+
+  // --- Harvest sources + jobs ---
+  await seedHarvest(prisma, {
+    springfieldId: springfield.id,
+    envAgencyId: envAgency.id,
+  });
+
+  // --- Dataset versions ---
+  await seedVersions(prisma);
 
   console.log("Seed complete!");
 }

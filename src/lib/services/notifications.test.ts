@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { getNotificationItems, formatRelativeDate } from "./notifications";
 
 const mockPrisma = vi.hoisted(() => ({
@@ -141,6 +141,15 @@ describe("getNotificationItems", () => {
 });
 
 describe("formatRelativeDate", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2025-06-15T12:00:00Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("returns 'Today' for same-day dates", () => {
     expect(formatRelativeDate(new Date())).toBe("Today");
   });
