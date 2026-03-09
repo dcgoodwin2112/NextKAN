@@ -38,7 +38,7 @@ export default async function AdminDashboard() {
             <p className="text-sm text-text-muted">Published Datasets</p>
             <p className="text-3xl font-bold">{stats.publishedCount}</p>
             {stats.publishedTrend !== 0 && (
-              <p className={`text-sm ${stats.publishedTrend > 0 ? "text-green-600" : "text-red-600"}`}>
+              <p className={`text-sm ${stats.publishedTrend > 0 ? "text-success" : "text-danger"}`}>
                 {stats.publishedTrend > 0 ? "+" : ""}{stats.publishedTrend} last 30d
               </p>
             )}
@@ -166,7 +166,7 @@ export default async function AdminDashboard() {
             <CardContent>
               <h3 className="font-medium mb-2">Stale Datasets</h3>
               {catalogHealth.staleDatasets.length === 0 ? (
-                <p className="text-sm text-green-600">All datasets up to date</p>
+                <p className="text-sm text-success">All datasets up to date</p>
               ) : (
                 <>
                   <p className="text-2xl font-bold">{catalogHealth.staleDatasets.length}</p>
@@ -184,7 +184,7 @@ export default async function AdminDashboard() {
             <CardContent>
               <h3 className="font-medium mb-2">No Distributions</h3>
               {catalogHealth.noDistributions.length === 0 ? (
-                <p className="text-sm text-green-600">All datasets have files</p>
+                <p className="text-sm text-success">All datasets have files</p>
               ) : (
                 <>
                   <p className="text-2xl font-bold">{catalogHealth.noDistributions.length}</p>
@@ -202,7 +202,7 @@ export default async function AdminDashboard() {
             <CardContent>
               <h3 className="font-medium mb-2">Missing Fields</h3>
               {catalogHealth.missingFields.length === 0 ? (
-                <p className="text-sm text-green-600">All fields complete</p>
+                <p className="text-sm text-success">All fields complete</p>
               ) : (
                 <ul className="space-y-1 text-sm">
                   {catalogHealth.missingFields.slice(0, 5).map((f) => (
@@ -230,7 +230,7 @@ export default async function AdminDashboard() {
             <CardContent>
               <h3 className="font-medium mb-2">Empty Organizations</h3>
               {catalogHealth.emptyOrgs.length === 0 ? (
-                <p className="text-sm text-green-600">All orgs have published data</p>
+                <p className="text-sm text-success">All orgs have published data</p>
               ) : (
                 <>
                   <p className="text-2xl font-bold">{catalogHealth.emptyOrgs.length}</p>

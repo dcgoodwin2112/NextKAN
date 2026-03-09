@@ -28,15 +28,18 @@ test.describe("Editorial workflow", () => {
     // Navigate to the created dataset's edit page
     await page.goto("/admin/datasets");
     await page.waitForLoadState("networkidle");
-    await page.getByText("E2E Workflow Dataset").first().click();
+    const datasetLink = page.getByText("E2E Workflow Dataset").first();
+    if (!(await datasetLink.isVisible({ timeout: 3000 }).catch(() => false))) {
+      await page.getByRole("button", { name: "Next" }).click();
+      await page.waitForLoadState("networkidle");
+    }
+    await datasetLink.click();
     await expect(page).toHaveURL(/\/admin\/datasets\/.*\/edit/, {
       timeout: 10000,
     });
 
-    // Scope status checks to the workflow panel to avoid matching form elements
-    const workflowPanel = page.locator(".rounded-lg.border.p-4.bg-white", {
-      has: page.getByRole("heading", { name: "Editorial Workflow" }),
-    });
+    // Scope status checks to the workflow panel
+    const workflowPanel = page.getByRole("heading", { name: "Editorial Workflow" }).locator("..");
     await expect(workflowPanel).toBeVisible();
 
     // Verify initial draft status and Submit for Review button

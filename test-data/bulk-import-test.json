@@ -1,0 +1,65 @@
+{
+  "@context": "https://project-open-data.cio.gov/v1.1/schema/catalog.jsonld",
+  "@id": "https://example.gov/data.json",
+  "@type": "dcat:Catalog",
+  "conformsTo": "https://project-open-data.cio.gov/v1.1/schema",
+  "describedBy": "https://project-open-data.cio.gov/v1.1/schema/catalog.json",
+  "dataset": [
+    {
+      "@type": "dcat:Dataset",
+      "title": "Air Quality Index Readings",
+      "description": "Hourly air quality index readings from monitoring stations across the metropolitan area, including PM2.5, PM10, ozone, and NO2 measurements.",
+      "identifier": "aqi-readings-2025",
+      "keyword": ["air-quality", "environment", "pollution", "monitoring"],
+      "accessLevel": "public",
+      "contactPoint": {
+        "@type": "vcard:Contact",
+        "fn": "Environmental Services",
+        "hasEmail": "mailto:enviro@example.gov"
+      },
+      "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "spatial": "United States",
+      "temporal": "2024-01-01/2025-12-31",
+      "distribution": [
+        {
+          "@type": "dcat:Distribution",
+          "title": "AQI Readings CSV",
+          "downloadURL": "https://example.gov/data/aqi-readings.csv",
+          "mediaType": "text/csv",
+          "format": "CSV",
+          "description": "Complete dataset in CSV format"
+        },
+        {
+          "@type": "dcat:Distribution",
+          "title": "AQI Readings API",
+          "accessURL": "https://example.gov/api/aqi",
+          "mediaType": "application/json",
+          "format": "API",
+          "description": "REST API endpoint for real-time readings"
+        }
+      ]
+    },
+    {
+      "@type": "dcat:Dataset",
+      "title": "Public Library Locations",
+      "description": "Addresses, hours, and services for all public library branches.",
+      "identifier": "library-locations",
+      "keyword": ["libraries", "community", "education"],
+      "accessLevel": "public",
+      "contactPoint": {
+        "@type": "vcard:Contact",
+        "fn": "Library Services",
+        "hasEmail": "mailto:library@example.gov"
+      },
+      "distribution": [
+        {
+          "@type": "dcat:Distribution",
+          "title": "Library Locations GeoJSON",
+          "downloadURL": "https://example.gov/data/libraries.geojson",
+          "mediaType": "application/geo+json",
+          "format": "GeoJSON"
+        }
+      ]
+    }
+  ]
+}

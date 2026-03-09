@@ -244,7 +244,7 @@ export function ApiTokenSection({ userId }: ApiTokenSectionProps) {
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button variant="ghost" size="sm">
-                          <Trash2 className="size-4 text-red-500" />
+                          <Trash2 className="size-4 text-danger" />
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>

@@ -31,8 +31,9 @@ test.describe("Harvest", () => {
     await page.getByRole("button", { name: /create/i }).click();
     await expect(page).toHaveURL(/\/admin\/harvest$/, { timeout: 10000 });
 
-    // Click to view details
-    await page.getByText("Manage").first().click();
+    // Click to view details — scope to the row for this source
+    const sourceRow = page.getByRole("row", { name: /E2E Detail Source/ });
+    await sourceRow.getByText("Manage").click();
     await expect(page.getByText("E2E Detail Source")).toBeVisible();
     await expect(page.getByText("Run Now")).toBeVisible();
   });

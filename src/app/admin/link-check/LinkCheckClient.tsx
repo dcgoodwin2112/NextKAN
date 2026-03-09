@@ -101,7 +101,7 @@ export function LinkCheckClient() {
               <Card>
                 <CardContent>
                   <p className="text-sm text-text-muted">Healthy</p>
-                  <p className="text-2xl font-bold text-green-600">
+                  <p className="text-2xl font-bold text-success">
                     {healthy.length}
                   </p>
                 </CardContent>
@@ -109,7 +109,7 @@ export function LinkCheckClient() {
               <Card>
                 <CardContent>
                   <p className="text-sm text-text-muted">Broken</p>
-                  <p className="text-2xl font-bold text-red-600">
+                  <p className="text-2xl font-bold text-danger">
                     {broken.length}
                   </p>
                 </CardContent>

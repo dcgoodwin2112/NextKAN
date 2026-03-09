@@ -162,6 +162,16 @@ export async function runHarvest(sourceId: string): Promise<HarvestResult> {
             datasetInput.keywords = ["untagged"];
           }
 
+          // Avoid identifier collision with existing non-harvested datasets
+          if (datasetInput.identifier) {
+            const existingByIdentifier = await prisma.dataset.findFirst({
+              where: { identifier: datasetInput.identifier, deletedAt: null },
+            });
+            if (existingByIdentifier) {
+              datasetInput.identifier = `harvest-${sourceId.slice(0, 8)}-${datasetInput.identifier}`;
+            }
+          }
+
           const dataset = await createDataset(datasetInput);
 
           // Set harvest tracking fields

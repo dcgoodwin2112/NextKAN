@@ -9,7 +9,7 @@ export async function GET() {
     description: siteConfig.description,
     url: siteUrl,
     endpoints: {
-      "dcat-us-1.1": `${siteUrl}/data.json`,
+      "dcat-us-1.1": `${siteUrl}/api/data.json`,
       "ckan-api": {
         package_list: `${siteUrl}/api/3/action/package_list`,
         package_show: `${siteUrl}/api/3/action/package_show`,
