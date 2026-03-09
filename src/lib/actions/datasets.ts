@@ -540,9 +540,17 @@ export async function addDistribution(datasetId: string, input: DistributionInpu
   });
 
   const storageProvider = process.env.STORAGE_PROVIDER || "local";
-  if (data.mediaType === "text/csv" && data.filePath && storageProvider === "local") {
-    const { importCsvToDatastore } = await import("@/lib/services/datastore");
-    await importCsvToDatastore(distribution);
+  if (data.filePath && storageProvider === "local") {
+    if (data.mediaType === "text/csv") {
+      const { importCsvToDatastore } = await import("@/lib/services/datastore");
+      await importCsvToDatastore(distribution);
+    } else if (data.mediaType === "application/json") {
+      const { importJsonToDatastore } = await import("@/lib/services/datastore");
+      await importJsonToDatastore(distribution);
+    } else if (data.mediaType === "application/geo+json") {
+      const { importGeoJsonToDatastore } = await import("@/lib/services/datastore");
+      await importGeoJsonToDatastore(distribution);
+    }
   }
 
   return distribution;

@@ -34,6 +34,11 @@ import {
   buildFilterClause,
   validateSql,
   importCsvToDatastore,
+  importJsonToDatastore,
+  importGeoJsonToDatastore,
+  flattenObject,
+  stringifyValues,
+  extractJsonArray,
   deleteDatastoreTable,
 } from "./datastore";
 import { readFile } from "fs/promises";
@@ -286,6 +291,395 @@ describe("importCsvToDatastore", () => {
         data: expect.objectContaining({
           status: "error",
           errorMessage: "File not found",
+        }),
+      })
+    );
+  });
+});
+
+describe("flattenObject", () => {
+  it("returns flat object as-is", () => {
+    expect(flattenObject({ a: 1, b: "two" })).toEqual({ a: 1, b: "two" });
+  });
+
+  it("flattens nested objects with dot notation", () => {
+    expect(flattenObject({ a: { b: 1, c: { d: 2 } } })).toEqual({
+      "a.b": 1,
+      "a.c.d": 2,
+    });
+  });
+
+  it("stops at maxDepth and preserves value as-is", () => {
+    const result = flattenObject({ a: { b: { c: "deep" } } }, "", 0, 1);
+    expect(result).toEqual({ "a.b": { c: "deep" } });
+  });
+
+  it("preserves arrays as-is", () => {
+    expect(flattenObject({ tags: [1, 2, 3] })).toEqual({ tags: [1, 2, 3] });
+  });
+
+  it("preserves null values", () => {
+    expect(flattenObject({ a: null })).toEqual({ a: null });
+  });
+
+  it("handles empty object", () => {
+    expect(flattenObject({})).toEqual({});
+  });
+});
+
+describe("stringifyValues", () => {
+  it("passes strings through", () => {
+    expect(stringifyValues({ a: "hello" })).toEqual({ a: "hello" });
+  });
+
+  it("converts numbers to strings", () => {
+    expect(stringifyValues({ a: 42 })).toEqual({ a: "42" });
+  });
+
+  it("converts booleans to strings", () => {
+    expect(stringifyValues({ a: true, b: false })).toEqual({
+      a: "true",
+      b: "false",
+    });
+  });
+
+  it("converts null to empty string", () => {
+    expect(stringifyValues({ a: null })).toEqual({ a: "" });
+  });
+
+  it("converts undefined to empty string", () => {
+    expect(stringifyValues({ a: undefined })).toEqual({ a: "" });
+  });
+
+  it("converts objects to JSON strings", () => {
+    expect(stringifyValues({ a: { x: 1 } })).toEqual({ a: '{"x":1}' });
+  });
+
+  it("converts arrays to JSON strings", () => {
+    expect(stringifyValues({ a: [1, 2] })).toEqual({ a: "[1,2]" });
+  });
+});
+
+describe("extractJsonArray", () => {
+  it("returns root array of objects", () => {
+    const data = [{ a: 1 }, { a: 2 }];
+    expect(extractJsonArray(data)).toEqual(data);
+  });
+
+  it("finds nested array in object", () => {
+    const data = { results: [{ a: 1 }, { a: 2 }] };
+    expect(extractJsonArray(data)).toEqual([{ a: 1 }, { a: 2 }]);
+  });
+
+  it("throws for empty array", () => {
+    expect(() => extractJsonArray([])).toThrow("JSON array is empty");
+  });
+
+  it("throws for array of primitives", () => {
+    expect(() => extractJsonArray([1, 2, 3])).toThrow(
+      "JSON array must contain objects"
+    );
+  });
+
+  it("throws when no array found in object", () => {
+    expect(() => extractJsonArray({ a: "string" })).toThrow(
+      "No array of objects found"
+    );
+  });
+
+  it("throws for null", () => {
+    expect(() => extractJsonArray(null)).toThrow("No array of objects found");
+  });
+});
+
+describe("importJsonToDatastore", () => {
+  const mockDistribution = {
+    id: "a1b2c3d4-e5f6-1234-a567-123456789abc",
+    filePath: "/tmp/test.json",
+    mediaType: "application/json",
+    datasetId: "ds-1",
+    title: null,
+    description: null,
+    downloadURL: null,
+    accessURL: null,
+    format: null,
+    conformsTo: null,
+    describedBy: null,
+    fileName: "test.json",
+    fileSize: 200,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  } as Distribution;
+
+  beforeEach(() => {
+    prismaMock.datastoreTable.create.mockResolvedValue({
+      id: "dt-1",
+      distributionId: mockDistribution.id,
+      tableName: "ds_a1b2c3d4",
+      columns: "[]",
+      rowCount: 0,
+      status: "pending",
+      errorMessage: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    prismaMock.datastoreTable.update.mockResolvedValue({} as any);
+  });
+
+  it("imports a JSON array into datastore", async () => {
+    vi.mocked(readFile).mockResolvedValue(
+      JSON.stringify([{ name: "Alice", age: 30 }, { name: "Bob", age: 25 }])
+    );
+
+    await importJsonToDatastore(mockDistribution);
+
+    expect(prismaMock.datastoreTable.create).toHaveBeenCalled();
+    expect(prismaMock.datastoreTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ status: "ready", rowCount: 2 }),
+      })
+    );
+  });
+
+  it("handles sparse objects by union of keys", async () => {
+    vi.mocked(readFile).mockResolvedValue(
+      JSON.stringify([{ a: 1 }, { b: 2 }])
+    );
+
+    await importJsonToDatastore(mockDistribution);
+
+    expect(prismaMock.datastoreTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ status: "ready", rowCount: 2 }),
+      })
+    );
+  });
+
+  it("flattens nested objects", async () => {
+    vi.mocked(readFile).mockResolvedValue(
+      JSON.stringify([{ info: { name: "Alice" } }])
+    );
+
+    await importJsonToDatastore(mockDistribution);
+
+    expect(prismaMock.datastoreTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          status: "ready",
+          columns: expect.stringContaining("info_name"),
+        }),
+      })
+    );
+  });
+
+  it("handles nested array property in object", async () => {
+    vi.mocked(readFile).mockResolvedValue(
+      JSON.stringify({ data: [{ x: 1 }] })
+    );
+
+    await importJsonToDatastore(mockDistribution);
+
+    expect(prismaMock.datastoreTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ status: "ready", rowCount: 1 }),
+      })
+    );
+  });
+
+  it("sets error status for invalid JSON", async () => {
+    vi.mocked(readFile).mockResolvedValue("not valid json{{{");
+
+    await importJsonToDatastore(mockDistribution);
+
+    expect(prismaMock.datastoreTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ status: "error" }),
+      })
+    );
+  });
+
+  it("sets error status when no filePath", async () => {
+    const noPath = { ...mockDistribution, filePath: null } as Distribution;
+
+    await importJsonToDatastore(noPath);
+
+    expect(prismaMock.datastoreTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          status: "error",
+          errorMessage: "No file path for distribution",
+        }),
+      })
+    );
+  });
+});
+
+describe("importGeoJsonToDatastore", () => {
+  const mockDistribution = {
+    id: "a1b2c3d4-e5f6-1234-a567-123456789abc",
+    filePath: "/tmp/test.geojson",
+    mediaType: "application/geo+json",
+    datasetId: "ds-1",
+    title: null,
+    description: null,
+    downloadURL: null,
+    accessURL: null,
+    format: null,
+    conformsTo: null,
+    describedBy: null,
+    fileName: "test.geojson",
+    fileSize: 500,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  } as Distribution;
+
+  beforeEach(() => {
+    prismaMock.datastoreTable.create.mockResolvedValue({
+      id: "dt-1",
+      distributionId: mockDistribution.id,
+      tableName: "ds_a1b2c3d4",
+      columns: "[]",
+      rowCount: 0,
+      status: "pending",
+      errorMessage: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    prismaMock.datastoreTable.update.mockResolvedValue({} as any);
+  });
+
+  it("imports a FeatureCollection into datastore", async () => {
+    const geojson = {
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          properties: { name: "Park", area: 500 },
+          geometry: { type: "Point", coordinates: [-77.0, 38.9] },
+        },
+        {
+          type: "Feature",
+          properties: { name: "Lake", area: 1200 },
+          geometry: { type: "Point", coordinates: [-76.5, 39.0] },
+        },
+      ],
+    };
+    vi.mocked(readFile).mockResolvedValue(JSON.stringify(geojson));
+
+    await importGeoJsonToDatastore(mockDistribution);
+
+    expect(prismaMock.datastoreTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ status: "ready", rowCount: 2 }),
+      })
+    );
+  });
+
+  it("stores geometry as TEXT column", async () => {
+    const geojson = {
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          properties: { name: "A" },
+          geometry: { type: "Point", coordinates: [0, 0] },
+        },
+      ],
+    };
+    vi.mocked(readFile).mockResolvedValue(JSON.stringify(geojson));
+
+    await importGeoJsonToDatastore(mockDistribution);
+
+    expect(prismaMock.datastoreTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          columns: expect.stringContaining("geometry"),
+        }),
+      })
+    );
+  });
+
+  it("handles features without properties", async () => {
+    const geojson = {
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          geometry: { type: "Point", coordinates: [1, 2] },
+        },
+      ],
+    };
+    vi.mocked(readFile).mockResolvedValue(JSON.stringify(geojson));
+
+    await importGeoJsonToDatastore(mockDistribution);
+
+    expect(prismaMock.datastoreTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ status: "ready", rowCount: 1 }),
+      })
+    );
+  });
+
+  it("accepts bare features array", async () => {
+    const features = [
+      {
+        properties: { id: 1 },
+        geometry: { type: "Point", coordinates: [0, 0] },
+      },
+    ];
+    vi.mocked(readFile).mockResolvedValue(JSON.stringify(features));
+
+    await importGeoJsonToDatastore(mockDistribution);
+
+    expect(prismaMock.datastoreTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ status: "ready", rowCount: 1 }),
+      })
+    );
+  });
+
+  it("sets error status for invalid GeoJSON", async () => {
+    vi.mocked(readFile).mockResolvedValue(JSON.stringify({ type: "Bad" }));
+
+    await importGeoJsonToDatastore(mockDistribution);
+
+    expect(prismaMock.datastoreTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          status: "error",
+          errorMessage: "Invalid GeoJSON: must have features array",
+        }),
+      })
+    );
+  });
+
+  it("sets error status for empty features", async () => {
+    vi.mocked(readFile).mockResolvedValue(
+      JSON.stringify({ type: "FeatureCollection", features: [] })
+    );
+
+    await importGeoJsonToDatastore(mockDistribution);
+
+    expect(prismaMock.datastoreTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          status: "error",
+          errorMessage: "GeoJSON features array is empty",
+        }),
+      })
+    );
+  });
+
+  it("sets error status when no filePath", async () => {
+    const noPath = { ...mockDistribution, filePath: null } as Distribution;
+
+    await importGeoJsonToDatastore(noPath);
+
+    expect(prismaMock.datastoreTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          status: "error",
+          errorMessage: "No file path for distribution",
         }),
       })
     );
