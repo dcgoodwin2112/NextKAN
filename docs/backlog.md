@@ -98,22 +98,6 @@ Pending features and tasks for future implementation. See `docs/backlog-complete
 
 ## Datastore Enhancements
 
-### JSON + GeoJSON Import
-
-**Priority:** Medium
-**Reason:** Only CSV files uploaded to local storage are currently parsed into queryable datastore tables. JSON and GeoJSON files are stored as static files with no parsing, type inference, or table creation.
-
-#### Scope
-
-- Detect `application/json` and `application/geo+json` mimetypes in `addDistribution()`
-- **JSON:** Expect array of objects at root (or nested under a configurable key). Flatten to columns.
-- **GeoJSON:** Extract `features[].properties` as columns, store `geometry` as TEXT/JSON column
-- Reuse existing `importCsvToDatastore()` patterns: DatastoreTable creation, type inference on values, batch insert, auto data dictionary generation
-- New `importJsonToDatastore()` and `importGeoJsonToDatastore()` functions in `src/lib/services/datastore.ts`
-- Trigger: same fire-and-forget pattern as CSV in `src/lib/actions/datasets.ts:addDistribution()`
-
----
-
 ### Remote URL Downloading
 
 **Priority:** Medium

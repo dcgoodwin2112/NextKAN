@@ -61,8 +61,76 @@ export function inferColumnTypes(
   });
 }
 
-export async function importCsvToDatastore(
-  distribution: Distribution
+export function flattenObject(
+  obj: Record<string, unknown>,
+  prefix = "",
+  depth = 0,
+  maxDepth = 3
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const fullKey = prefix ? `${prefix}.${key}` : key;
+    if (
+      value !== null &&
+      typeof value === "object" &&
+      !Array.isArray(value) &&
+      depth < maxDepth
+    ) {
+      Object.assign(
+        result,
+        flattenObject(value as Record<string, unknown>, fullKey, depth + 1, maxDepth)
+      );
+    } else {
+      result[fullKey] = value;
+    }
+  }
+  return result;
+}
+
+export function stringifyValues(
+  row: Record<string, unknown>
+): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const [key, value] of Object.entries(row)) {
+    if (value === null || value === undefined) {
+      result[key] = "";
+    } else if (typeof value === "object") {
+      result[key] = JSON.stringify(value);
+    } else {
+      result[key] = String(value);
+    }
+  }
+  return result;
+}
+
+export function extractJsonArray(
+  data: unknown
+): Record<string, unknown>[] {
+  if (Array.isArray(data)) {
+    if (data.length === 0) {
+      throw new Error("JSON array is empty");
+    }
+    if (typeof data[0] !== "object" || data[0] === null) {
+      throw new Error("JSON array must contain objects");
+    }
+    return data as Record<string, unknown>[];
+  }
+
+  if (typeof data === "object" && data !== null) {
+    for (const value of Object.values(data as Record<string, unknown>)) {
+      if (Array.isArray(value) && value.length > 0 && typeof value[0] === "object" && value[0] !== null) {
+        return value as Record<string, unknown>[];
+      }
+    }
+  }
+
+  throw new Error("No array of objects found in JSON");
+}
+
+async function importRowsToDatastore(
+  distribution: Distribution,
+  rawColumns: string[],
+  rows: Record<string, string>[]
 ): Promise<void> {
   const tableName = generateTableName(distribution.id);
 
@@ -81,26 +149,11 @@ export async function importCsvToDatastore(
       data: { status: "importing" },
     });
 
-    if (!distribution.filePath) {
-      throw new Error("No file path for distribution");
-    }
-
-    const fileContent = await readFile(distribution.filePath, "utf-8");
-    const parsed = Papa.parse<Record<string, string>>(fileContent, {
-      header: true,
-      skipEmptyLines: true,
-    });
-
-    if (parsed.errors.length > 0 && parsed.data.length === 0) {
-      throw new Error(`CSV parse error: ${parsed.errors[0].message}`);
-    }
-
-    const rawColumns = parsed.meta.fields ?? [];
     if (rawColumns.length === 0) {
-      throw new Error("CSV has no columns");
+      throw new Error("No columns found");
     }
 
-    const columns = inferColumnTypes(rawColumns, parsed.data);
+    const columns = inferColumnTypes(rawColumns, rows);
 
     // Deduplicate sanitized column names
     const seen = new Map<string, number>();
@@ -128,7 +181,6 @@ export async function importCsvToDatastore(
       );
 
       const insertCols = columns.map((c) => `"${c.name}"`).join(", ");
-      const rows = parsed.data;
 
       for (let i = 0; i < rows.length; i += maxPerBatch) {
         const batch = rows.slice(i, i + maxPerBatch);
@@ -192,6 +244,153 @@ export async function importCsvToDatastore(
       data: { status: "error", errorMessage: message },
     });
   }
+}
+
+export async function importCsvToDatastore(
+  distribution: Distribution
+): Promise<void> {
+  await importFileToDatastore(distribution, (fileContent) => {
+    const parsed = Papa.parse<Record<string, string>>(fileContent, {
+      header: true,
+      skipEmptyLines: true,
+    });
+
+    if (parsed.errors.length > 0 && parsed.data.length === 0) {
+      throw new Error(`CSV parse error: ${parsed.errors[0].message}`);
+    }
+
+    const rawColumns = parsed.meta.fields ?? [];
+    return { columns: rawColumns, rows: parsed.data };
+  });
+}
+
+function parseJsonToRows(fileContent: string): {
+  columns: string[];
+  rows: Record<string, string>[];
+} {
+  const parsed = JSON.parse(fileContent);
+  const rawObjects = extractJsonArray(parsed);
+  const flattened = rawObjects.map((r) => flattenObject(r));
+
+  // Union all keys across rows (JSON rows may have different keys)
+  const allKeysSet = new Set<string>();
+  for (const row of flattened) {
+    for (const key of Object.keys(row)) {
+      allKeysSet.add(key);
+    }
+  }
+  const columns = Array.from(allKeysSet);
+
+  const rows = flattened.map((row) => {
+    const filled: Record<string, unknown> = {};
+    for (const key of columns) {
+      filled[key] = key in row ? row[key] : null;
+    }
+    return stringifyValues(filled);
+  });
+
+  return { columns, rows };
+}
+
+function parseGeoJsonToRows(fileContent: string): {
+  columns: string[];
+  rows: Record<string, string>[];
+} {
+  const parsed = JSON.parse(fileContent);
+
+  // Accept FeatureCollection or bare features array
+  let features: Array<{ properties?: Record<string, unknown>; geometry?: unknown }>;
+  if (Array.isArray(parsed)) {
+    features = parsed;
+  } else if (parsed?.features && Array.isArray(parsed.features)) {
+    features = parsed.features;
+  } else {
+    throw new Error("Invalid GeoJSON: must have features array");
+  }
+
+  if (features.length === 0) {
+    throw new Error("GeoJSON features array is empty");
+  }
+
+  const flattened = features.map((feature) => {
+    const props = flattenObject(feature.properties || {});
+    props.geometry = JSON.stringify(feature.geometry ?? null);
+    return props;
+  });
+
+  const allKeysSet = new Set<string>();
+  for (const row of flattened) {
+    for (const key of Object.keys(row)) {
+      allKeysSet.add(key);
+    }
+  }
+  const columns = Array.from(allKeysSet);
+
+  const rows = flattened.map((row) => {
+    const filled: Record<string, unknown> = {};
+    for (const key of columns) {
+      filled[key] = key in row ? row[key] : null;
+    }
+    return stringifyValues(filled);
+  });
+
+  return { columns, rows };
+}
+
+async function importFileToDatastore(
+  distribution: Distribution,
+  parser: (content: string) => { columns: string[]; rows: Record<string, string>[] }
+): Promise<void> {
+  if (!distribution.filePath) {
+    const tableName = generateTableName(distribution.id);
+    const record = await prisma.datastoreTable.create({
+      data: {
+        distributionId: distribution.id,
+        tableName,
+        columns: "[]",
+        status: "pending",
+      },
+    });
+    await prisma.datastoreTable.update({
+      where: { id: record.id },
+      data: { status: "error", errorMessage: "No file path for distribution" },
+    });
+    return;
+  }
+
+  try {
+    const fileContent = await readFile(distribution.filePath, "utf-8");
+    const { columns, rows } = parser(fileContent);
+    await importRowsToDatastore(distribution, columns, rows);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Unknown import error";
+    const tableName = generateTableName(distribution.id);
+    const record = await prisma.datastoreTable.create({
+      data: {
+        distributionId: distribution.id,
+        tableName,
+        columns: "[]",
+        status: "pending",
+      },
+    });
+    await prisma.datastoreTable.update({
+      where: { id: record.id },
+      data: { status: "error", errorMessage: message },
+    });
+  }
+}
+
+export async function importJsonToDatastore(
+  distribution: Distribution
+): Promise<void> {
+  await importFileToDatastore(distribution, parseJsonToRows);
+}
+
+export async function importGeoJsonToDatastore(
+  distribution: Distribution
+): Promise<void> {
+  await importFileToDatastore(distribution, parseGeoJsonToRows);
 }
 
 export function validateColumn(

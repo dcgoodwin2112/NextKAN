@@ -2,6 +2,8 @@ import { describe, it, expect, vi } from "vitest";
 import { prismaMock } from "@/__mocks__/prisma";
 
 const mockImportCsv = vi.fn();
+const mockImportJson = vi.fn();
+const mockImportGeoJson = vi.fn();
 const mockDeleteTable = vi.fn();
 
 vi.mock("@/lib/db", () => ({
@@ -10,6 +12,8 @@ vi.mock("@/lib/db", () => ({
 
 vi.mock("@/lib/services/datastore", () => ({
   importCsvToDatastore: mockImportCsv,
+  importJsonToDatastore: mockImportJson,
+  importGeoJsonToDatastore: mockImportGeoJson,
   deleteDatastoreTable: mockDeleteTable,
 }));
 
@@ -32,7 +36,14 @@ vi.mock("@/lib/email-templates/dataset-created", () => ({
 
 import { addDistribution, removeDistribution } from "./datasets";
 
+import { beforeEach } from "vitest";
+
 describe("addDistribution", () => {
+  beforeEach(() => {
+    mockImportCsv.mockClear();
+    mockImportJson.mockClear();
+    mockImportGeoJson.mockClear();
+  });
   it("validates input", async () => {
     prismaMock.distribution.create.mockResolvedValue({
       id: "dist-1",
@@ -102,9 +113,8 @@ describe("addDistribution", () => {
     expect(mockImportCsv).toHaveBeenCalledWith(dist);
   });
 
-  it("does not trigger import for non-CSV", async () => {
-    mockImportCsv.mockClear();
-    prismaMock.distribution.create.mockResolvedValue({
+  it("triggers datastore import for JSON with filePath", async () => {
+    const dist = {
       id: "dist-json",
       title: "JSON",
       description: null,
@@ -120,7 +130,8 @@ describe("addDistribution", () => {
       datasetId: "ds-1",
       createdAt: new Date(),
       updatedAt: new Date(),
-    });
+    };
+    prismaMock.distribution.create.mockResolvedValue(dist);
 
     await addDistribution("ds-1", {
       title: "JSON",
@@ -132,7 +143,77 @@ describe("addDistribution", () => {
       fileSize: 512,
     });
 
+    expect(mockImportJson).toHaveBeenCalledWith(dist);
     expect(mockImportCsv).not.toHaveBeenCalled();
+  });
+
+  it("triggers datastore import for GeoJSON with filePath", async () => {
+    const dist = {
+      id: "dist-geojson",
+      title: "GeoJSON",
+      description: null,
+      downloadURL: "https://example.com/data.geojson",
+      accessURL: null,
+      mediaType: "application/geo+json",
+      format: "GeoJSON",
+      conformsTo: null,
+      describedBy: null,
+      fileName: "data.geojson",
+      filePath: "/uploads/data.geojson",
+      fileSize: 1024,
+      datasetId: "ds-1",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    prismaMock.distribution.create.mockResolvedValue(dist);
+
+    await addDistribution("ds-1", {
+      title: "GeoJSON",
+      downloadURL: "https://example.com/data.geojson",
+      mediaType: "application/geo+json",
+      format: "GeoJSON",
+      fileName: "data.geojson",
+      filePath: "/uploads/data.geojson",
+      fileSize: 1024,
+    });
+
+    expect(mockImportGeoJson).toHaveBeenCalledWith(dist);
+    expect(mockImportCsv).not.toHaveBeenCalled();
+    expect(mockImportJson).not.toHaveBeenCalled();
+  });
+
+  it("does not trigger import for unsupported types", async () => {
+    prismaMock.distribution.create.mockResolvedValue({
+      id: "dist-pdf",
+      title: "PDF",
+      description: null,
+      downloadURL: "https://example.com/doc.pdf",
+      accessURL: null,
+      mediaType: "application/pdf",
+      format: "PDF",
+      conformsTo: null,
+      describedBy: null,
+      fileName: "doc.pdf",
+      filePath: "/uploads/doc.pdf",
+      fileSize: 2048,
+      datasetId: "ds-1",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    await addDistribution("ds-1", {
+      title: "PDF",
+      downloadURL: "https://example.com/doc.pdf",
+      mediaType: "application/pdf",
+      format: "PDF",
+      fileName: "doc.pdf",
+      filePath: "/uploads/doc.pdf",
+      fileSize: 2048,
+    });
+
+    expect(mockImportCsv).not.toHaveBeenCalled();
+    expect(mockImportJson).not.toHaveBeenCalled();
+    expect(mockImportGeoJson).not.toHaveBeenCalled();
   });
 });
 
