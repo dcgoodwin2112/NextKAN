@@ -61,7 +61,7 @@ export default async function AdminDashboard() {
         <Card>
           <CardContent>
             <p className="text-sm text-text-muted">Avg Quality Score</p>
-            <p className="text-3xl font-bold">{stats.avgQualityScore}/100</p>
+            <p className="text-3xl font-bold">{stats.avgQualityScore}%</p>
           </CardContent>
         </Card>
       </div>

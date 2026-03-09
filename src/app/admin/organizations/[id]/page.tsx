@@ -83,7 +83,7 @@ export default async function OrgDashboardPage({ params }: Props) {
         <Card>
           <CardContent className="pt-6">
             <p className="text-sm text-text-muted">Avg Quality</p>
-            <p className="text-2xl font-bold">{avgQualityScore}<span className="text-sm font-normal text-text-muted"> / 100</span></p>
+            <p className="text-2xl font-bold">{avgQualityScore}<span className="text-sm font-normal text-text-muted">%</span></p>
           </CardContent>
         </Card>
       </div>

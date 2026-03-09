@@ -46,10 +46,10 @@ export function QualityFilterBar({ organizations }: QualityFilterBarProps) {
           onChange={(e) => updateParam("score", e.target.value)}
         >
           <option value="">All</option>
-          <option value="poor">Poor (0-39)</option>
-          <option value="fair">Fair (40-69)</option>
-          <option value="good">Good (70-89)</option>
-          <option value="excellent">Excellent (90-100)</option>
+          <option value="poor">F (0-59)</option>
+          <option value="fair">D (60-69)</option>
+          <option value="good">B–C (70-89)</option>
+          <option value="excellent">A (90-100)</option>
         </NativeSelect>
       </div>
 

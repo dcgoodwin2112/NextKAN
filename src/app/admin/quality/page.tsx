@@ -28,8 +28,8 @@ const datasetIncludes = {
 } as const;
 
 const scoreRanges: Record<string, [number, number]> = {
-  poor: [0, 39],
-  fair: [40, 69],
+  poor: [0, 59],
+  fair: [60, 69],
   good: [70, 89],
   excellent: [90, 100],
 };
