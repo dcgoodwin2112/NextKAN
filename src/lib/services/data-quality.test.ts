@@ -210,23 +210,28 @@ describe("calculateQualityScore", () => {
 });
 
 describe("getQualityTier", () => {
-  it("returns Gold for scores >= 80", () => {
-    expect(getQualityTier(80).label).toBe("Gold");
-    expect(getQualityTier(100).label).toBe("Gold");
+  it("returns A for scores >= 90", () => {
+    expect(getQualityTier(90)).toEqual({ label: "A", color: "text-success-text" });
+    expect(getQualityTier(100).label).toBe("A");
   });
 
-  it("returns Silver for scores 60-79", () => {
-    expect(getQualityTier(60).label).toBe("Silver");
-    expect(getQualityTier(79).label).toBe("Silver");
+  it("returns B for scores 80-89", () => {
+    expect(getQualityTier(80)).toEqual({ label: "B", color: "text-primary" });
+    expect(getQualityTier(89).label).toBe("B");
   });
 
-  it("returns Bronze for scores 40-59", () => {
-    expect(getQualityTier(40).label).toBe("Bronze");
-    expect(getQualityTier(59).label).toBe("Bronze");
+  it("returns C for scores 70-79", () => {
+    expect(getQualityTier(70)).toEqual({ label: "C", color: "text-warning-text" });
+    expect(getQualityTier(79).label).toBe("C");
   });
 
-  it("returns Needs Improvement for scores < 40", () => {
-    expect(getQualityTier(0).label).toBe("Needs Improvement");
-    expect(getQualityTier(39).label).toBe("Needs Improvement");
+  it("returns D for scores 60-69", () => {
+    expect(getQualityTier(60)).toEqual({ label: "D", color: "text-warning-text" });
+    expect(getQualityTier(69).label).toBe("D");
+  });
+
+  it("returns F for scores < 60", () => {
+    expect(getQualityTier(0)).toEqual({ label: "F", color: "text-danger-text" });
+    expect(getQualityTier(59).label).toBe("F");
   });
 });
