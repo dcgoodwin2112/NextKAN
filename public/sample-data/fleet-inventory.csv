@@ -1,0 +1,9 @@
+VehicleID,Department,VehicleType,Make,Model,Year,FuelType,Mileage,AnnualMaintenanceCost,AcquisitionDate
+FLT-001,Public Works,Dump Truck,Ford,F-750,2019,Diesel,45200,8500,2019-03-15
+FLT-002,Public Works,Pickup,Chevrolet,Silverado 2500,2021,Gasoline,32100,3200,2021-06-01
+FLT-003,Parks & Recreation,Utility Vehicle,John Deere,Gator,2020,Gasoline,18500,2100,2020-04-10
+FLT-004,Public Safety,Sedan,Ford,Explorer,2022,Hybrid,28900,4500,2022-01-20
+FLT-005,Public Safety,Sedan,Dodge,Charger,2021,Gasoline,41200,5100,2021-02-15
+FLT-006,Administration,Sedan,Toyota,Camry,2023,Hybrid,12400,1800,2023-03-01
+FLT-007,Public Works,Loader,Caterpillar,950M,2018,Diesel,8200,12500,2018-07-22
+FLT-008,Transportation,Bus,Blue Bird,Vision,2020,Diesel,62300,9800,2020-08-15

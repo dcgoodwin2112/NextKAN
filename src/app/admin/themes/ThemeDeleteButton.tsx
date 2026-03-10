@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { deleteTheme } from "@/lib/actions/themes";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -13,21 +15,25 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-interface CustomFieldDeleteButtonProps {
-  id: string;
-  label: string;
-  valueCount?: number;
-  onDelete: (id: string) => Promise<void>;
+interface ThemeDeleteButtonProps {
+  themeId: string;
+  datasetCount?: number;
 }
 
-export function CustomFieldDeleteButton({ id, label, valueCount = 0, onDelete }: CustomFieldDeleteButtonProps) {
+export function ThemeDeleteButton({ themeId, datasetCount = 0 }: ThemeDeleteButtonProps) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+
+  async function handleDelete() {
+    await deleteTheme(themeId);
+    router.refresh();
+  }
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <Button
         variant="outline"
-        size="sm"
+        size="xs"
         className="border-danger text-danger hover:bg-danger-subtle"
         onClick={() => setOpen(true)}
       >
@@ -37,9 +43,9 @@ export function CustomFieldDeleteButton({ id, label, valueCount = 0, onDelete }:
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will permanently delete the custom field &quot;{label}&quot;.
-            {valueCount > 0 && (
-              <> This will also delete <strong>{valueCount}</strong> stored value{valueCount === 1 ? "" : "s"} across datasets.</>
+            This will permanently delete this theme.
+            {datasetCount > 0 && (
+              <> It is currently used by <strong>{datasetCount}</strong> dataset{datasetCount === 1 ? "" : "s"} — they will be unlinked from this theme.</>
             )}
             {" "}This action cannot be undone.
           </AlertDialogDescription>
@@ -48,7 +54,7 @@ export function CustomFieldDeleteButton({ id, label, valueCount = 0, onDelete }:
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             variant="destructive"
-            onClick={() => onDelete(id)}
+            onClick={handleDelete}
           >
             Delete
           </AlertDialogAction>

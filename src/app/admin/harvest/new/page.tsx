@@ -150,9 +150,18 @@ export default function NewHarvestSourcePage() {
             <p className="text-xs text-text-muted">{schedulePreview}</p>
           )}
         </div>
-        <Button type="submit" disabled={isPending}>
-          {isPending ? "Creating..." : "Create Source"}
-        </Button>
+        <div className="flex gap-2">
+          <Button type="submit" disabled={isPending}>
+            {isPending ? "Creating..." : "Create Source"}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.push("/admin/harvest")}
+          >
+            Cancel
+          </Button>
+        </div>
       </form>
     </div>
   );

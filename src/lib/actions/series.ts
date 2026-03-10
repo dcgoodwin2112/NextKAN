@@ -7,7 +7,9 @@ import {
   type SeriesCreateInput,
   type SeriesUpdateInput,
 } from "@/lib/schemas/series";
+import { logActivity } from "@/lib/services/activity";
 import { generateSlug } from "@/lib/utils/slug";
+import { silentCatch } from "@/lib/utils/log";
 
 const seriesIncludes = {
   datasets: { include: { publisher: true } },
@@ -16,7 +18,7 @@ const seriesIncludes = {
 export async function createSeries(input: SeriesCreateInput) {
   const data = seriesCreateSchema.parse(input);
   const slug = generateSlug(data.title);
-  return prisma.datasetSeries.create({
+  const series = await prisma.datasetSeries.create({
     data: {
       title: data.title,
       identifier: data.identifier,
@@ -25,6 +27,18 @@ export async function createSeries(input: SeriesCreateInput) {
     },
     include: seriesIncludes,
   });
+
+  silentCatch(
+    logActivity({
+      action: "create",
+      entityType: "series",
+      entityId: series.id,
+      entityName: series.title,
+    }),
+    "activity"
+  );
+
+  return series;
 }
 
 export async function updateSeries(id: string, input: SeriesUpdateInput) {
@@ -38,11 +52,23 @@ export async function updateSeries(id: string, input: SeriesUpdateInput) {
   if (data.identifier !== undefined) updateData.identifier = data.identifier;
   if (data.description !== undefined) updateData.description = data.description || null;
 
-  return prisma.datasetSeries.update({
+  const series = await prisma.datasetSeries.update({
     where: { id },
     data: updateData,
     include: seriesIncludes,
   });
+
+  silentCatch(
+    logActivity({
+      action: "update",
+      entityType: "series",
+      entityId: series.id,
+      entityName: series.title,
+    }),
+    "activity"
+  );
+
+  return series;
 }
 
 export async function deleteSeries(id: string) {
@@ -51,7 +77,19 @@ export async function deleteSeries(id: string) {
     where: { seriesId: id },
     data: { seriesId: null },
   });
-  return prisma.datasetSeries.delete({ where: { id } });
+  const series = await prisma.datasetSeries.delete({ where: { id } });
+
+  silentCatch(
+    logActivity({
+      action: "delete",
+      entityType: "series",
+      entityId: id,
+      entityName: series.title,
+    }),
+    "activity"
+  );
+
+  return series;
 }
 
 export async function getSeries(id: string) {

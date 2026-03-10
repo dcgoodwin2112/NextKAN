@@ -250,6 +250,13 @@ export default function NewChartPage() {
               >
                 {saving ? "Creating..." : "Create Chart"}
               </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push("/admin/charts")}
+              >
+                Cancel
+              </Button>
             </div>
 
             {error && <p className="text-sm text-danger">{error}</p>}

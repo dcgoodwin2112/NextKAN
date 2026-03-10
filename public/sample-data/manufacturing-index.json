@@ -1,0 +1,11 @@
+[
+  {"Month":"2024-01","Sector":"Automotive","OutputIndex":102.3,"EmploymentIndex":99.8,"NewOrders":105.1,"Inventory":97.2},
+  {"Month":"2024-02","Sector":"Automotive","OutputIndex":103.1,"EmploymentIndex":100.2,"NewOrders":106.4,"Inventory":96.8},
+  {"Month":"2024-03","Sector":"Automotive","OutputIndex":101.8,"EmploymentIndex":99.5,"NewOrders":104.2,"Inventory":98.1},
+  {"Month":"2024-01","Sector":"Electronics","OutputIndex":98.7,"EmploymentIndex":101.3,"NewOrders":97.5,"Inventory":102.4},
+  {"Month":"2024-02","Sector":"Electronics","OutputIndex":99.4,"EmploymentIndex":101.8,"NewOrders":98.9,"Inventory":101.6},
+  {"Month":"2024-03","Sector":"Electronics","OutputIndex":100.2,"EmploymentIndex":102.1,"NewOrders":100.5,"Inventory":100.9},
+  {"Month":"2024-01","Sector":"Food Processing","OutputIndex":104.5,"EmploymentIndex":100.0,"NewOrders":103.8,"Inventory":99.1},
+  {"Month":"2024-02","Sector":"Food Processing","OutputIndex":105.1,"EmploymentIndex":100.3,"NewOrders":104.6,"Inventory":98.7},
+  {"Month":"2024-03","Sector":"Food Processing","OutputIndex":104.9,"EmploymentIndex":100.1,"NewOrders":104.2,"Inventory":99.3}
+]

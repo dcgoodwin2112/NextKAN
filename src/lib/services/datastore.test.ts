@@ -27,6 +27,17 @@ vi.mock("fs/promises", () => ({
   readFile: vi.fn(),
 }));
 
+const mockSheetToJson = vi.fn();
+vi.mock("xlsx", () => ({
+  read: vi.fn((_buffer: Buffer, _opts: unknown) => ({
+    SheetNames: ["Sheet1"],
+    Sheets: { Sheet1: {} },
+  })),
+  utils: {
+    sheet_to_json: (...args: unknown[]) => mockSheetToJson(...args),
+  },
+}));
+
 import {
   generateTableName,
   sanitizeColumnName,
@@ -36,6 +47,7 @@ import {
   importCsvToDatastore,
   importJsonToDatastore,
   importGeoJsonToDatastore,
+  importExcelToDatastore,
   flattenObject,
   stringifyValues,
   extractJsonArray,
@@ -681,6 +693,183 @@ describe("importGeoJsonToDatastore", () => {
           status: "error",
           errorMessage: "No file path for distribution",
         }),
+      })
+    );
+  });
+});
+
+describe("importExcelToDatastore", () => {
+  const mockDistribution = {
+    id: "a1b2c3d4-e5f6-1234-a567-123456789abc",
+    filePath: "/tmp/test.xlsx",
+    mediaType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    datasetId: "ds-1",
+    title: null,
+    description: null,
+    downloadURL: null,
+    accessURL: null,
+    format: null,
+    conformsTo: null,
+    describedBy: null,
+    fileName: "test.xlsx",
+    fileSize: 5000,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  } as Distribution;
+
+  beforeEach(() => {
+    mockSheetToJson.mockReset();
+    vi.mocked(readFile).mockReset();
+    prismaMock.datastoreTable.create.mockResolvedValue({
+      id: "dt-1",
+      distributionId: mockDistribution.id,
+      tableName: "ds_a1b2c3d4",
+      columns: "[]",
+      rowCount: 0,
+      status: "pending",
+      errorMessage: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    prismaMock.datastoreTable.update.mockResolvedValue({} as any);
+  });
+
+  it("parses first sheet and imports rows", async () => {
+    vi.mocked(readFile).mockResolvedValue(Buffer.from("fake excel"));
+
+    const XLSX = await import("xlsx");
+    vi.mocked(XLSX.read).mockReturnValue({
+      SheetNames: ["Sheet1"],
+      Sheets: { Sheet1: {} },
+    } as any);
+    mockSheetToJson.mockReturnValue([
+      { name: "Alice", age: 30 },
+      { name: "Bob", age: 25 },
+    ]);
+
+    await importExcelToDatastore(mockDistribution);
+
+    expect(XLSX.read).toHaveBeenCalledWith(expect.any(Buffer), { type: "buffer" });
+    expect(prismaMock.datastoreTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ status: "ready", rowCount: 2 }),
+      })
+    );
+  });
+
+  it("creates error table when no filePath", async () => {
+    const noPath = { ...mockDistribution, filePath: null } as Distribution;
+
+    await importExcelToDatastore(noPath);
+
+    expect(prismaMock.datastoreTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          status: "error",
+          errorMessage: "No file path for distribution",
+        }),
+      })
+    );
+  });
+
+  it("creates error table for empty sheet", async () => {
+    vi.mocked(readFile).mockResolvedValue(Buffer.from("fake excel"));
+
+    const XLSX = await import("xlsx");
+    vi.mocked(XLSX.read).mockReturnValue({
+      SheetNames: ["Sheet1"],
+      Sheets: { Sheet1: {} },
+    } as any);
+    mockSheetToJson.mockReturnValue([]);
+
+    await importExcelToDatastore(mockDistribution);
+
+    expect(prismaMock.datastoreTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          status: "error",
+          errorMessage: "Excel sheet is empty",
+        }),
+      })
+    );
+  });
+
+  it("creates error table for workbook with no sheets", async () => {
+    vi.mocked(readFile).mockResolvedValue(Buffer.from("fake excel"));
+
+    const XLSX = await import("xlsx");
+    vi.mocked(XLSX.read).mockReturnValue({
+      SheetNames: [],
+      Sheets: {},
+    } as any);
+
+    await importExcelToDatastore(mockDistribution);
+
+    expect(prismaMock.datastoreTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          status: "error",
+          errorMessage: "Excel file has no sheets",
+        }),
+      })
+    );
+  });
+
+  it("creates error table on file read error", async () => {
+    vi.mocked(readFile).mockRejectedValue(new Error("ENOENT: file not found"));
+
+    await importExcelToDatastore(mockDistribution);
+
+    expect(prismaMock.datastoreTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          status: "error",
+          errorMessage: "ENOENT: file not found",
+        }),
+      })
+    );
+  });
+
+  it("converts mixed value types to strings", async () => {
+    vi.mocked(readFile).mockResolvedValue(Buffer.from("fake excel"));
+
+    const XLSX = await import("xlsx");
+    vi.mocked(XLSX.read).mockReturnValue({
+      SheetNames: ["Sheet1"],
+      Sheets: { Sheet1: {} },
+    } as any);
+    mockSheetToJson.mockReturnValue([
+      { name: "Alice", age: 30, active: true },
+    ]);
+
+    await importExcelToDatastore(mockDistribution);
+
+    expect(prismaMock.datastoreTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ status: "ready", rowCount: 1 }),
+      })
+    );
+  });
+
+  it("uses first sheet when multiple sheets exist", async () => {
+    vi.mocked(readFile).mockResolvedValue(Buffer.from("fake excel"));
+
+    const XLSX = await import("xlsx");
+    vi.mocked(XLSX.read).mockReturnValue({
+      SheetNames: ["Data", "Metadata"],
+      Sheets: { Data: {}, Metadata: {} },
+    } as any);
+    mockSheetToJson.mockReturnValue([{ col: "val" }]);
+
+    await importExcelToDatastore(mockDistribution);
+
+    expect(mockSheetToJson).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ defval: "" })
+    );
+    expect(prismaMock.datastoreTable.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ status: "ready", rowCount: 1 }),
       })
     );
   });

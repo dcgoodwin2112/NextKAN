@@ -1,0 +1,9 @@
+Date,VesselName,VesselType,CargoCategory,TonnageGross,Berth,DwellHours
+2024-01-05,MV Springfield Star,Bulk Carrier,Grain,32500,B-1,18
+2024-01-08,SS River Queen,Tanker,Petroleum,28000,B-3,24
+2024-01-12,MV Heartland,Container,Mixed Freight,41200,B-2,12
+2024-01-15,SS Prairie Wind,Bulk Carrier,Coal,35800,B-1,20
+2024-01-19,MV Capital City,Container,Manufactured Goods,38500,B-2,14
+2024-01-22,SS Green Valley,Tanker,Chemicals,26300,B-3,22
+2024-01-26,MV Iron Horse,Bulk Carrier,Iron Ore,44100,B-1,16
+2024-01-30,SS Lakefront,Container,Agricultural,29700,B-2,10

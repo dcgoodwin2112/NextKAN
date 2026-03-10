@@ -31,6 +31,7 @@ const navGroups: NavGroup[] = [
       { href: "/admin/custom-fields", label: "Custom Fields", requiredRole: "admin" },
       { href: "/admin/series", label: "Series" },
       { href: "/admin/licenses", label: "Licenses" },
+      { href: "/admin/themes", label: "Themes" },
       { href: "/admin/organizations", label: "Organizations" },
       { href: "/admin/pages", label: "Pages", requiredRole: "admin" },
       { href: "/admin/charts", label: "Charts" },

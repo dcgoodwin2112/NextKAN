@@ -8,10 +8,12 @@ import {
   type HarvestSourceUpdateInput,
 } from "@/lib/schemas/harvest";
 import { runHarvest } from "@/lib/services/harvest";
+import { logActivity } from "@/lib/services/activity";
+import { silentCatch } from "@/lib/utils/log";
 
 export async function createHarvestSource(input: HarvestSourceCreateInput) {
   const data = harvestSourceCreateSchema.parse(input);
-  return prisma.harvestSource.create({
+  const source = await prisma.harvestSource.create({
     data: {
       name: data.name,
       url: data.url,
@@ -21,6 +23,18 @@ export async function createHarvestSource(input: HarvestSourceCreateInput) {
       enabled: data.enabled,
     },
   });
+
+  silentCatch(
+    logActivity({
+      action: "create",
+      entityType: "harvest_source",
+      entityId: source.id,
+      entityName: source.name,
+    }),
+    "activity"
+  );
+
+  return source;
 }
 
 export async function updateHarvestSource(
@@ -28,16 +42,40 @@ export async function updateHarvestSource(
   input: HarvestSourceUpdateInput
 ) {
   const data = harvestSourceUpdateSchema.parse(input);
-  return prisma.harvestSource.update({
+  const source = await prisma.harvestSource.update({
     where: { id },
     data,
   });
+
+  silentCatch(
+    logActivity({
+      action: "update",
+      entityType: "harvest_source",
+      entityId: source.id,
+      entityName: source.name,
+    }),
+    "activity"
+  );
+
+  return source;
 }
 
 export async function deleteHarvestSource(id: string) {
   // Delete associated harvest jobs first
   await prisma.harvestJob.deleteMany({ where: { sourceId: id } });
-  return prisma.harvestSource.delete({ where: { id } });
+  const source = await prisma.harvestSource.delete({ where: { id } });
+
+  silentCatch(
+    logActivity({
+      action: "delete",
+      entityType: "harvest_source",
+      entityId: id,
+      entityName: source.name,
+    }),
+    "activity"
+  );
+
+  return source;
 }
 
 export async function getHarvestSource(id: string) {
@@ -82,5 +120,17 @@ export async function listHarvestJobs(sourceId: string) {
 }
 
 export async function triggerHarvest(sourceId: string) {
+  const source = await prisma.harvestSource.findUnique({ where: { id: sourceId } });
+
+  silentCatch(
+    logActivity({
+      action: "trigger",
+      entityType: "harvest_source",
+      entityId: sourceId,
+      entityName: source?.name || sourceId,
+    }),
+    "activity"
+  );
+
   return runHarvest(sourceId);
 }

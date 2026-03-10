@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -8,6 +8,7 @@ import {
   createColumnHelper,
 } from "@tanstack/react-table";
 import { DownloadLink } from "@/components/analytics/DownloadLink";
+import type { Map as LeafletMap } from "leaflet";
 
 interface DataPreviewProps {
   distributionId: string;
@@ -30,13 +31,30 @@ interface JsonPreviewData {
   truncated: boolean;
 }
 
+interface JsonTablePreviewData {
+  type: "json-table";
+  columns: string[];
+  rows: Record<string, string>[];
+  totalRows: number;
+  truncated: boolean;
+}
+
+interface GeoJsonPreviewData {
+  type: "geojson";
+  columns: string[];
+  rows: Record<string, string>[];
+  totalRows: number;
+  truncated: boolean;
+  geojson: unknown;
+}
+
 interface UnsupportedData {
   type: "unsupported";
   format: string;
   message: string;
 }
 
-type PreviewData = CsvPreviewData | JsonPreviewData | UnsupportedData;
+type PreviewData = CsvPreviewData | JsonPreviewData | JsonTablePreviewData | GeoJsonPreviewData | UnsupportedData;
 
 function CsvTable({ data }: { data: CsvPreviewData }) {
   const columnHelper = createColumnHelper<Record<string, string>>();
@@ -83,6 +101,82 @@ function CsvTable({ data }: { data: CsvPreviewData }) {
         <p className="text-xs text-text-muted mt-2">
           Showing {data.rows.length} of {data.totalRows} rows
         </p>
+      )}
+    </div>
+  );
+}
+
+function GeoJsonPreview({ data }: { data: GeoJsonPreviewData }) {
+  const [view, setView] = useState<"table" | "map">("table");
+  const mapRef = useRef<HTMLDivElement>(null);
+  const [mapInstance, setMapInstance] = useState<LeafletMap | null>(null);
+
+  useEffect(() => {
+    if (view !== "map" || !mapRef.current) return;
+
+    import("leaflet").then((L) => {
+      // @ts-expect-error CSS import
+      import("leaflet/dist/leaflet.css");
+
+      if (mapInstance) {
+        mapInstance.remove();
+      }
+
+      const map = L.map(mapRef.current!).setView([39.8283, -98.5795], 4);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+      }).addTo(map);
+
+      try {
+        const geoLayer = L.geoJSON(data.geojson as any).addTo(map);
+        map.fitBounds(geoLayer.getBounds(), { padding: [20, 20] });
+      } catch {
+        // fallback — keep default view
+      }
+
+      setMapInstance(map);
+    });
+
+    return () => {
+      if (mapInstance) {
+        mapInstance.remove();
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view, data.geojson]);
+
+  const tableData: CsvPreviewData = {
+    type: "csv",
+    columns: data.columns,
+    rows: data.rows,
+    totalRows: data.totalRows,
+    truncated: data.truncated,
+  };
+
+  return (
+    <div>
+      <div className="flex gap-2 mb-3">
+        <button
+          onClick={() => setView("table")}
+          className={`px-3 py-1 text-sm rounded ${view === "table" ? "bg-primary text-white" : "bg-surface border border-border"}`}
+        >
+          Table
+        </button>
+        <button
+          onClick={() => setView("map")}
+          className={`px-3 py-1 text-sm rounded ${view === "map" ? "bg-primary text-white" : "bg-surface border border-border"}`}
+        >
+          Map
+        </button>
+      </div>
+      {view === "table" ? (
+        <CsvTable data={tableData} />
+      ) : (
+        <div
+          ref={mapRef}
+          style={{ height: 400, width: "100%" }}
+          className="rounded border"
+        />
       )}
     </div>
   );
@@ -150,6 +244,21 @@ export function DataPreview({ distributionId, format, filePath, downloadURL }: D
 
   if (preview.type === "csv") {
     return <CsvTable data={preview} />;
+  }
+
+  if (preview.type === "json-table") {
+    const tableData: CsvPreviewData = {
+      type: "csv",
+      columns: preview.columns,
+      rows: preview.rows,
+      totalRows: preview.totalRows,
+      truncated: preview.truncated,
+    };
+    return <CsvTable data={tableData} />;
+  }
+
+  if (preview.type === "geojson") {
+    return <GeoJsonPreview data={preview} />;
   }
 
   if (preview.type === "json") {

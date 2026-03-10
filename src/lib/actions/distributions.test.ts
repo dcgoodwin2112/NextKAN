@@ -4,7 +4,9 @@ import { prismaMock } from "@/__mocks__/prisma";
 const mockImportCsv = vi.fn();
 const mockImportJson = vi.fn();
 const mockImportGeoJson = vi.fn();
+const mockImportExcel = vi.fn();
 const mockDeleteTable = vi.fn();
+const mockFetchAndImport = vi.fn().mockResolvedValue(undefined);
 
 vi.mock("@/lib/db", () => ({
   prisma: prismaMock,
@@ -14,6 +16,7 @@ vi.mock("@/lib/services/datastore", () => ({
   importCsvToDatastore: mockImportCsv,
   importJsonToDatastore: mockImportJson,
   importGeoJsonToDatastore: mockImportGeoJson,
+  importExcelToDatastore: mockImportExcel,
   deleteDatastoreTable: mockDeleteTable,
 }));
 
@@ -34,6 +37,10 @@ vi.mock("@/lib/email-templates/dataset-created", () => ({
   }),
 }));
 
+vi.mock("@/lib/services/remote-fetch", () => ({
+  fetchAndImportRemoteResource: mockFetchAndImport,
+}));
+
 import { addDistribution, removeDistribution } from "./datasets";
 
 import { beforeEach } from "vitest";
@@ -43,6 +50,7 @@ describe("addDistribution", () => {
     mockImportCsv.mockClear();
     mockImportJson.mockClear();
     mockImportGeoJson.mockClear();
+    mockImportExcel.mockClear();
   });
   it("validates input", async () => {
     prismaMock.distribution.create.mockResolvedValue({
@@ -182,6 +190,74 @@ describe("addDistribution", () => {
     expect(mockImportJson).not.toHaveBeenCalled();
   });
 
+  it("triggers datastore import for XLSX with filePath", async () => {
+    const dist = {
+      id: "dist-xlsx",
+      title: "Excel",
+      description: null,
+      downloadURL: "https://example.com/data.xlsx",
+      accessURL: null,
+      mediaType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      format: "XLSX",
+      conformsTo: null,
+      describedBy: null,
+      fileName: "data.xlsx",
+      filePath: "/uploads/data.xlsx",
+      fileSize: 4096,
+      datasetId: "ds-1",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    prismaMock.distribution.create.mockResolvedValue(dist);
+
+    await addDistribution("ds-1", {
+      title: "Excel",
+      downloadURL: "https://example.com/data.xlsx",
+      mediaType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      format: "XLSX",
+      fileName: "data.xlsx",
+      filePath: "/uploads/data.xlsx",
+      fileSize: 4096,
+    });
+
+    expect(mockImportExcel).toHaveBeenCalledWith(dist);
+    expect(mockImportCsv).not.toHaveBeenCalled();
+  });
+
+  it("triggers datastore import for XLS with filePath", async () => {
+    const dist = {
+      id: "dist-xls",
+      title: "Legacy Excel",
+      description: null,
+      downloadURL: "https://example.com/data.xls",
+      accessURL: null,
+      mediaType: "application/vnd.ms-excel",
+      format: "XLS",
+      conformsTo: null,
+      describedBy: null,
+      fileName: "data.xls",
+      filePath: "/uploads/data.xls",
+      fileSize: 2048,
+      datasetId: "ds-1",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    prismaMock.distribution.create.mockResolvedValue(dist);
+
+    await addDistribution("ds-1", {
+      title: "Legacy Excel",
+      downloadURL: "https://example.com/data.xls",
+      mediaType: "application/vnd.ms-excel",
+      format: "XLS",
+      fileName: "data.xls",
+      filePath: "/uploads/data.xls",
+      fileSize: 2048,
+    });
+
+    expect(mockImportExcel).toHaveBeenCalledWith(dist);
+    expect(mockImportCsv).not.toHaveBeenCalled();
+  });
+
   it("does not trigger import for unsupported types", async () => {
     prismaMock.distribution.create.mockResolvedValue({
       id: "dist-pdf",
@@ -214,6 +290,103 @@ describe("addDistribution", () => {
     expect(mockImportCsv).not.toHaveBeenCalled();
     expect(mockImportJson).not.toHaveBeenCalled();
     expect(mockImportGeoJson).not.toHaveBeenCalled();
+  });
+});
+
+describe("addDistribution remote fetch", () => {
+  beforeEach(() => {
+    mockFetchAndImport.mockClear();
+  });
+
+  it("calls fetchAndImportRemoteResource when downloadURL present, no filePath", async () => {
+    const dist = {
+      id: "dist-remote",
+      title: "Remote CSV",
+      description: null,
+      downloadURL: "https://example.com/data.csv",
+      accessURL: null,
+      mediaType: "text/csv",
+      format: "CSV",
+      conformsTo: null,
+      describedBy: null,
+      fileName: null,
+      filePath: null,
+      fileSize: null,
+      datasetId: "ds-1",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    prismaMock.distribution.create.mockResolvedValue(dist);
+
+    await addDistribution("ds-1", {
+      title: "Remote CSV",
+      downloadURL: "https://example.com/data.csv",
+      mediaType: "text/csv",
+      format: "CSV",
+    });
+
+    expect(mockFetchAndImport).toHaveBeenCalledWith("dist-remote", "https://example.com/data.csv");
+  });
+
+  it("does NOT call fetchAndImportRemoteResource when filePath is present", async () => {
+    const dist = {
+      id: "dist-local",
+      title: "Local CSV",
+      description: null,
+      downloadURL: "https://example.com/data.csv",
+      accessURL: null,
+      mediaType: "text/csv",
+      format: "CSV",
+      conformsTo: null,
+      describedBy: null,
+      fileName: "data.csv",
+      filePath: "/uploads/data.csv",
+      fileSize: 1024,
+      datasetId: "ds-1",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    prismaMock.distribution.create.mockResolvedValue(dist);
+
+    await addDistribution("ds-1", {
+      title: "Local CSV",
+      downloadURL: "https://example.com/data.csv",
+      mediaType: "text/csv",
+      format: "CSV",
+      fileName: "data.csv",
+      filePath: "/uploads/data.csv",
+      fileSize: 1024,
+    });
+
+    expect(mockFetchAndImport).not.toHaveBeenCalled();
+  });
+
+  it("does NOT call fetchAndImportRemoteResource when downloadURL is absent", async () => {
+    const dist = {
+      id: "dist-access",
+      title: "Access Only",
+      description: null,
+      downloadURL: null,
+      accessURL: "https://example.com/api",
+      mediaType: null,
+      format: null,
+      conformsTo: null,
+      describedBy: null,
+      fileName: null,
+      filePath: null,
+      fileSize: null,
+      datasetId: "ds-1",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    prismaMock.distribution.create.mockResolvedValue(dist);
+
+    await addDistribution("ds-1", {
+      title: "Access Only",
+      accessURL: "https://example.com/api",
+    });
+
+    expect(mockFetchAndImport).not.toHaveBeenCalled();
   });
 });
 

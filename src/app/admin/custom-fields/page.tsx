@@ -75,6 +75,7 @@ export default async function CustomFieldsPage() {
                     <CustomFieldDeleteButton
                       id={def.id}
                       label={def.label}
+                      valueCount={def._count.values}
                       onDelete={handleDelete}
                     />
                   </div>

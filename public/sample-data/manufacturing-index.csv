@@ -1,0 +1,10 @@
+Month,Sector,OutputIndex,EmploymentIndex,NewOrders,Inventory
+2024-01,Automotive,102.3,99.8,105.1,97.2
+2024-02,Automotive,103.1,100.2,106.4,96.8
+2024-03,Automotive,101.8,99.5,104.2,98.1
+2024-01,Electronics,98.7,101.3,97.5,102.4
+2024-02,Electronics,99.4,101.8,98.9,101.6
+2024-03,Electronics,100.2,102.1,100.5,100.9
+2024-01,Food Processing,104.5,100.0,103.8,99.1
+2024-02,Food Processing,105.1,100.3,104.6,98.7
+2024-03,Food Processing,104.9,100.1,104.2,99.3

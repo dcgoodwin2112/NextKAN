@@ -550,7 +550,22 @@ export async function addDistribution(datasetId: string, input: DistributionInpu
     } else if (data.mediaType === "application/geo+json") {
       const { importGeoJsonToDatastore } = await import("@/lib/services/datastore");
       await importGeoJsonToDatastore(distribution);
+    } else if (
+      data.mediaType === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+      data.mediaType === "application/vnd.ms-excel"
+    ) {
+      const { importExcelToDatastore } = await import("@/lib/services/datastore");
+      await importExcelToDatastore(distribution);
     }
+  }
+
+  // Remote URL fetch: download and import when only downloadURL is provided (no local upload)
+  if (!data.filePath && data.downloadURL) {
+    const { fetchAndImportRemoteResource } = await import("@/lib/services/remote-fetch");
+    silentCatch(
+      fetchAndImportRemoteResource(distribution.id, data.downloadURL),
+      "remote-fetch"
+    );
   }
 
   return distribution;
