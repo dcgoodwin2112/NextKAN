@@ -1,0 +1,45 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {"permitNumber": "BP-2024-001", "issueDate": "2024-01-08", "type": "Residential", "description": "Single-family new construction", "valuation": 285000},
+      "geometry": {"type": "Point", "coordinates": [-89.648, 39.782]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"permitNumber": "BP-2024-002", "issueDate": "2024-01-12", "type": "Commercial", "description": "Office renovation", "valuation": 125000},
+      "geometry": {"type": "Point", "coordinates": [-89.645, 39.798]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"permitNumber": "BP-2024-003", "issueDate": "2024-01-18", "type": "Residential", "description": "Addition/remodel", "valuation": 45000},
+      "geometry": {"type": "Point", "coordinates": [-89.660, 39.775]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"permitNumber": "BP-2024-004", "issueDate": "2024-01-25", "type": "Commercial", "description": "New retail space", "valuation": 520000},
+      "geometry": {"type": "Point", "coordinates": [-89.642, 39.770]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"permitNumber": "BP-2024-005", "issueDate": "2024-02-03", "type": "Industrial", "description": "Warehouse expansion", "valuation": 380000},
+      "geometry": {"type": "Point", "coordinates": [-89.630, 39.810]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"permitNumber": "BP-2024-006", "issueDate": "2024-02-10", "type": "Residential", "description": "Deck/patio", "valuation": 12000},
+      "geometry": {"type": "Point", "coordinates": [-89.655, 39.790]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"permitNumber": "BP-2024-007", "issueDate": "2024-02-18", "type": "Commercial", "description": "Restaurant build-out", "valuation": 95000},
+      "geometry": {"type": "Point", "coordinates": [-89.650, 39.795]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"permitNumber": "BP-2024-008", "issueDate": "2024-02-26", "type": "Residential", "description": "Single-family new construction", "valuation": 310000},
+      "geometry": {"type": "Point", "coordinates": [-89.638, 39.805]}
+    }
+  ]
+}

@@ -393,6 +393,63 @@ export async function importGeoJsonToDatastore(
   await importFileToDatastore(distribution, parseGeoJsonToRows);
 }
 
+export async function importExcelToDatastore(
+  distribution: Distribution
+): Promise<void> {
+  if (!distribution.filePath) {
+    const tableName = generateTableName(distribution.id);
+    const record = await prisma.datastoreTable.create({
+      data: {
+        distributionId: distribution.id,
+        tableName,
+        columns: "[]",
+        status: "pending",
+      },
+    });
+    await prisma.datastoreTable.update({
+      where: { id: record.id },
+      data: { status: "error", errorMessage: "No file path for distribution" },
+    });
+    return;
+  }
+
+  try {
+    const XLSX = await import("xlsx");
+    const buffer = await readFile(distribution.filePath);
+    const workbook = XLSX.read(buffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+    if (!sheetName) throw new Error("Excel file has no sheets");
+
+    const sheet = workbook.Sheets[sheetName];
+    const jsonRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, {
+      defval: "",
+    });
+
+    if (jsonRows.length === 0) throw new Error("Excel sheet is empty");
+
+    const columns = Object.keys(jsonRows[0]);
+    const rows = jsonRows.map((row) => stringifyValues(row));
+
+    await importRowsToDatastore(distribution, columns, rows);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Unknown import error";
+    const tableName = generateTableName(distribution.id);
+    const record = await prisma.datastoreTable.create({
+      data: {
+        distributionId: distribution.id,
+        tableName,
+        columns: "[]",
+        status: "pending",
+      },
+    });
+    await prisma.datastoreTable.update({
+      where: { id: record.id },
+      data: { status: "error", errorMessage: message },
+    });
+  }
+}
+
 export function validateColumn(
   name: string,
   columns: DatastoreColumn[]

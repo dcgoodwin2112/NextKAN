@@ -88,6 +88,7 @@ export async function listCustomFieldDefinitions(organizationId?: string) {
 
   return prisma.customFieldDefinition.findMany({
     where,
+    include: { _count: { select: { values: true } } },
     orderBy: { sortOrder: "asc" },
   });
 }

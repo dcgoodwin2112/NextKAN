@@ -8,6 +8,8 @@ import {
   type SavedChartCreateInput,
   type ChartUpdateInput,
 } from "@/lib/schemas/chart";
+import { logActivity } from "@/lib/services/activity";
+import { silentCatch } from "@/lib/utils/log";
 
 const chartIncludes = {
   distribution: {
@@ -70,11 +72,33 @@ export async function updateChart(id: string, input: ChartUpdateInput) {
   if (data.chartType !== undefined) updateData.chartType = data.chartType;
   if (data.config !== undefined) updateData.config = JSON.stringify(data.config);
 
-  return prisma.savedChart.update({ where: { id }, data: updateData });
+  const chart = await prisma.savedChart.update({ where: { id }, data: updateData });
+
+  silentCatch(
+    logActivity({
+      action: "update",
+      entityType: "chart",
+      entityId: chart.id,
+      entityName: chart.title || "Untitled Chart",
+    }),
+    "activity"
+  );
+
+  return chart;
 }
 
 export async function deleteChart(id: string) {
-  await prisma.savedChart.delete({ where: { id } });
+  const chart = await prisma.savedChart.delete({ where: { id } });
+
+  silentCatch(
+    logActivity({
+      action: "delete",
+      entityType: "chart",
+      entityId: id,
+      entityName: chart.title || "Untitled Chart",
+    }),
+    "activity"
+  );
 }
 
 export async function createChart(input: SavedChartCreateInput) {
@@ -82,7 +106,7 @@ export async function createChart(input: SavedChartCreateInput) {
   if (!session?.user?.id) throw new Error("Unauthorized");
 
   const data = savedChartCreateSchema.parse(input);
-  return prisma.savedChart.create({
+  const chart = await prisma.savedChart.create({
     data: {
       distributionId: data.distributionId,
       title: data.title || null,
@@ -91,6 +115,18 @@ export async function createChart(input: SavedChartCreateInput) {
       createdById: session.user.id,
     },
   });
+
+  silentCatch(
+    logActivity({
+      action: "create",
+      entityType: "chart",
+      entityId: chart.id,
+      entityName: chart.title || "Untitled Chart",
+    }),
+    "activity"
+  );
+
+  return chart;
 }
 
 export async function listChartableDistributions() {

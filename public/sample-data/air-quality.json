@@ -1,0 +1,22 @@
+[
+  {"StationID":"AQ-001","StationName":"Downtown Central","Date":"2024-01-15","PM25":12.3,"PM10":28.1,"Ozone":0.042,"AQI":52,"Status":"Good"},
+  {"StationID":"AQ-001","StationName":"Downtown Central","Date":"2024-02-15","PM25":14.1,"PM10":31.5,"Ozone":0.038,"AQI":58,"Status":"Moderate"},
+  {"StationID":"AQ-001","StationName":"Downtown Central","Date":"2024-03-15","PM25":10.8,"PM10":24.2,"Ozone":0.045,"AQI":48,"Status":"Good"},
+  {"StationID":"AQ-001","StationName":"Downtown Central","Date":"2024-04-15","PM25":15.6,"PM10":33.8,"Ozone":0.051,"AQI":62,"Status":"Moderate"},
+  {"StationID":"AQ-002","StationName":"Westside Park","Date":"2024-01-15","PM25":8.4,"PM10":19.3,"Ozone":0.035,"AQI":38,"Status":"Good"},
+  {"StationID":"AQ-002","StationName":"Westside Park","Date":"2024-02-15","PM25":9.7,"PM10":22.1,"Ozone":0.032,"AQI":42,"Status":"Good"},
+  {"StationID":"AQ-002","StationName":"Westside Park","Date":"2024-03-15","PM25":7.2,"PM10":16.8,"Ozone":0.039,"AQI":34,"Status":"Good"},
+  {"StationID":"AQ-002","StationName":"Westside Park","Date":"2024-04-15","PM25":11.3,"PM10":25.4,"Ozone":0.048,"AQI":50,"Status":"Good"},
+  {"StationID":"AQ-003","StationName":"Industrial Zone North","Date":"2024-01-15","PM25":22.8,"PM10":48.3,"Ozone":0.058,"AQI":89,"Status":"Moderate"},
+  {"StationID":"AQ-003","StationName":"Industrial Zone North","Date":"2024-02-15","PM25":25.1,"PM10":52.7,"Ozone":0.062,"AQI":98,"Status":"Moderate"},
+  {"StationID":"AQ-003","StationName":"Industrial Zone North","Date":"2024-03-15","PM25":19.4,"PM10":42.1,"Ozone":0.055,"AQI":78,"Status":"Moderate"},
+  {"StationID":"AQ-003","StationName":"Industrial Zone North","Date":"2024-04-15","PM25":28.3,"PM10":58.9,"Ozone":0.068,"AQI":112,"Status":"Unhealthy for Sensitive Groups"},
+  {"StationID":"AQ-004","StationName":"Lakeside Monitor","Date":"2024-01-15","PM25":6.1,"PM10":14.2,"Ozone":0.029,"AQI":28,"Status":"Good"},
+  {"StationID":"AQ-004","StationName":"Lakeside Monitor","Date":"2024-02-15","PM25":7.8,"PM10":17.5,"Ozone":0.031,"AQI":35,"Status":"Good"},
+  {"StationID":"AQ-004","StationName":"Lakeside Monitor","Date":"2024-03-15","PM25":5.9,"PM10":13.1,"Ozone":0.033,"AQI":27,"Status":"Good"},
+  {"StationID":"AQ-004","StationName":"Lakeside Monitor","Date":"2024-04-15","PM25":9.2,"PM10":20.8,"Ozone":0.041,"AQI":44,"Status":"Good"},
+  {"StationID":"AQ-005","StationName":"Suburban East","Date":"2024-01-15","PM25":10.5,"PM10":23.7,"Ozone":0.040,"AQI":46,"Status":"Good"},
+  {"StationID":"AQ-005","StationName":"Suburban East","Date":"2024-02-15","PM25":11.9,"PM10":26.3,"Ozone":0.037,"AQI":51,"Status":"Moderate"},
+  {"StationID":"AQ-005","StationName":"Suburban East","Date":"2024-03-15","PM25":9.1,"PM10":20.4,"Ozone":0.043,"AQI":42,"Status":"Good"},
+  {"StationID":"AQ-005","StationName":"Suburban East","Date":"2024-04-15","PM25":13.7,"PM10":30.2,"Ozone":0.052,"AQI":56,"Status":"Moderate"}
+]

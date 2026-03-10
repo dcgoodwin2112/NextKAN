@@ -1,0 +1,9 @@
+PermitNumber,IssueDate,Type,Description,Valuation,SquareFootage,Address,Latitude,Longitude
+BP-2024-001,2024-01-08,Residential,Single-family new construction,285000,2200,1425 Oak Ave,-89.648,39.782
+BP-2024-002,2024-01-12,Commercial,Office renovation,125000,4800,300 Main St,-89.645,39.798
+BP-2024-003,2024-01-18,Residential,Addition/remodel,45000,600,822 Elm Dr,-89.660,39.775
+BP-2024-004,2024-01-25,Commercial,New retail space,520000,8500,1100 S Grand Ave,-89.642,39.770
+BP-2024-005,2024-02-03,Industrial,Warehouse expansion,380000,12000,2200 Industrial Pkwy,-89.630,39.810
+BP-2024-006,2024-02-10,Residential,Deck/patio,12000,400,445 Maple Ln,-89.655,39.790
+BP-2024-007,2024-02-18,Commercial,Restaurant build-out,95000,3200,618 Washington St,-89.650,39.795
+BP-2024-008,2024-02-26,Residential,Single-family new construction,310000,2400,1680 Cedar Ct,-89.638,39.805

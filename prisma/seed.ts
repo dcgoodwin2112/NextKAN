@@ -2,9 +2,11 @@ import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import bcrypt from "bcryptjs";
 import Papa from "papaparse";
-import { readFile } from "fs/promises";
+import { readFile, writeFile } from "fs/promises";
+import { existsSync } from "fs";
 import Database from "better-sqlite3";
 import path from "path";
+import XLSX from "xlsx";
 import { seedLicenses } from "./seeds/licenses";
 import { seedSeries } from "./seeds/series";
 import { seedTemplates } from "./seeds/templates";
@@ -105,41 +107,141 @@ const datastoreTypeToDictType: Record<string, string> = {
   BOOLEAN: "boolean",
 };
 
-async function importSeedCsvs(): Promise<void> {
+const IMPORTABLE_TYPES = new Set([
+  "text/csv",
+  "application/json",
+  "application/geo+json",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-excel",
+]);
+
+function parseRows(
+  mediaType: string,
+  fileContent: string | Buffer
+): { rawColumns: string[]; rows: Record<string, string>[] } | null {
+  if (mediaType === "text/csv") {
+    const parsed = Papa.parse<Record<string, string>>(
+      fileContent as string,
+      { header: true, skipEmptyLines: true }
+    );
+    return { rawColumns: parsed.meta.fields ?? [], rows: parsed.data };
+  }
+
+  if (mediaType === "application/json") {
+    const data = JSON.parse(fileContent as string);
+    const arr = Array.isArray(data) ? data : [data];
+    if (arr.length === 0) return null;
+    const rawColumns = Object.keys(arr[0]);
+    const rows = arr.map((obj: Record<string, unknown>) => {
+      const row: Record<string, string> = {};
+      for (const key of rawColumns) {
+        const val = obj[key];
+        row[key] = val == null ? "" : String(val);
+      }
+      return row;
+    });
+    return { rawColumns, rows };
+  }
+
+  if (mediaType === "application/geo+json") {
+    const geojson = JSON.parse(fileContent as string);
+    const features = geojson.features ?? [];
+    if (features.length === 0) return null;
+    const propKeys = Object.keys(features[0].properties ?? {});
+    const rawColumns = [...propKeys, "geometry"];
+    const rows = features.map(
+      (f: { properties?: Record<string, unknown>; geometry?: unknown }) => {
+        const row: Record<string, string> = {};
+        for (const key of propKeys) {
+          const val = f.properties?.[key];
+          row[key] = val == null ? "" : String(val);
+        }
+        row["geometry"] = JSON.stringify(f.geometry ?? null);
+        return row;
+      }
+    );
+    return { rawColumns, rows };
+  }
+
+  if (
+    mediaType ===
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+    mediaType === "application/vnd.ms-excel"
+  ) {
+    const wb = XLSX.read(fileContent as Buffer, { type: "buffer" });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const data = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
+    if (data.length === 0) return null;
+    const rawColumns = Object.keys(data[0]);
+    const rows = data.map((obj) => {
+      const row: Record<string, string> = {};
+      for (const key of rawColumns) {
+        const val = obj[key];
+        row[key] = val == null ? "" : String(val);
+      }
+      return row;
+    });
+    return { rawColumns, rows };
+  }
+
+  return null;
+}
+
+async function generateSeedXlsx(): Promise<void> {
+  const xlsxPath = path.resolve("public/sample-data/annual-budget.xlsx");
+  if (existsSync(xlsxPath)) return;
+
+  const csvContent = await readFile(
+    path.resolve("public/sample-data/annual-budget.csv"),
+    "utf-8"
+  );
+  const parsed = Papa.parse<Record<string, string>>(csvContent, {
+    header: true,
+    skipEmptyLines: true,
+  });
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.json_to_sheet(parsed.data);
+  XLSX.utils.book_append_sheet(wb, ws, "Budget");
+  const buf = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
+  await writeFile(xlsxPath, buf);
+  console.log(`Seed: generated annual-budget.xlsx (${buf.length} bytes)`);
+}
+
+async function importSeedFiles(): Promise<void> {
   const distributions = await prisma.distribution.findMany({
-    where: {
-      mediaType: "text/csv",
-      filePath: { not: null },
-    },
+    where: { filePath: { not: null } },
   });
 
   let imported = 0;
 
   for (const dist of distributions) {
-    // Skip if already imported (idempotent)
+    if (!IMPORTABLE_TYPES.has(dist.mediaType)) continue;
+
     const existing = await prisma.datastoreTable.findUnique({
       where: { distributionId: dist.id },
     });
     if (existing) continue;
 
     const filePath = path.resolve(dist.filePath!);
-    let fileContent: string;
+    let fileContent: string | Buffer;
     try {
-      fileContent = await readFile(filePath, "utf-8");
+      const isExcel =
+        dist.mediaType.includes("spreadsheetml") ||
+        dist.mediaType === "application/vnd.ms-excel";
+      fileContent = await readFile(filePath, isExcel ? undefined : "utf-8");
     } catch {
-      console.warn(`Seed: skipping ${dist.fileName} — file not found at ${filePath}`);
+      console.warn(
+        `Seed: skipping ${dist.fileName} — file not found at ${filePath}`
+      );
       continue;
     }
 
-    const parsed = Papa.parse<Record<string, string>>(fileContent, {
-      header: true,
-      skipEmptyLines: true,
-    });
+    const result = parseRows(dist.mediaType, fileContent);
+    if (!result || result.rawColumns.length === 0) continue;
 
-    const rawColumns = parsed.meta.fields ?? [];
-    if (rawColumns.length === 0) continue;
-
-    const columns = inferColumnTypes(rawColumns, parsed.data);
+    const { rawColumns, rows } = result;
+    const columns = inferColumnTypes(rawColumns, rows);
 
     // Deduplicate sanitized column names
     const seen = new Map<string, number>();
@@ -157,7 +259,6 @@ async function importSeedCsvs(): Promise<void> {
     const db = new Database(dbPath);
 
     try {
-      // Create table
       const colDefs = columns
         .map((c) => `"${c.name}" ${c.type}`)
         .join(", ");
@@ -165,13 +266,11 @@ async function importSeedCsvs(): Promise<void> {
         `CREATE TABLE IF NOT EXISTS "${tableName}" (_rowid INTEGER PRIMARY KEY AUTOINCREMENT, ${colDefs})`
       );
 
-      // Batch insert
       const maxPerBatch = Math.min(
         Math.floor(999 / columns.length),
         1000
       );
       const insertCols = columns.map((c) => `"${c.name}"`).join(", ");
-      const rows = parsed.data;
 
       for (let i = 0; i < rows.length; i += maxPerBatch) {
         const batch = rows.slice(i, i + maxPerBatch);
@@ -206,7 +305,6 @@ async function importSeedCsvs(): Promise<void> {
         ).run(...values);
       }
 
-      // Create DatastoreTable record
       await prisma.datastoreTable.create({
         data: {
           distributionId: dist.id,
@@ -217,12 +315,13 @@ async function importSeedCsvs(): Promise<void> {
         },
       });
 
-      // Create DataDictionary + fields
       const existingDict = await prisma.dataDictionary.findUnique({
         where: { distributionId: dist.id },
       });
       if (existingDict) {
-        await prisma.dataDictionary.delete({ where: { id: existingDict.id } });
+        await prisma.dataDictionary.delete({
+          where: { id: existingDict.id },
+        });
       }
 
       await prisma.dataDictionary.create({
@@ -454,6 +553,19 @@ async function main() {
           downloadURL: "/sample-data/annual-budget.json",
           mediaType: "application/json",
           format: "JSON",
+          filePath: "public/sample-data/annual-budget.json",
+          fileName: "annual-budget.json",
+          fileSize: 2276,
+        },
+        {
+          title: "Budget Data (Excel)",
+          downloadURL: "/sample-data/annual-budget.xlsx",
+          mediaType:
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          format: "XLSX",
+          filePath: "public/sample-data/annual-budget.xlsx",
+          fileName: "annual-budget.xlsx",
+          fileSize: 20386,
         },
       ],
     },
@@ -532,10 +644,13 @@ async function main() {
           fileSize: 1277,
         },
         {
-          title: "Air Quality Data (JSON API)",
-          downloadURL: "/sample-data/air-quality.csv",
+          title: "Air Quality Data (JSON)",
+          downloadURL: "/sample-data/air-quality.json",
           mediaType: "application/json",
           format: "JSON",
+          filePath: "public/sample-data/air-quality.json",
+          fileName: "air-quality.json",
+          fileSize: 2886,
         },
       ],
     },
@@ -574,11 +689,13 @@ async function main() {
           fileSize: 874,
         },
         {
-          // PDF placeholder — no real file generated
           title: "School Report Cards (PDF)",
-          downloadURL: "https://example.com/data/school-report-cards.pdf",
+          downloadURL: "/sample-data/school-report-cards.pdf",
           mediaType: "application/pdf",
           format: "PDF",
+          filePath: "public/sample-data/school-report-cards.pdf",
+          fileName: "school-report-cards.pdf",
+          fileSize: 663,
         },
       ],
     },
@@ -686,13 +803,18 @@ async function main() {
           downloadURL: "/sample-data/parks.geojson",
           mediaType: "application/geo+json",
           format: "GeoJSON",
+          filePath: "public/sample-data/parks.geojson",
+          fileName: "parks.geojson",
+          fileSize: 2639,
         },
         {
-          // PDF placeholder — no real file generated
           title: "Parks Guide (PDF)",
-          downloadURL: "https://example.com/data/parks-guide.pdf",
+          downloadURL: "/sample-data/parks-guide.pdf",
           mediaType: "application/pdf",
           format: "PDF",
+          filePath: "public/sample-data/parks-guide.pdf",
+          fileName: "parks-guide.pdf",
+          fileSize: 663,
         },
       ],
     },
@@ -771,6 +893,9 @@ async function main() {
           downloadURL: "/sample-data/chronic-disease.json",
           mediaType: "application/json",
           format: "JSON",
+          filePath: "public/sample-data/chronic-disease.json",
+          fileName: "chronic-disease.json",
+          fileSize: 2304,
         },
       ],
     },
@@ -881,11 +1006,13 @@ async function main() {
           fileSize: 635,
         },
         {
-          // PDF placeholder — no real file generated
           title: "Survey Report (PDF)",
-          downloadURL: "https://example.com/data/workforce-report.pdf",
+          downloadURL: "/sample-data/workforce-report.pdf",
           mediaType: "application/pdf",
           format: "PDF",
+          filePath: "public/sample-data/workforce-report.pdf",
+          fileName: "workforce-report.pdf",
+          fileSize: 659,
         },
       ],
     },
@@ -911,9 +1038,12 @@ async function main() {
       distributions: [
         {
           title: "Crop Yield Data (CSV)",
-          downloadURL: "https://example.com/data/crop-yields.csv",
+          downloadURL: "/sample-data/crop-yields.csv",
           mediaType: "text/csv",
           format: "CSV",
+          filePath: "public/sample-data/crop-yields.csv",
+          fileName: "crop-yields.csv",
+          fileSize: 526,
         },
       ],
     },
@@ -943,15 +1073,21 @@ async function main() {
       distributions: [
         {
           title: "Manufacturing Index (CSV)",
-          downloadURL: "https://example.com/data/manufacturing-index.csv",
+          downloadURL: "/sample-data/manufacturing-index.csv",
           mediaType: "text/csv",
           format: "CSV",
+          filePath: "public/sample-data/manufacturing-index.csv",
+          fileName: "manufacturing-index.csv",
+          fileSize: 454,
         },
         {
           title: "Manufacturing Index (JSON)",
-          downloadURL: "https://example.com/data/manufacturing-index.json",
+          downloadURL: "/sample-data/manufacturing-index.json",
           mediaType: "application/json",
           format: "JSON",
+          filePath: "public/sample-data/manufacturing-index.json",
+          fileName: "manufacturing-index.json",
+          fileSize: 1134,
         },
       ],
     },
@@ -977,9 +1113,12 @@ async function main() {
       distributions: [
         {
           title: "Vessel Traffic (CSV)",
-          downloadURL: "https://example.com/data/vessel-traffic.csv",
+          downloadURL: "/sample-data/vessel-traffic.csv",
           mediaType: "text/csv",
           format: "CSV",
+          filePath: "public/sample-data/vessel-traffic.csv",
+          fileName: "vessel-traffic.csv",
+          fileSize: 555,
         },
       ],
     },
@@ -1010,9 +1149,12 @@ async function main() {
       distributions: [
         {
           title: "CPI Data (CSV)",
-          downloadURL: "https://example.com/data/cpi-springfield.csv",
+          downloadURL: "/sample-data/cpi-springfield.csv",
           mediaType: "text/csv",
           format: "CSV",
+          filePath: "public/sample-data/cpi-springfield.csv",
+          fileName: "cpi-springfield.csv",
+          fileSize: 371,
         },
       ],
     },
@@ -1045,15 +1187,21 @@ async function main() {
       distributions: [
         {
           title: "Building Permits (CSV)",
-          downloadURL: "https://example.com/data/building-permits.csv",
+          downloadURL: "/sample-data/building-permits.csv",
           mediaType: "text/csv",
           format: "CSV",
+          filePath: "public/sample-data/building-permits.csv",
+          fileName: "building-permits.csv",
+          fileSize: 864,
         },
         {
           title: "Building Permits (GeoJSON)",
-          downloadURL: "https://example.com/data/building-permits.geojson",
+          downloadURL: "/sample-data/building-permits.geojson",
           mediaType: "application/geo+json",
           format: "GeoJSON",
+          filePath: "public/sample-data/building-permits.geojson",
+          fileName: "building-permits.geojson",
+          fileSize: 2213,
         },
       ],
     },
@@ -1087,9 +1235,12 @@ async function main() {
       distributions: [
         {
           title: "Emissions Inventory (CSV)",
-          downloadURL: "https://example.com/data/emissions-inventory.csv",
+          downloadURL: "/sample-data/emissions-inventory.csv",
           mediaType: "text/csv",
           format: "CSV",
+          filePath: "public/sample-data/emissions-inventory.csv",
+          fileName: "emissions-inventory.csv",
+          fileSize: 604,
         },
       ],
     },
@@ -1123,9 +1274,12 @@ async function main() {
       distributions: [
         {
           title: "Vaccination Data (CSV)",
-          downloadURL: "https://example.com/data/vaccination-rates.csv",
+          downloadURL: "/sample-data/vaccination-rates.csv",
           mediaType: "text/csv",
           format: "CSV",
+          filePath: "public/sample-data/vaccination-rates.csv",
+          fileName: "vaccination-rates.csv",
+          fileSize: 454,
         },
       ],
     },
@@ -1155,9 +1309,12 @@ async function main() {
       distributions: [
         {
           title: "Fleet Inventory (CSV)",
-          downloadURL: "https://example.com/data/fleet-inventory.csv",
+          downloadURL: "/sample-data/fleet-inventory.csv",
           mediaType: "text/csv",
           format: "CSV",
+          filePath: "public/sample-data/fleet-inventory.csv",
+          fileName: "fleet-inventory.csv",
+          fileSize: 753,
         },
       ],
     },
@@ -1249,8 +1406,9 @@ async function main() {
     });
   }
 
-  // --- Import CSV data into datastore ---
-  await importSeedCsvs();
+  // --- Generate xlsx + import all data into datastore ---
+  await generateSeedXlsx();
+  await importSeedFiles();
 
   // --- Licenses ---
   await seedLicenses(prisma);

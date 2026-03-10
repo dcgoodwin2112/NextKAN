@@ -1,0 +1,11 @@
+Year,AgeGroup,VaccineType,Region,CoverageRate,DosesAdministered
+2022,0-4,DTaP,Northeast,94.2,285000
+2022,0-4,MMR,Northeast,93.8,282000
+2022,5-17,Tdap,Northeast,91.5,890000
+2022,18-64,Influenza,Northeast,48.3,12500000
+2022,65+,Influenza,Northeast,72.1,4200000
+2023,0-4,DTaP,Northeast,94.5,288000
+2023,0-4,MMR,Northeast,93.6,280000
+2023,5-17,Tdap,Northeast,91.8,895000
+2023,18-64,Influenza,Northeast,49.1,12800000
+2023,65+,Influenza,Northeast,73.4,4350000

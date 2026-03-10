@@ -406,7 +406,7 @@ export function DatasetForm({
         {availableThemes.length > 0 && (
           <div>
             <Label className="mb-1">Themes</Label>
-            <div className="grid grid-cols-2 gap-1 max-h-48 overflow-y-auto border rounded p-2">
+            <div className="grid grid-cols-2 gap-1 max-h-72 overflow-y-auto border rounded p-2">
               {availableThemes.map((theme) => (
                 <label key={theme.id} className="flex items-center gap-2 text-sm py-0.5">
                   <input

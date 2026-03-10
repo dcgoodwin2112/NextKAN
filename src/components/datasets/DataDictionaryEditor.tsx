@@ -1,7 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useRef, useTransition } from "react";
 import type { DataDictionaryField } from "@/generated/prisma/client";
+import {
+  parseDictionaryCSV,
+  parseDictionaryJSON,
+  exportDictionaryCSV,
+  exportDictionaryJSON,
+} from "@/lib/services/data-dictionary-io";
 
 const fieldTypes = [
   "string",
@@ -40,10 +46,89 @@ export function DataDictionaryEditor({
       type: f.type,
       description: f.description || "",
       format: f.format || "",
+      constraints: f.constraints || "",
       sortOrder: f.sortOrder,
     }))
   );
   const [isPending, startTransition] = useTransition();
+  const [importMessage, setImportMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function handleImport(file: File) {
+    setImportMessage(null);
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = reader.result as string;
+      const isJSON = file.name.endsWith(".json");
+      const result = isJSON ? parseDictionaryJSON(text) : parseDictionaryCSV(text);
+
+      if (result.errors.length > 0) {
+        const errorLines = result.errors.map(
+          (e) => `Row ${e.row}: ${e.message}`
+        );
+        setImportMessage({
+          type: "error",
+          text: `Import errors:\n${errorLines.join("\n")}`,
+        });
+        if (result.fields.length > 0) {
+          setFields(
+            result.fields.map((f) => ({
+              name: f.name,
+              title: f.title || "",
+              type: f.type,
+              description: f.description || "",
+              format: f.format || "",
+              constraints: f.constraints || "",
+              sortOrder: f.sortOrder,
+            }))
+          );
+        }
+      } else if (result.fields.length === 0) {
+        setImportMessage({ type: "error", text: "No fields found in file." });
+      } else {
+        setFields(
+          result.fields.map((f) => ({
+            name: f.name,
+            title: f.title || "",
+            type: f.type,
+            description: f.description || "",
+            format: f.format || "",
+            constraints: f.constraints || "",
+            sortOrder: f.sortOrder,
+          }))
+        );
+        setImportMessage({
+          type: "success",
+          text: `Imported ${result.fields.length} field(s). Review and click Save.`,
+        });
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function handleExport(format: "csv" | "json") {
+    const mapped = fields.map((f) => ({
+      name: f.name,
+      type: f.type as "string" | "number" | "integer" | "boolean" | "date" | "datetime",
+      title: f.title || undefined,
+      description: f.description || undefined,
+      format: f.format || undefined,
+      constraints: f.constraints || undefined,
+      sortOrder: f.sortOrder,
+    }));
+
+    const content = format === "csv" ? exportDictionaryCSV(mapped) : exportDictionaryJSON(mapped);
+    const mimeType = format === "csv" ? "text/csv" : "application/json";
+    const ext = format === "csv" ? "csv" : "json";
+
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `data-dictionary.${ext}`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   function updateField(index: number, key: string, value: string) {
     setFields((prev) =>
@@ -70,7 +155,7 @@ export function DataDictionaryEditor({
   function addField() {
     setFields((prev) => [
       ...prev,
-      { name: "", title: "", type: "string", description: "", format: "", sortOrder: prev.length },
+      { name: "", title: "", type: "string", description: "", format: "", constraints: "", sortOrder: prev.length },
     ]);
   }
 
@@ -80,6 +165,30 @@ export function DataDictionaryEditor({
 
   return (
     <div>
+      {importMessage && (
+        <div
+          role="alert"
+          className={`mb-3 rounded border p-3 text-sm whitespace-pre-line ${
+            importMessage.type === "error"
+              ? "border-danger bg-danger/10 text-danger"
+              : "border-primary bg-primary-subtle text-primary"
+          }`}
+        >
+          {importMessage.text}
+        </div>
+      )}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".csv,.json"
+        className="hidden"
+        data-testid="dictionary-file-input"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) handleImport(file);
+          e.target.value = "";
+        }}
+      />
       {fields.length > 0 && (
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-border text-sm">
@@ -152,7 +261,7 @@ export function DataDictionaryEditor({
           </table>
         </div>
       )}
-      <div className="mt-3 flex gap-2">
+      <div className="mt-3 flex flex-wrap gap-2">
         <button
           type="button"
           onClick={addField}
@@ -160,15 +269,38 @@ export function DataDictionaryEditor({
         >
           Add Field
         </button>
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="rounded border border-primary px-3 py-1.5 text-sm text-primary hover:bg-primary-subtle"
+        >
+          Import...
+        </button>
         {fields.length > 0 && (
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={isPending}
-            className="rounded bg-primary px-4 py-2 text-sm text-white hover:bg-primary-hover disabled:opacity-50"
-          >
-            {isPending ? "Saving..." : "Save Data Dictionary"}
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={() => handleExport("csv")}
+              className="rounded border border-primary px-3 py-1.5 text-sm text-primary hover:bg-primary-subtle"
+            >
+              Export CSV
+            </button>
+            <button
+              type="button"
+              onClick={() => handleExport("json")}
+              className="rounded border border-primary px-3 py-1.5 text-sm text-primary hover:bg-primary-subtle"
+            >
+              Export JSON
+            </button>
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={isPending}
+              className="rounded bg-primary px-4 py-2 text-sm text-white hover:bg-primary-hover disabled:opacity-50"
+            >
+              {isPending ? "Saving..." : "Save Data Dictionary"}
+            </button>
+          </>
         )}
       </div>
     </div>

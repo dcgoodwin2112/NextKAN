@@ -1,0 +1,11 @@
+Year,FacilityName,Sector,CO2_tons,Methane_tons,NOx_tons,PM25_tons
+2022,Springfield Power Plant,Energy,245000,1200,890,45
+2022,Heartland Manufacturing,Industrial,82000,340,420,28
+2022,Metro Waste Treatment,Waste,18500,2800,120,8
+2022,Springfield Refinery,Energy,195000,950,760,52
+2023,Springfield Power Plant,Energy,238000,1150,870,42
+2023,Heartland Manufacturing,Industrial,79500,320,400,26
+2023,Metro Waste Treatment,Waste,17800,2650,115,7
+2023,Springfield Refinery,Energy,190000,920,740,50
+2024,Springfield Power Plant,Energy,225000,1080,820,38
+2024,Heartland Manufacturing,Industrial,76000,300,380,24

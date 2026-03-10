@@ -92,4 +92,87 @@ describe("DataPreview", () => {
     expect(iframe).toBeTruthy();
     expect(iframe?.getAttribute("src")).toBe("https://example.com/doc.pdf");
   });
+
+  it("renders Excel as table (type=csv from API)", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          type: "csv",
+          columns: ["Department", "Budget"],
+          rows: [{ Department: "Parks", Budget: "50000" }],
+          totalRows: 1,
+          truncated: false,
+        }),
+    } as any);
+
+    render(
+      <DataPreview
+        distributionId="dist-1"
+        format="XLSX"
+        filePath="/uploads/budget.xlsx"
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Department")).toBeTruthy();
+      expect(screen.getByText("Parks")).toBeTruthy();
+    });
+  });
+
+  it("renders json-table as table", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          type: "json-table",
+          columns: ["city", "pop"],
+          rows: [{ city: "Springfield", pop: "50000" }],
+          totalRows: 1,
+          truncated: false,
+        }),
+    } as any);
+
+    render(
+      <DataPreview
+        distributionId="dist-1"
+        format="JSON"
+        filePath="/uploads/data.json"
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("city")).toBeTruthy();
+      expect(screen.getByText("Springfield")).toBeTruthy();
+    });
+  });
+
+  it("renders GeoJSON with table view and map/table toggle", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          type: "geojson",
+          columns: ["name", "geometry"],
+          rows: [{ name: "Park A", geometry: '{"type":"Point"}' }],
+          totalRows: 1,
+          truncated: false,
+          geojson: { type: "FeatureCollection", features: [] },
+        }),
+    } as any);
+
+    render(
+      <DataPreview
+        distributionId="dist-1"
+        format="GEOJSON"
+        filePath="/uploads/data.geojson"
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Table")).toBeTruthy();
+      expect(screen.getByText("Map")).toBeTruthy();
+      expect(screen.getByText("Park A")).toBeTruthy();
+    });
+  });
 });

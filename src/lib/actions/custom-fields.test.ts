@@ -131,6 +131,7 @@ describe("listCustomFieldDefinitions", () => {
     expect(result).toHaveLength(1);
     expect(prismaMock.customFieldDefinition.findMany).toHaveBeenCalledWith({
       where: {},
+      include: { _count: { select: { values: true } } },
       orderBy: { sortOrder: "asc" },
     });
   });
@@ -140,6 +141,7 @@ describe("listCustomFieldDefinitions", () => {
     await listCustomFieldDefinitions("org-1");
     expect(prismaMock.customFieldDefinition.findMany).toHaveBeenCalledWith({
       where: { OR: [{ organizationId: null }, { organizationId: "org-1" }] },
+      include: { _count: { select: { values: true } } },
       orderBy: { sortOrder: "asc" },
     });
   });

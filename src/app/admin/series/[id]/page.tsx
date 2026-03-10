@@ -1,13 +1,11 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getSeries, updateSeries, deleteSeries } from "@/lib/actions/series";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
+import { SeriesForm } from "@/components/admin/SeriesForm";
 import { SeriesDeleteButton } from "./SeriesDeleteButton";
+import type { SeriesCreateInput } from "@/lib/schemas/series";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -18,20 +16,14 @@ export default async function EditSeriesPage({ params }: Props) {
   const series = await getSeries(id);
   if (!series) notFound();
 
-  async function handleUpdate(formData: FormData) {
+  async function handleUpdate(data: SeriesCreateInput) {
     "use server";
-    await updateSeries(id, {
-      title: formData.get("title") as string,
-      identifier: formData.get("identifier") as string,
-      description: (formData.get("description") as string) || undefined,
-    });
-    redirect("/admin/series");
+    await updateSeries(id, data);
   }
 
   async function handleDelete() {
     "use server";
     await deleteSeries(id);
-    redirect("/admin/series");
   }
 
   return (
@@ -47,36 +39,15 @@ export default async function EditSeriesPage({ params }: Props) {
         <SeriesDeleteButton onDelete={handleDelete} />
       </AdminPageHeader>
 
-      <form action={handleUpdate} className="max-w-xl space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="title">Title *</Label>
-          <Input
-            id="title"
-            name="title"
-            type="text"
-            defaultValue={series.title}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="identifier">Identifier *</Label>
-          <Input
-            id="identifier"
-            name="identifier"
-            type="text"
-            defaultValue={series.identifier}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="description">Description</Label>
-          <Textarea
-            id="description"
-            name="description"
-            defaultValue={series.description || ""}
-            rows={3}
-          />
-        </div>
-        <Button type="submit">Update Series</Button>
-      </form>
+      <SeriesForm
+        initialData={{
+          id: series.id,
+          title: series.title,
+          identifier: series.identifier,
+          description: series.description,
+        }}
+        onSubmit={handleUpdate}
+      />
 
       {series.datasets.length > 0 && (
         <div className="mt-8">
