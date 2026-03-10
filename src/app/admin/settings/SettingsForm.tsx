@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Settings, Zap, Database } from "lucide-react";
 import { updateSettings } from "@/lib/actions/settings";
 
 interface SettingsFormProps {
@@ -41,7 +42,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
       {/* General */}
       <Card>
         <CardHeader>
-          <CardTitle>General</CardTitle>
+          <CardTitle className="flex items-center gap-2"><Settings className="size-5" /> General</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -112,7 +113,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
       {/* Features */}
       <Card>
         <CardHeader>
-          <CardTitle>Features</CardTitle>
+          <CardTitle className="flex items-center gap-2"><Zap className="size-5" /> Features</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <ToggleField
@@ -180,7 +181,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
       {/* Catalog */}
       <Card>
         <CardHeader>
-          <CardTitle>Catalog</CardTitle>
+          <CardTitle className="flex items-center gap-2"><Database className="size-5" /> Catalog</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">

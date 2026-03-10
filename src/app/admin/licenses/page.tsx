@@ -3,6 +3,7 @@ import { listLicenses } from "@/lib/actions/licenses";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { EmptyState } from "@/components/admin/EmptyState";
 import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -21,7 +22,7 @@ export default async function AdminLicensesPage() {
     <div>
       <AdminPageHeader title="Licenses">
         <Button asChild>
-          <Link href="/admin/licenses/new">New License</Link>
+          <Link href="/admin/licenses/new"><Plus /> New License</Link>
         </Button>
       </AdminPageHeader>
 

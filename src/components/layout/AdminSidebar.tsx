@@ -3,7 +3,32 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import {
+  Menu,
+  X,
+  LayoutDashboard,
+  Database,
+  FileText,
+  SlidersHorizontal,
+  Layers,
+  Scale,
+  Palette,
+  Building2,
+  BookOpen,
+  BarChart3,
+  Download,
+  Upload,
+  CheckCircle2,
+  Link as LinkIcon,
+  Users,
+  MessageSquare,
+  TrendingUp,
+  History,
+  Trash2,
+  Monitor,
+  Settings,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -11,6 +36,7 @@ import { Separator } from "@/components/ui/separator";
 interface NavItem {
   href: string;
   label: string;
+  icon: LucideIcon;
   requiredRole?: string;
 }
 
@@ -21,41 +47,41 @@ interface NavGroup {
 
 const navGroups: NavGroup[] = [
   {
-    items: [{ href: "/admin", label: "Dashboard" }],
+    items: [{ href: "/admin", label: "Dashboard", icon: LayoutDashboard }],
   },
   {
     label: "Content",
     items: [
-      { href: "/admin/datasets", label: "Datasets" },
-      { href: "/admin/templates", label: "Templates" },
-      { href: "/admin/custom-fields", label: "Custom Fields", requiredRole: "admin" },
-      { href: "/admin/series", label: "Series" },
-      { href: "/admin/licenses", label: "Licenses" },
-      { href: "/admin/themes", label: "Themes" },
-      { href: "/admin/organizations", label: "Organizations" },
-      { href: "/admin/pages", label: "Pages", requiredRole: "admin" },
-      { href: "/admin/charts", label: "Charts" },
+      { href: "/admin/datasets", label: "Datasets", icon: Database },
+      { href: "/admin/templates", label: "Templates", icon: FileText },
+      { href: "/admin/custom-fields", label: "Custom Fields", icon: SlidersHorizontal, requiredRole: "admin" },
+      { href: "/admin/series", label: "Series", icon: Layers },
+      { href: "/admin/licenses", label: "Licenses", icon: Scale },
+      { href: "/admin/themes", label: "Themes", icon: Palette },
+      { href: "/admin/organizations", label: "Organizations", icon: Building2 },
+      { href: "/admin/pages", label: "Pages", icon: BookOpen, requiredRole: "admin" },
+      { href: "/admin/charts", label: "Charts", icon: BarChart3 },
     ],
   },
   {
     label: "Data Management",
     items: [
-      { href: "/admin/harvest", label: "Harvest", requiredRole: "admin" },
-      { href: "/admin/import", label: "Import" },
-      { href: "/admin/quality", label: "Quality" },
-      { href: "/admin/link-check", label: "Link Checker", requiredRole: "admin" },
+      { href: "/admin/harvest", label: "Harvest", icon: Download, requiredRole: "admin" },
+      { href: "/admin/import", label: "Import", icon: Upload },
+      { href: "/admin/quality", label: "Quality", icon: CheckCircle2 },
+      { href: "/admin/link-check", label: "Link Checker", icon: LinkIcon, requiredRole: "admin" },
     ],
   },
   {
     label: "Administration",
     items: [
-      { href: "/admin/users", label: "Users", requiredRole: "admin" },
-      { href: "/admin/comments", label: "Comments", requiredRole: "admin" },
-      { href: "/admin/analytics", label: "Analytics", requiredRole: "admin" },
-      { href: "/admin/activity", label: "Activity", requiredRole: "admin" },
-      { href: "/admin/trash", label: "Trash", requiredRole: "admin" },
-      { href: "/admin/system", label: "System", requiredRole: "admin" },
-      { href: "/admin/settings", label: "Settings", requiredRole: "admin" },
+      { href: "/admin/users", label: "Users", icon: Users, requiredRole: "admin" },
+      { href: "/admin/comments", label: "Comments", icon: MessageSquare, requiredRole: "admin" },
+      { href: "/admin/analytics", label: "Analytics", icon: TrendingUp, requiredRole: "admin" },
+      { href: "/admin/activity", label: "Activity", icon: History, requiredRole: "admin" },
+      { href: "/admin/trash", label: "Trash", icon: Trash2, requiredRole: "admin" },
+      { href: "/admin/system", label: "System", icon: Monitor, requiredRole: "admin" },
+      { href: "/admin/settings", label: "Settings", icon: Settings, requiredRole: "admin" },
     ],
   },
 ];
@@ -122,12 +148,13 @@ export function AdminSidebar({ userRole }: AdminSidebarProps) {
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        "block rounded px-3 py-2 text-sm",
+                        "flex items-center gap-2 rounded px-3 py-2 text-sm",
                         isActive
                           ? "bg-sidebar-primary/10 text-sidebar-primary font-medium"
                           : "text-sidebar-foreground hover:bg-sidebar-accent"
                       )}
                     >
+                      <item.icon className="size-4 shrink-0" />
                       {item.label}
                     </Link>
                   );

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useSelection } from "@/hooks/useSelection";
+import { Eye, EyeOff, Trash2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -58,10 +59,11 @@ export function AdminPageListClient({ orderedPages }: AdminPageListClientProps) 
   }
 
   const actions: BulkAction[] = [
-    { label: "Publish", onClick: () => handleBulkPublish(true) },
-    { label: "Unpublish", onClick: () => handleBulkPublish(false) },
+    { label: "Publish", icon: Eye, onClick: () => handleBulkPublish(true) },
+    { label: "Unpublish", icon: EyeOff, onClick: () => handleBulkPublish(false) },
     {
       label: "Delete",
+      icon: Trash2,
       onClick: handleBulkDelete,
       variant: "destructive",
       requiresConfirmation: true,

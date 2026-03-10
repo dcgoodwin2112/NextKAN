@@ -15,6 +15,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CollapsibleSection } from "@/components/admin/CollapsibleSection";
+import {
+  Database,
+  Download,
+  Clock,
+  BarChart3,
+  FileCheck,
+  MessageSquare,
+  AlertTriangle,
+  AlertCircle,
+  FileX,
+  BookOpen,
+  Building2,
+} from "lucide-react";
 import Link from "next/link";
 
 export default async function AdminDashboard() {
@@ -35,7 +48,7 @@ export default async function AdminDashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardContent>
-            <p className="text-sm text-text-muted">Published Datasets</p>
+            <div className="flex items-center gap-2 text-sm text-text-muted"><Database className="size-4" /> Published Datasets</div>
             <p className="text-3xl font-bold">{stats.publishedCount}</p>
             {stats.publishedTrend !== 0 && (
               <p className={`text-sm ${stats.publishedTrend > 0 ? "text-success" : "text-danger"}`}>
@@ -46,21 +59,21 @@ export default async function AdminDashboard() {
         </Card>
         <Card>
           <CardContent>
-            <p className="text-sm text-text-muted">Downloads This Month</p>
+            <div className="flex items-center gap-2 text-sm text-text-muted"><Download className="size-4" /> Downloads This Month</div>
             <p className="text-3xl font-bold">{stats.downloadsThisMonth}</p>
           </CardContent>
         </Card>
         {stats.pendingReviewCount !== null && (
           <Card>
             <CardContent>
-              <p className="text-sm text-text-muted">Pending Review</p>
+              <div className="flex items-center gap-2 text-sm text-text-muted"><Clock className="size-4" /> Pending Review</div>
               <p className="text-3xl font-bold">{stats.pendingReviewCount}</p>
             </CardContent>
           </Card>
         )}
         <Card>
           <CardContent>
-            <p className="text-sm text-text-muted">Avg Quality Score</p>
+            <div className="flex items-center gap-2 text-sm text-text-muted"><BarChart3 className="size-4" /> Avg Quality Score</div>
             <p className="text-3xl font-bold">{stats.avgQualityScore}%</p>
           </CardContent>
         </Card>
@@ -75,7 +88,7 @@ export default async function AdminDashboard() {
               <Card>
                 <CardContent>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-medium">Pending Review</h3>
+                    <h3 className="flex items-center gap-2 font-medium"><FileCheck className="size-4" /> Pending Review</h3>
                     <Badge variant="secondary">{actionItems.pendingReview.length}</Badge>
                   </div>
                   <ul className="space-y-2 text-sm">
@@ -100,7 +113,7 @@ export default async function AdminDashboard() {
               <Card>
                 <CardContent>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-medium">Pending Comments</h3>
+                    <h3 className="flex items-center gap-2 font-medium"><MessageSquare className="size-4" /> Pending Comments</h3>
                     <Badge variant="secondary">{actionItems.pendingComments.count}</Badge>
                   </div>
                   <p className="text-sm text-text-muted">
@@ -117,7 +130,7 @@ export default async function AdminDashboard() {
               <Card>
                 <CardContent>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-medium">Failed Harvests</h3>
+                    <h3 className="flex items-center gap-2 font-medium"><AlertTriangle className="size-4" /> Failed Harvests</h3>
                     <Badge variant="destructive">{actionItems.failedHarvests.length}</Badge>
                   </div>
                   <ul className="space-y-2 text-sm">
@@ -137,7 +150,7 @@ export default async function AdminDashboard() {
               <Card>
                 <CardContent>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-medium">Lowest Quality</h3>
+                    <h3 className="flex items-center gap-2 font-medium"><AlertCircle className="size-4" /> Lowest Quality</h3>
                     <Link href="/admin/quality" className="text-xs text-link hover:underline">View all</Link>
                   </div>
                   <ul className="space-y-2 text-sm">
@@ -164,7 +177,7 @@ export default async function AdminDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <Card>
             <CardContent>
-              <h3 className="font-medium mb-2">Stale Datasets</h3>
+              <h3 className="flex items-center gap-2 font-medium mb-2"><Clock className="size-4" /> Stale Datasets</h3>
               {catalogHealth.staleDatasets.length === 0 ? (
                 <p className="text-sm text-success">All datasets up to date</p>
               ) : (
@@ -182,7 +195,7 @@ export default async function AdminDashboard() {
 
           <Card>
             <CardContent>
-              <h3 className="font-medium mb-2">No Distributions</h3>
+              <h3 className="flex items-center gap-2 font-medium mb-2"><FileX className="size-4" /> No Distributions</h3>
               {catalogHealth.noDistributions.length === 0 ? (
                 <p className="text-sm text-success">All datasets have files</p>
               ) : (
@@ -200,7 +213,7 @@ export default async function AdminDashboard() {
 
           <Card>
             <CardContent>
-              <h3 className="font-medium mb-2">Missing Fields</h3>
+              <h3 className="flex items-center gap-2 font-medium mb-2"><AlertCircle className="size-4" /> Missing Fields</h3>
               {catalogHealth.missingFields.length === 0 ? (
                 <p className="text-sm text-success">All fields complete</p>
               ) : (
@@ -218,7 +231,7 @@ export default async function AdminDashboard() {
 
           <Card>
             <CardContent>
-              <h3 className="font-medium mb-2">Dictionary Coverage</h3>
+              <h3 className="flex items-center gap-2 font-medium mb-2"><BookOpen className="size-4" /> Dictionary Coverage</h3>
               <p className="text-2xl font-bold">{catalogHealth.dictionaryCoverage.percent}%</p>
               <p className="text-sm text-text-muted">
                 {catalogHealth.dictionaryCoverage.withDictionary} of {catalogHealth.dictionaryCoverage.total} distributions
@@ -228,7 +241,7 @@ export default async function AdminDashboard() {
 
           <Card>
             <CardContent>
-              <h3 className="font-medium mb-2">Empty Organizations</h3>
+              <h3 className="flex items-center gap-2 font-medium mb-2"><Building2 className="size-4" /> Empty Organizations</h3>
               {catalogHealth.emptyOrgs.length === 0 ? (
                 <p className="text-sm text-success">All orgs have published data</p>
               ) : (

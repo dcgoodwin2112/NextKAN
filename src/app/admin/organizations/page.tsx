@@ -10,6 +10,7 @@ import { SearchBar } from "@/components/ui/SearchBar";
 import { Pagination } from "@/components/ui/Pagination";
 import { OrgFilterBar } from "@/components/admin/OrgFilterBar";
 import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 /** Sort organizations so children appear immediately after their parent. */
 function sortTreeOrder<
@@ -72,7 +73,7 @@ export default async function AdminOrganizationsPage({
     <div>
       <AdminPageHeader title="Organizations">
         <Button asChild>
-          <Link href="/admin/organizations/new">New Organization</Link>
+          <Link href="/admin/organizations/new"><Plus /> New Organization</Link>
         </Button>
       </AdminPageHeader>
 

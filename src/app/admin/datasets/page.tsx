@@ -10,6 +10,7 @@ import { SearchBar } from "@/components/ui/SearchBar";
 import { Pagination } from "@/components/ui/Pagination";
 import { DatasetFilterBar } from "@/components/admin/DatasetFilterBar";
 import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 export default async function AdminDatasetsPage({
   searchParams,
@@ -47,7 +48,7 @@ export default async function AdminDatasetsPage({
     <div>
       <AdminPageHeader title="Datasets">
         <Button asChild>
-          <Link href="/admin/datasets/new">New Dataset</Link>
+          <Link href="/admin/datasets/new"><Plus /> New Dataset</Link>
         </Button>
       </AdminPageHeader>
 

@@ -7,6 +7,7 @@ import { useSelection } from "@/hooks/useSelection";
 import { DatasetTable } from "@/components/datasets/DatasetTable";
 import { DatasetCard } from "@/components/datasets/DatasetCard";
 import { BulkActionBar, type BulkAction } from "@/components/admin/BulkActionBar";
+import { Trash2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Label } from "@/components/ui/label";
@@ -94,6 +95,7 @@ export function AdminDatasetListClient({
     { label: "Change Organization", onClick: () => setOrgDialogOpen(true) },
     {
       label: "Delete",
+      icon: Trash2,
       onClick: handleBulkDelete,
       variant: "destructive",
       requiresConfirmation: true,

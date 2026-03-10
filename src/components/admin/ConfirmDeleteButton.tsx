@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -54,6 +55,7 @@ export function ConfirmDeleteButton({
           : "border-danger text-danger hover:bg-danger-subtle"}
         onClick={() => setOpen(true)}
       >
+        <Trash2 />
         {triggerLabel}
       </Button>
       <AlertDialogContent>

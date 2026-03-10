@@ -7,6 +7,7 @@ import { SearchBar } from "@/components/ui/SearchBar";
 import { Pagination } from "@/components/ui/Pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -43,7 +44,7 @@ export default async function AdminChartsPage({
     <div>
       <AdminPageHeader title="Charts">
         <Button asChild>
-          <Link href="/admin/charts/new">New Chart</Link>
+          <Link href="/admin/charts/new"><Plus /> New Chart</Link>
         </Button>
       </AdminPageHeader>
 

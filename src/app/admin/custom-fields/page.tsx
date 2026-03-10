@@ -4,6 +4,7 @@ import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { EmptyState } from "@/components/admin/EmptyState";
 import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -34,7 +35,7 @@ export default async function CustomFieldsPage() {
       />
       <AdminPageHeader title="Custom Fields">
         <Button asChild>
-          <Link href="/admin/custom-fields/new">New Custom Field</Link>
+          <Link href="/admin/custom-fields/new"><Plus /> New Custom Field</Link>
         </Button>
       </AdminPageHeader>
 

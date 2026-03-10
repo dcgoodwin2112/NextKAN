@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Link as LinkIcon, CheckCircle2, XCircle, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -58,6 +59,7 @@ export function LinkCheckClient() {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Button onClick={runCheck} disabled={loading}>
+          <Search />
           {loading ? "Checking..." : "Check Links"}
         </Button>
         {results && (
@@ -94,13 +96,13 @@ export function LinkCheckClient() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card>
                 <CardContent>
-                  <p className="text-sm text-text-muted">Total Checked</p>
+                  <div className="flex items-center gap-2 text-sm text-text-muted"><LinkIcon className="size-4" /> Total Checked</div>
                   <p className="text-2xl font-bold">{results.length}</p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent>
-                  <p className="text-sm text-text-muted">Healthy</p>
+                  <div className="flex items-center gap-2 text-sm text-text-muted"><CheckCircle2 className="size-4" /> Healthy</div>
                   <p className="text-2xl font-bold text-success">
                     {healthy.length}
                   </p>
@@ -108,7 +110,7 @@ export function LinkCheckClient() {
               </Card>
               <Card>
                 <CardContent>
-                  <p className="text-sm text-text-muted">Broken</p>
+                  <div className="flex items-center gap-2 text-sm text-text-muted"><XCircle className="size-4" /> Broken</div>
                   <p className="text-2xl font-bold text-danger">
                     {broken.length}
                   </p>

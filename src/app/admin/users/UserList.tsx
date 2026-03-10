@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useSelection } from "@/hooks/useSelection";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -188,6 +189,7 @@ export function UserList({ users, organizations }: UserListProps) {
     { label: "Change Role", onClick: () => setRoleDialogOpen(true) },
     {
       label: "Delete",
+      icon: Trash2,
       onClick: handleBulkDelete,
       variant: "destructive",
       requiresConfirmation: true,

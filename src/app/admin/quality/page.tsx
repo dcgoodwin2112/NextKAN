@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/admin/EmptyState";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { Pagination } from "@/components/ui/Pagination";
 import { QualityFilterBar } from "@/components/admin/QualityFilterBar";
+import { Database, BarChart3, AlertTriangle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -150,19 +151,19 @@ export default async function QualityReportPage({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <Card>
           <CardContent>
-            <p className="text-sm text-text-muted">Total Datasets</p>
+            <div className="flex items-center gap-2 text-sm text-text-muted"><Database className="size-4" /> Total Datasets</div>
             <p className="text-2xl font-bold">{total}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent>
-            <p className="text-sm text-text-muted">Average Quality Score</p>
+            <div className="flex items-center gap-2 text-sm text-text-muted"><BarChart3 className="size-4" /> Average Quality Score</div>
             <p className="text-2xl font-bold">{avgScore}/100</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent>
-            <p className="text-sm text-text-muted">Most Common Gap</p>
+            <div className="flex items-center gap-2 text-sm text-text-muted"><AlertTriangle className="size-4" /> Most Common Gap</div>
             <p className="text-2xl font-bold">{topMissing[0]?.[0] || "None"}</p>
           </CardContent>
         </Card>

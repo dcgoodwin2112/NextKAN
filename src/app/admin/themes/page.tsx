@@ -3,6 +3,7 @@ import { listThemes } from "@/lib/actions/themes";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { EmptyState } from "@/components/admin/EmptyState";
 import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -20,7 +21,7 @@ export default async function AdminThemesPage() {
     <div>
       <AdminPageHeader title="Themes">
         <Button asChild>
-          <Link href="/admin/themes/new">New Theme</Link>
+          <Link href="/admin/themes/new"><Plus /> New Theme</Link>
         </Button>
       </AdminPageHeader>
 

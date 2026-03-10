@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface EmptyStateProps {
@@ -22,7 +23,7 @@ export function EmptyState({
       )}
       {actionLabel && actionHref && (
         <Button asChild className="mt-4">
-          <Link href={actionHref}>{actionLabel}</Link>
+          <Link href={actionHref}><Plus /> {actionLabel}</Link>
         </Button>
       )}
     </div>
