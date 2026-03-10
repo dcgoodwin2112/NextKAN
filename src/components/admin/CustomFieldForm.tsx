@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { CUSTOM_FIELD_TYPES } from "@/lib/schemas/custom-field";
 
 interface Organization {
@@ -99,7 +100,9 @@ export function CustomFieldForm({ initialData, organizations, onSubmit }: Custom
     } catch (err) {
       // Next.js redirect throws NEXT_REDIRECT — let it propagate
       if (err instanceof Error && err.message === "NEXT_REDIRECT") throw err;
-      setError(err instanceof Error ? err.message : "An error occurred");
+      const message = err instanceof Error ? err.message : "An error occurred";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -135,6 +138,7 @@ export function CustomFieldForm({ initialData, organizations, onSubmit }: Custom
           onChange={(e) => setLabel(e.target.value)}
           placeholder="e.g. Department Code"
         />
+        <p className="text-xs text-text-muted">Display name shown to users in the dataset form.</p>
       </div>
 
       <div className="space-y-2">
@@ -151,14 +155,14 @@ export function CustomFieldForm({ initialData, organizations, onSubmit }: Custom
             </option>
           ))}
         </NativeSelect>
+        <p className="text-xs text-text-muted">Cannot be changed after creation.</p>
       </div>
 
       <div className="flex items-center gap-2">
-        <input
+        <Checkbox
           id="cf-required"
-          type="checkbox"
           checked={required}
-          onChange={(e) => setRequired(e.target.checked)}
+          onCheckedChange={(c) => setRequired(c === true)}
         />
         <label htmlFor="cf-required" className="text-sm font-medium">
           Required
@@ -173,6 +177,7 @@ export function CustomFieldForm({ initialData, organizations, onSubmit }: Custom
           value={sortOrder}
           onChange={(e) => setSortOrder(Number(e.target.value))}
         />
+        <p className="text-xs text-text-muted">Display order in the dataset form (lower numbers appear first).</p>
       </div>
 
       {showOptions && (
@@ -231,6 +236,7 @@ export function CustomFieldForm({ initialData, organizations, onSubmit }: Custom
             </option>
           ))}
         </NativeSelect>
+        <p className="text-xs text-text-muted">Limit this field to datasets from one organization, or leave global for all.</p>
       </div>
 
       <div className="flex gap-2">

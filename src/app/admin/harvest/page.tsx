@@ -6,7 +6,7 @@ import { EmptyState } from "@/components/admin/EmptyState";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { Pagination } from "@/components/ui/Pagination";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/admin/StatusBadge";
 import {
   Table,
   TableBody,
@@ -42,6 +42,10 @@ export default async function AdminHarvestPage({
           <Link href="/admin/harvest/new">New Source</Link>
         </Button>
       </AdminPageHeader>
+
+      <p className="text-sm text-text-muted mb-6 max-w-2xl">
+        Harvest sources automatically import datasets from external catalogs on a schedule. Each source points to a DCAT-US data.json or CKAN API endpoint and maps incoming datasets to a local organization.
+      </p>
 
       <div className="space-y-4 mb-6">
         <div className="max-w-xl">
@@ -93,24 +97,7 @@ export default async function AdminHarvestPage({
                 <TableCell className="text-text-muted">{source.type}</TableCell>
                 <TableCell>
                   {source.lastStatus && (
-                    <Badge
-                      variant={
-                        source.lastStatus === "success"
-                          ? "default"
-                          : source.lastStatus === "partial"
-                            ? "secondary"
-                            : "destructive"
-                      }
-                      className={
-                        source.lastStatus === "success"
-                          ? "bg-success-subtle text-success-text hover:bg-success-subtle"
-                          : source.lastStatus === "partial"
-                            ? "bg-warning-subtle text-warning-text hover:bg-warning-subtle"
-                            : ""
-                      }
-                    >
-                      {source.lastStatus}
-                    </Badge>
+                    <StatusBadge status={source.lastStatus} />
                   )}
                 </TableCell>
                 <TableCell>{source.datasetCount}</TableCell>
@@ -120,16 +107,10 @@ export default async function AdminHarvestPage({
                     : "Never"}
                 </TableCell>
                 <TableCell>
-                  <Badge
-                    variant={source.enabled ? "default" : "secondary"}
-                    className={
-                      source.enabled
-                        ? "bg-success-subtle text-success-text hover:bg-success-subtle"
-                        : "bg-surface-alt text-text-muted hover:bg-surface-alt"
-                    }
-                  >
-                    {source.enabled ? "Yes" : "No"}
-                  </Badge>
+                  <StatusBadge
+                    status={source.enabled ? "active" : "disabled"}
+                    label={source.enabled ? "Yes" : "No"}
+                  />
                 </TableCell>
                 <TableCell>
                   <Link

@@ -83,7 +83,11 @@ export default async function HarvestSourceDetailPage({ params }: Props) {
         <HarvestDeleteButton onDelete={handleDelete} />
       </AdminPageHeader>
 
-      <div className="grid grid-cols-2 gap-4 text-sm mb-8">
+      <p className="text-sm text-text-muted mb-6">
+        Use <strong>Run Now</strong> to trigger an immediate harvest. The history table below shows the result of each run including datasets created, updated, and archived.
+      </p>
+
+      <dl className="grid grid-cols-2 gap-4 text-sm mb-8">
         <div>
           <dt className="font-medium text-text-muted">URL</dt>
           <dd className="mt-1 break-all">{source.url}</dd>
@@ -108,7 +112,7 @@ export default async function HarvestSourceDetailPage({ params }: Props) {
           <dt className="font-medium text-text-muted">Datasets</dt>
           <dd className="mt-1">{source.datasetCount}</dd>
         </div>
-      </div>
+      </dl>
 
       {source.lastErrorMsg && (
         <div className="mb-6 rounded bg-danger-subtle p-3 text-sm text-danger-text">

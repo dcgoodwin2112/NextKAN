@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
+import { Checkbox } from "@/components/ui/checkbox";
 import type { ChartConfig } from "@/lib/schemas/chart";
 
 const chartTypeOptions = [
@@ -174,6 +175,7 @@ export default function EditChartPage() {
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Chart title (optional)"
             />
+            <p className="text-xs text-text-muted">Optional display name for this chart. Shown in the admin list and on the embed page.</p>
           </div>
 
           <div className="space-y-2">
@@ -206,6 +208,7 @@ export default function EditChartPage() {
                     </option>
                   ))}
                 </NativeSelect>
+                <p className="text-xs text-text-muted">Column used for labels or categories along the horizontal axis.</p>
               </div>
 
               <div className="space-y-2">
@@ -216,15 +219,15 @@ export default function EditChartPage() {
                       key={c.name}
                       className="flex items-center gap-1 text-sm"
                     >
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         checked={yColumns.includes(c.name)}
-                        onChange={() => toggleYColumn(c.name)}
+                        onCheckedChange={() => toggleYColumn(c.name)}
                       />
                       {c.name}
                     </label>
                   ))}
                 </div>
+                <p className="text-xs text-text-muted">Select one or more numeric columns to plot. Multiple selections create grouped series.</p>
               </div>
             </>
           )}
@@ -262,7 +265,7 @@ export default function EditChartPage() {
 
         {/* Live preview */}
         <div className="rounded border border-border p-4">
-          <h3 className="text-sm font-medium mb-3">Preview</h3>
+          <h2 className="text-sm font-medium mb-3">Preview</h2>
           {data.length > 0 ? (
             <ChartRenderer
               chartType={chartType}

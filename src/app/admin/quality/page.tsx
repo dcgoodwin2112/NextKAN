@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { calculateQualityScore } from "@/lib/services/data-quality";
 import { QualityBadge } from "@/components/datasets/QualityBadge";
+import { Badge } from "@/components/ui/badge";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { EmptyState } from "@/components/admin/EmptyState";
 import { SearchBar } from "@/components/ui/SearchBar";
@@ -172,12 +173,9 @@ export default async function QualityReportPage({
           <h2 className="text-lg font-semibold mb-3">Most Common Missing Fields</h2>
           <div className="flex flex-wrap gap-2">
             {topMissing.map(([field, count]) => (
-              <span
-                key={field}
-                className="inline-flex items-center gap-1 rounded bg-surface-alt px-3 py-1 text-sm"
-              >
+              <Badge key={field} variant="secondary" className="gap-1">
                 {field} <span className="text-text-muted">({count})</span>
-              </span>
+              </Badge>
             ))}
           </div>
         </div>

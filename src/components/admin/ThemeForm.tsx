@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import type { ThemeCreateInput } from "@/lib/schemas/theme";
 
 interface ThemeData {
@@ -49,7 +50,9 @@ export function ThemeForm({ initialData, onSubmit }: ThemeFormProps) {
       router.push("/admin/themes");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      const message = err instanceof Error ? err.message : "An error occurred";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -93,6 +96,7 @@ export function ThemeForm({ initialData, onSubmit }: ThemeFormProps) {
             value={color}
             onChange={(e) => setColor(e.target.value)}
             className="h-10 w-10 cursor-pointer rounded border border-border"
+            aria-label="Color picker"
           />
           <Input
             id="color"
@@ -103,6 +107,7 @@ export function ThemeForm({ initialData, onSubmit }: ThemeFormProps) {
             className="w-32"
           />
         </div>
+        <p className="text-xs text-text-muted">Accent color shown on theme badges and cards throughout the site.</p>
       </div>
 
       <div className="flex gap-2">

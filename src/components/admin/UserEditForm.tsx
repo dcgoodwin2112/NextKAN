@@ -155,6 +155,7 @@ export function UserEditForm({ user, organizations, isCurrentUser }: UserEditFor
               <option key={org.id} value={org.id}>{org.name}</option>
             ))}
           </NativeSelect>
+          <p className="text-xs text-text-muted">Assigns this user to an organization for Org Admin permissions and default dataset ownership.</p>
         </div>
 
         <div className="flex gap-2">

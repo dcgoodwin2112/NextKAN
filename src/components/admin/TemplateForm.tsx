@@ -8,7 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { CollapsibleSection } from "@/components/admin/CollapsibleSection";
+import { toast } from "sonner";
 import type { TemplateCreateInput, TemplateFields } from "@/lib/schemas/template";
 
 interface Organization {
@@ -184,7 +186,9 @@ export function TemplateForm({
       router.push("/admin/templates");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      const message = err instanceof Error ? err.message : "An error occurred";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -314,11 +318,10 @@ export function TemplateForm({
             <div className="grid grid-cols-2 gap-1 max-h-48 overflow-y-auto border rounded p-2">
               {availableThemes.map((theme) => (
                 <label key={theme.id} className="flex items-center gap-2 text-sm py-0.5">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={selectedThemeIds.includes(theme.id)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
+                    onCheckedChange={(c) => {
+                      if (c === true) {
                         setSelectedThemeIds([...selectedThemeIds, theme.id]);
                       } else {
                         setSelectedThemeIds(selectedThemeIds.filter((id) => id !== theme.id));
@@ -347,7 +350,7 @@ export function TemplateForm({
       </fieldset>
 
       {/* Federal Fields */}
-      <CollapsibleSection title="Federal Fields" defaultOpen={false} headingLevel="h3">
+      <CollapsibleSection title="Federal Fields" defaultOpen={false} headingLevel="h2">
         <fieldset className="space-y-4 pl-4">
           <div className="space-y-2">
             <Label htmlFor="bureauCode">Bureau Code</Label>
@@ -358,6 +361,7 @@ export function TemplateForm({
               onChange={(e) => setBureauCode(e.target.value)}
               placeholder="015:11"
             />
+            <p className="text-xs text-text-muted">OMB agency/bureau code (format: 000:00).</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="programCode">Program Code</Label>
@@ -368,12 +372,13 @@ export function TemplateForm({
               onChange={(e) => setProgramCode(e.target.value)}
               placeholder="015:001"
             />
+            <p className="text-xs text-text-muted">Federal program inventory code (format: 000:000).</p>
           </div>
         </fieldset>
       </CollapsibleSection>
 
       {/* Access & License */}
-      <CollapsibleSection title="Access & License" defaultOpen={false} headingLevel="h3">
+      <CollapsibleSection title="Access & License" defaultOpen={false} headingLevel="h2">
         <fieldset className="space-y-4 pl-4">
           <div className="space-y-2">
             <Label htmlFor="license">License</Label>
@@ -406,6 +411,7 @@ export function TemplateForm({
               value={rights}
               onChange={(e) => setRights(e.target.value)}
             />
+            <p className="text-xs text-text-muted">Additional access or use restrictions beyond the license.</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="landingPage">Landing Page</Label>
@@ -420,10 +426,10 @@ export function TemplateForm({
       </CollapsibleSection>
 
       {/* Coverage */}
-      <CollapsibleSection title="Coverage" defaultOpen={false} headingLevel="h3">
+      <CollapsibleSection title="Coverage" defaultOpen={false} headingLevel="h2">
         <fieldset className="space-y-4 pl-4">
           <div className="space-y-2">
-            <Label htmlFor="spatial">Spatial</Label>
+            <Label htmlFor="spatial">Spatial Coverage</Label>
             <Input
               id="spatial"
               type="text"
@@ -432,7 +438,7 @@ export function TemplateForm({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="temporal">Temporal</Label>
+            <Label htmlFor="temporal">Temporal Coverage</Label>
             <Input
               id="temporal"
               type="text"
@@ -440,15 +446,16 @@ export function TemplateForm({
               onChange={(e) => setTemporal(e.target.value)}
               placeholder="2020-01-01/2024-12-31"
             />
+            <p className="text-xs text-text-muted">Time period covered as start/end dates.</p>
           </div>
         </fieldset>
       </CollapsibleSection>
 
       {/* Additional Metadata */}
-      <CollapsibleSection title="Additional Metadata" defaultOpen={false} headingLevel="h3">
+      <CollapsibleSection title="Additional Metadata" defaultOpen={false} headingLevel="h2">
         <fieldset className="space-y-4 pl-4">
           <div className="space-y-2">
-            <Label htmlFor="accrualPeriodicity">Accrual Periodicity</Label>
+            <Label htmlFor="accrualPeriodicity">Update Frequency</Label>
             <Input
               id="accrualPeriodicity"
               type="text"
@@ -456,6 +463,7 @@ export function TemplateForm({
               onChange={(e) => setAccrualPeriodicity(e.target.value)}
               placeholder="R/P1Y"
             />
+            <p className="text-xs text-text-muted">ISO 8601 duration: R/P1D (daily), R/P1W (weekly), R/P1M (monthly), R/P1Y (annually).</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="conformsTo">Conforms To</Label>
@@ -465,18 +473,19 @@ export function TemplateForm({
               value={conformsTo}
               onChange={(e) => setConformsTo(e.target.value)}
             />
+            <p className="text-xs text-text-muted">URL of a standard or schema this dataset conforms to.</p>
           </div>
           <div className="flex items-center gap-2">
-            <input
+            <Checkbox
               id="dataQuality"
-              type="checkbox"
               checked={dataQuality === true}
-              onChange={(e) => setDataQuality(e.target.checked ? true : undefined)}
+              onCheckedChange={(c) => setDataQuality(c === true ? true : undefined)}
             />
             <label htmlFor="dataQuality" className="text-sm font-medium">
               Data Quality
             </label>
           </div>
+          <p className="text-xs text-text-muted ml-6">Certifies this data meets your agency&apos;s quality standards.</p>
           <div className="space-y-2">
             <Label htmlFor="describedBy">Described By</Label>
             <Input
@@ -485,6 +494,7 @@ export function TemplateForm({
               value={describedBy}
               onChange={(e) => setDescribedBy(e.target.value)}
             />
+            <p className="text-xs text-text-muted">URL to a data dictionary or schema describing this dataset&apos;s structure.</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="isPartOf">Is Part Of</Label>
@@ -494,6 +504,7 @@ export function TemplateForm({
               value={isPartOf}
               onChange={(e) => setIsPartOf(e.target.value)}
             />
+            <p className="text-xs text-text-muted">Identifier of a parent dataset or collection this belongs to.</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="language">Language</Label>
@@ -503,13 +514,14 @@ export function TemplateForm({
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
             />
+            <p className="text-xs text-text-muted">BCP 47 language code (e.g., en-US, es, fr).</p>
           </div>
         </fieldset>
       </CollapsibleSection>
 
       {/* DCAT-US v3.0 */}
       {availableSeries.length > 0 && (
-        <CollapsibleSection title="DCAT-US v3.0" defaultOpen={false} headingLevel="h3">
+        <CollapsibleSection title="DCAT-US v3.0" defaultOpen={false} headingLevel="h2">
           <fieldset className="space-y-4 pl-4">
             <div className="space-y-2">
               <Label htmlFor="seriesId">Series</Label>
@@ -527,7 +539,7 @@ export function TemplateForm({
               </NativeSelect>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="dcatVersion">Version</Label>
+              <Label htmlFor="dcatVersion">Data Version</Label>
               <Input
                 id="dcatVersion"
                 type="text"

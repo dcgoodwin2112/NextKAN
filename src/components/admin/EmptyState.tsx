@@ -16,7 +16,7 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
-      <h3 className="text-lg font-medium">{title}</h3>
+      <h2 className="text-lg font-medium">{title}</h2>
       {description && (
         <p className="mt-1 text-sm text-text-muted max-w-sm">{description}</p>
       )}

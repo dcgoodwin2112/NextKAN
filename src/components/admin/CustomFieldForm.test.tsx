@@ -99,6 +99,18 @@ describe("CustomFieldForm", () => {
     expect(screen.getByLabelText("Sort Order")).toHaveValue(5);
   });
 
+  it("shows error toast on submit failure", async () => {
+    const { toast } = await import("sonner");
+    onSubmit.mockRejectedValueOnce(new Error("Server error"));
+    const user = userEvent.setup();
+    render(<CustomFieldForm organizations={mockOrgs} onSubmit={onSubmit} />);
+    await user.type(screen.getByLabelText("Name *"), "test_field");
+    await user.type(screen.getByLabelText("Label *"), "Test Field");
+    await user.click(screen.getByRole("button", { name: "Create" }));
+    expect(toast.error).toHaveBeenCalledWith("Server error");
+    expect(screen.getByText("Server error")).toBeInTheDocument();
+  });
+
   it("disables name field when editing", () => {
     render(
       <CustomFieldForm

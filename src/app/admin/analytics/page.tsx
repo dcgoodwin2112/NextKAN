@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 interface Props {
@@ -44,17 +45,16 @@ export default async function AnalyticsDashboardPage({ searchParams }: Props) {
       <AdminPageHeader title="Analytics Dashboard">
         <div className="flex gap-2">
           {periods.map((p) => (
-            <Link
+            <Button
               key={p.value}
-              href={`/admin/analytics?period=${p.value}`}
-              className={`px-3 py-1 rounded text-sm ${
-                period === p.value
-                  ? "bg-primary text-white"
-                  : "bg-surface-alt text-text-secondary hover:bg-surface-inset"
-              }`}
+              asChild
+              variant={period === p.value ? "default" : "outline"}
+              size="sm"
             >
-              {p.label}
-            </Link>
+              <Link href={`/admin/analytics?period=${p.value}`}>
+                {p.label}
+              </Link>
+            </Button>
           ))}
         </div>
       </AdminPageHeader>

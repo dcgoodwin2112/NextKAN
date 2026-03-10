@@ -1,9 +1,17 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { VersionActions } from "./VersionActions";
 
+vi.mock("sonner", () => ({
+  toast: { success: vi.fn(), error: vi.fn() },
+}));
+
 describe("VersionActions", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it("renders both buttons", () => {
     render(
       <VersionActions
@@ -74,5 +82,32 @@ describe("VersionActions", () => {
     );
 
     expect(onCompare).toHaveBeenCalled();
+  });
+
+  it("shows error toast on compare failure", async () => {
+    const { toast } = await import("sonner");
+    const onCompare = vi.fn().mockRejectedValueOnce(new Error("Compare failed"));
+    const user = userEvent.setup();
+    render(
+      <VersionActions versionLabel="1.0.0" onRevert={vi.fn()} onCompare={onCompare} />
+    );
+    await user.click(screen.getByRole("button", { name: "Compare with Current" }));
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Failed to compare versions");
+    });
+  });
+
+  it("shows error toast on revert failure", async () => {
+    const { toast } = await import("sonner");
+    const onRevert = vi.fn().mockRejectedValueOnce(new Error("Revert failed"));
+    const user = userEvent.setup();
+    render(
+      <VersionActions versionLabel="1.0.0" onRevert={onRevert} onCompare={vi.fn()} />
+    );
+    await user.click(screen.getByRole("button", { name: "Revert to this version" }));
+    await user.click(screen.getByRole("button", { name: "Revert" }));
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Failed to revert version");
+    });
   });
 });

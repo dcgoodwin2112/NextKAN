@@ -90,6 +90,7 @@ export function OrganizationForm({
           value={imageUrl}
           onChange={(e) => setImageUrl(e.target.value)}
         />
+        <p className="text-xs text-text-muted">Logo or image displayed on organization cards and detail pages.</p>
       </div>
       <div className="space-y-2">
         <Label htmlFor="parentId">Parent Organization</Label>
@@ -107,6 +108,7 @@ export function OrganizationForm({
               </option>
             ))}
         </NativeSelect>
+        <p className="text-xs text-text-muted">Creates a hierarchy. Sub-organizations appear nested under the parent.</p>
       </div>
       <div className="flex gap-2">
         <Button type="submit" disabled={loading}>

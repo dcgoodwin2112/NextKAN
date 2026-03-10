@@ -11,12 +11,14 @@ interface LicenseOption {
   name: string;
   url: string | null;
 }
+import { toast } from "sonner";
 import { MetadataCompleteness } from "./MetadataCompleteness";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { CollapsibleSection } from "@/components/admin/CollapsibleSection";
 import type { DatasetCreateInput } from "@/lib/schemas/dataset";
 import type { TemplateFields } from "@/lib/schemas/template";
@@ -236,7 +238,7 @@ export function DatasetForm({
     const ids = updated.map((d) => d.id).filter(Boolean) as string[];
     if (ids.length === updated.length) {
       import("@/lib/actions/datasets").then(({ reorderDistributions }) => {
-        reorderDistributions(initialData!.id, ids).catch(() => {});
+        reorderDistributions(initialData!.id, ids).catch(() => toast.error("Failed to reorder distributions"));
       });
     }
   }
@@ -371,6 +373,7 @@ export function DatasetForm({
             onChange={(e) => setIdentifier(e.target.value)}
             placeholder="Auto-generated if blank"
           />
+          <p className="text-xs text-text-muted">Unique ID for this dataset; auto-generated from the title if left blank.</p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="keywords">Keywords * (press Enter to add)</Label>
@@ -409,11 +412,10 @@ export function DatasetForm({
             <div className="grid grid-cols-2 gap-1 max-h-72 overflow-y-auto border rounded p-2">
               {availableThemes.map((theme) => (
                 <label key={theme.id} className="flex items-center gap-2 text-sm py-0.5">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={selectedThemeIds.includes(theme.id)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
+                    onCheckedChange={(c) => {
+                      if (c === true) {
                         setSelectedThemeIds([...selectedThemeIds, theme.id]);
                       } else {
                         setSelectedThemeIds(selectedThemeIds.filter((id) => id !== theme.id));
@@ -498,7 +500,7 @@ export function DatasetForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="accrualPeriodicity">Accrual Periodicity</Label>
+          <Label htmlFor="accrualPeriodicity">Update Frequency</Label>
           <Input
             id="accrualPeriodicity"
             type="text"
@@ -506,11 +508,12 @@ export function DatasetForm({
             onChange={(e) => setAccrualPeriodicity(e.target.value)}
             placeholder="R/P1Y"
           />
+          <p className="text-xs text-text-muted">ISO 8601 duration: R/P1D (daily), R/P1W (weekly), R/P1M (monthly), R/P1Y (annually).</p>
         </div>
       </fieldset>
 
       {/* Federal Fields */}
-      <CollapsibleSection title="Federal Fields" defaultOpen={false} headingLevel="h3">
+      <CollapsibleSection title="Federal Fields" defaultOpen={false} headingLevel="h2">
         <fieldset className="space-y-4 pl-4">
           <div className="space-y-2">
             <Label htmlFor="bureauCode">Bureau Code</Label>
@@ -521,6 +524,7 @@ export function DatasetForm({
               onChange={(e) => setBureauCode(e.target.value)}
               placeholder="015:11"
             />
+            <p className="text-xs text-text-muted">OMB agency/bureau code (format: 000:00).</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="programCode">Program Code</Label>
@@ -531,12 +535,13 @@ export function DatasetForm({
               onChange={(e) => setProgramCode(e.target.value)}
               placeholder="015:001"
             />
+            <p className="text-xs text-text-muted">Federal program inventory code (format: 000:000).</p>
           </div>
         </fieldset>
       </CollapsibleSection>
 
       {/* Access & License */}
-      <CollapsibleSection title="Access & License" defaultOpen={false} headingLevel="h3">
+      <CollapsibleSection title="Access & License" defaultOpen={false} headingLevel="h2">
         <fieldset className="space-y-4 pl-4">
           <div className="space-y-2">
             <Label htmlFor="license">License</Label>
@@ -569,6 +574,7 @@ export function DatasetForm({
               value={rights}
               onChange={(e) => setRights(e.target.value)}
             />
+            <p className="text-xs text-text-muted">Additional access or use restrictions beyond the license.</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="landingPage">Landing Page</Label>
@@ -583,19 +589,20 @@ export function DatasetForm({
       </CollapsibleSection>
 
       {/* Coverage */}
-      <CollapsibleSection title="Coverage" defaultOpen={false} headingLevel="h3">
+      <CollapsibleSection title="Coverage" defaultOpen={false} headingLevel="h2">
         <fieldset className="space-y-4 pl-4">
           <div className="space-y-2">
-            <Label htmlFor="spatial">Spatial</Label>
+            <Label htmlFor="spatial">Spatial Coverage</Label>
             <Input
               id="spatial"
               type="text"
               value={spatial}
               onChange={(e) => setSpatial(e.target.value)}
             />
+            <p className="text-xs text-text-muted">Geographic area covered (e.g., &quot;United States&quot; or GeoJSON).</p>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="temporal">Temporal</Label>
+            <Label htmlFor="temporal">Temporal Coverage</Label>
             <Input
               id="temporal"
               type="text"
@@ -603,12 +610,13 @@ export function DatasetForm({
               onChange={(e) => setTemporal(e.target.value)}
               placeholder="2020-01-01/2024-12-31"
             />
+            <p className="text-xs text-text-muted">Time period covered as start/end dates.</p>
           </div>
         </fieldset>
       </CollapsibleSection>
 
       {/* Additional Metadata */}
-      <CollapsibleSection title="Additional Metadata" defaultOpen={false} headingLevel="h3">
+      <CollapsibleSection title="Additional Metadata" defaultOpen={false} headingLevel="h2">
         <fieldset className="space-y-4 pl-4">
           <div className="space-y-2">
             <Label htmlFor="conformsTo">Conforms To</Label>
@@ -618,18 +626,19 @@ export function DatasetForm({
               value={conformsTo}
               onChange={(e) => setConformsTo(e.target.value)}
             />
+            <p className="text-xs text-text-muted">URL of a standard or schema this dataset conforms to.</p>
           </div>
           <div className="flex items-center gap-2">
-            <input
+            <Checkbox
               id="dataQuality"
-              type="checkbox"
               checked={dataQuality === true}
-              onChange={(e) => setDataQuality(e.target.checked ? true : undefined)}
+              onCheckedChange={(c) => setDataQuality(c === true ? true : undefined)}
             />
             <label htmlFor="dataQuality" className="text-sm font-medium">
               Data Quality
             </label>
           </div>
+          <p className="text-xs text-text-muted ml-6">Certifies this data meets your agency&apos;s quality standards.</p>
           <div className="space-y-2">
             <Label htmlFor="describedBy">Described By</Label>
             <Input
@@ -638,6 +647,7 @@ export function DatasetForm({
               value={describedBy}
               onChange={(e) => setDescribedBy(e.target.value)}
             />
+            <p className="text-xs text-text-muted">URL to a data dictionary or schema describing this dataset&apos;s structure.</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="isPartOf">Is Part Of</Label>
@@ -647,6 +657,7 @@ export function DatasetForm({
               value={isPartOf}
               onChange={(e) => setIsPartOf(e.target.value)}
             />
+            <p className="text-xs text-text-muted">Identifier of a parent dataset or collection this belongs to.</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="language">Language</Label>
@@ -656,13 +667,14 @@ export function DatasetForm({
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
             />
+            <p className="text-xs text-text-muted">BCP 47 language code (e.g., en-US, es, fr).</p>
           </div>
         </fieldset>
       </CollapsibleSection>
 
       {/* DCAT-US v3.0 */}
       {availableSeries.length > 0 && (
-        <CollapsibleSection title="DCAT-US v3.0" defaultOpen={false} headingLevel="h3">
+        <CollapsibleSection title="DCAT-US v3.0" defaultOpen={false} headingLevel="h2">
           <fieldset className="space-y-4 pl-4">
             <div className="space-y-2">
               <Label htmlFor="seriesId">Series</Label>
@@ -680,7 +692,7 @@ export function DatasetForm({
               </NativeSelect>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="dcatVersion">Version</Label>
+              <Label htmlFor="dcatVersion">Data Version</Label>
               <Input
                 id="dcatVersion"
                 type="text"
@@ -688,6 +700,7 @@ export function DatasetForm({
                 onChange={(e) => setDcatVersion(e.target.value)}
                 placeholder="e.g. 2.1"
               />
+              <p className="text-xs text-text-muted">The version of the dataset itself (DCAT-US v3.0 metadata field)</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="dcatVersionNotes">Version Notes</Label>
@@ -714,7 +727,7 @@ export function DatasetForm({
 
       {/* Custom Fields */}
       {cfDefs.length > 0 && (
-        <CollapsibleSection title="Custom Fields" defaultOpen={true} headingLevel="h3">
+        <CollapsibleSection title="Custom Fields" defaultOpen={true} headingLevel="h2">
           <fieldset className="space-y-4 pl-4">
             {cfDefs.map((def) => {
               const cfValue = customFields[def.name] || "";
@@ -724,11 +737,10 @@ export function DatasetForm({
               if (def.type === "boolean") {
                 return (
                   <div key={def.id} className="flex items-center gap-2">
-                    <input
+                    <Checkbox
                       id={`cf-${def.name}`}
-                      type="checkbox"
                       checked={cfValue === "true"}
-                      onChange={(e) => setCfValue(e.target.checked ? "true" : "false")}
+                      onCheckedChange={(c) => setCfValue(c === true ? "true" : "false")}
                     />
                     <label htmlFor={`cf-${def.name}`} className="text-sm font-medium">
                       {def.label}{def.required ? " *" : ""}
@@ -767,11 +779,10 @@ export function DatasetForm({
                     <div className="grid grid-cols-2 gap-1 max-h-48 overflow-y-auto border rounded p-2">
                       {(def.options || []).map((opt) => (
                         <label key={opt} className="flex items-center gap-2 text-sm py-0.5">
-                          <input
-                            type="checkbox"
+                          <Checkbox
                             checked={selected.includes(opt)}
-                            onChange={(e) => {
-                              const next = e.target.checked
+                            onCheckedChange={(c) => {
+                              const next = c === true
                                 ? [...selected, opt]
                                 : selected.filter((s) => s !== opt);
                               setCfValue(JSON.stringify(next));

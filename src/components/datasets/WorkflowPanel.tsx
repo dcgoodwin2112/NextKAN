@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import type { WorkflowStatus } from "@/lib/services/workflow";
+import { StatusBadge } from "@/components/admin/StatusBadge";
 
 interface WorkflowTransitionRecord {
   id: string;
@@ -20,21 +22,21 @@ interface WorkflowPanelProps {
   onTransition: (toStatus: string, note?: string) => Promise<void>;
 }
 
-const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  draft: { label: "Draft", color: "bg-surface-alt text-text-secondary" },
-  pending_review: { label: "Pending Review", color: "bg-warning-subtle text-warning-text" },
-  approved: { label: "Approved", color: "bg-success-subtle text-success-text" },
-  published: { label: "Published", color: "bg-primary-subtle text-primary-subtle-text" },
-  rejected: { label: "Rejected", color: "bg-danger-subtle text-danger-text" },
-  archived: { label: "Archived", color: "bg-surface-inset text-text-tertiary" },
+const STATUS_LABELS: Record<string, { label: string }> = {
+  draft: { label: "Draft" },
+  pending_review: { label: "Pending Review" },
+  approved: { label: "Approved" },
+  published: { label: "Published" },
+  rejected: { label: "Rejected" },
+  archived: { label: "Archived" },
 };
 
 const TRANSITION_LABELS: Record<string, { label: string; style: string }> = {
-  pending_review: { label: "Submit for Review", style: "bg-warning hover:opacity-90 text-white" },
-  approved: { label: "Approve", style: "bg-success hover:opacity-90 text-white" },
-  rejected: { label: "Reject", style: "bg-danger hover:opacity-90 text-white" },
-  published: { label: "Publish", style: "bg-primary hover:bg-primary-hover text-white" },
-  draft: { label: "Return to Draft", style: "bg-secondary hover:opacity-90 text-white" },
+  pending_review: { label: "Submit for Review", style: "bg-warning hover:opacity-90 text-white dark:text-black" },
+  approved: { label: "Approve", style: "bg-success hover:opacity-90 text-white dark:text-black" },
+  rejected: { label: "Reject", style: "bg-danger hover:opacity-90 text-white dark:text-black" },
+  published: { label: "Publish", style: "bg-primary hover:bg-primary-hover text-primary-foreground" },
+  draft: { label: "Return to Draft", style: "bg-secondary hover:opacity-90 text-secondary-foreground" },
   archived: { label: "Archive", style: "border border-border text-text-secondary hover:bg-surface" },
 };
 
@@ -47,13 +49,15 @@ export function WorkflowPanel({
   const [note, setNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const statusInfo = STATUS_LABELS[currentStatus] || { label: currentStatus, color: "bg-surface-alt" };
+  const statusInfo = STATUS_LABELS[currentStatus] || { label: currentStatus };
 
   const handleTransition = async (toStatus: string) => {
     setIsSubmitting(true);
     try {
       await onTransition(toStatus, note || undefined);
       setNote("");
+    } catch {
+      toast.error("Workflow transition failed");
     } finally {
       setIsSubmitting(false);
     }
@@ -61,14 +65,12 @@ export function WorkflowPanel({
 
   return (
     <div className="rounded-lg border border-border p-4 bg-background">
-      <h3 className="text-sm font-semibold mb-3">Editorial Workflow</h3>
+      <h2 className="text-sm font-semibold mb-3">Editorial Workflow</h2>
 
       <div className="mb-4">
         <span className="text-xs text-text-muted">Current Status</span>
         <div className="mt-1">
-          <span className={`inline-block rounded-full px-3 py-1 text-sm font-medium ${statusInfo.color}`}>
-            {statusInfo.label}
-          </span>
+          <StatusBadge status={currentStatus} label={statusInfo.label} />
         </div>
       </div>
 

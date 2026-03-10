@@ -1,17 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { ConfirmDeleteButton } from "@/components/admin/ConfirmDeleteButton";
 
 interface CustomFieldDeleteButtonProps {
   id: string;
@@ -21,39 +10,16 @@ interface CustomFieldDeleteButtonProps {
 }
 
 export function CustomFieldDeleteButton({ id, label, valueCount = 0, onDelete }: CustomFieldDeleteButtonProps) {
-  const [open, setOpen] = useState(false);
+  const extraWarning = valueCount > 0
+    ? `This will also delete ${valueCount} stored value${valueCount === 1 ? "" : "s"} across datasets.`
+    : undefined;
 
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
-      <Button
-        variant="outline"
-        size="sm"
-        className="border-danger text-danger hover:bg-danger-subtle"
-        onClick={() => setOpen(true)}
-      >
-        Delete
-      </Button>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This will permanently delete the custom field &quot;{label}&quot;.
-            {valueCount > 0 && (
-              <> This will also delete <strong>{valueCount}</strong> stored value{valueCount === 1 ? "" : "s"} across datasets.</>
-            )}
-            {" "}This action cannot be undone.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            variant="destructive"
-            onClick={() => onDelete(id)}
-          >
-            Delete
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <ConfirmDeleteButton
+      entityName={`the custom field "${label}"`}
+      onConfirm={() => onDelete(id)}
+      size="sm"
+      extraWarning={extraWarning}
+    />
   );
 }

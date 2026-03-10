@@ -18,6 +18,9 @@ interface ConfirmDeleteButtonProps {
   onConfirm: () => void;
   size?: "default" | "sm" | "xs";
   softDelete?: boolean;
+  extraWarning?: string;
+  triggerVariant?: "outline" | "ghost";
+  triggerLabel?: string;
 }
 
 export function ConfirmDeleteButton({
@@ -25,24 +28,33 @@ export function ConfirmDeleteButton({
   onConfirm,
   size = "default",
   softDelete = false,
+  extraWarning,
+  triggerVariant = "outline",
+  triggerLabel = "Delete",
 }: ConfirmDeleteButtonProps) {
   const [open, setOpen] = useState(false);
 
-  const description = softDelete
+  const baseDescription = softDelete
     ? `This will move ${entityName} to the trash. You can restore it later from the Trash page.`
     : `This will permanently delete ${entityName}. This action cannot be undone.`;
 
-  const actionLabel = softDelete ? "Move to Trash" : "Delete";
+  const description = extraWarning
+    ? `${baseDescription} ${extraWarning}`
+    : baseDescription;
+
+  const actionLabel = softDelete ? "Move to Trash" : triggerLabel;
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <Button
-        variant="outline"
+        variant={triggerVariant}
         size={size}
-        className="border-danger text-danger hover:bg-danger-subtle"
+        className={triggerVariant === "ghost"
+          ? "text-destructive hover:text-destructive"
+          : "border-danger text-danger hover:bg-danger-subtle"}
         onClick={() => setOpen(true)}
       >
-        Delete
+        {triggerLabel}
       </Button>
       <AlertDialogContent>
         <AlertDialogHeader>

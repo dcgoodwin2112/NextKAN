@@ -9,6 +9,7 @@ import rehypeStringify from "rehype-stringify";
 import { rehypeChartPlaceholder } from "@/lib/utils/rehype-chart-placeholder";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { ChartPickerDialog } from "./ChartPickerDialog";
 
 type EditorMode = "edit" | "split" | "preview";
@@ -76,7 +77,7 @@ export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
         onChange(value + "\n" + imageMarkdown);
       }
     } catch {
-      // Silently fail — user can retry
+      toast.error("Image upload failed");
     } finally {
       setUploading(false);
       // Reset file input

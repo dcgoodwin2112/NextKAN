@@ -54,7 +54,7 @@ export function FacetSidebar({ facets }: FacetSidebarProps) {
     <aside className="w-full" aria-label="Search filters">
       {activeFilters.length > 0 && (
         <div className="mb-4">
-          <h3 className="text-sm font-semibold mb-2">Active Filters</h3>
+          <h2 className="text-sm font-semibold mb-2">Active Filters</h2>
           <div className="flex flex-wrap gap-1">
             {activeFilters.map((f) => (
               <button

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import type { SeriesCreateInput } from "@/lib/schemas/series";
 
 interface SeriesData {
@@ -53,7 +54,9 @@ export function SeriesForm({ initialData, onSubmit }: SeriesFormProps) {
       router.push("/admin/series");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      const message = err instanceof Error ? err.message : "An error occurred";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -87,6 +90,7 @@ export function SeriesForm({ initialData, onSubmit }: SeriesFormProps) {
           onChange={(e) => setIdentifier(e.target.value)}
           placeholder="e.g. climate-data-annual"
         />
+        <p className="text-xs text-text-muted">URL-safe identifier used in public URLs (e.g., /series/climate-data-annual). Lowercase letters, numbers, and hyphens.</p>
       </div>
 
       <div className="space-y-2">

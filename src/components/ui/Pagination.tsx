@@ -83,7 +83,7 @@ export function Pagination({
             onClick={() => navigateToPage(item)}
             className={`rounded px-3 py-1 text-sm ${
               item === currentPage
-                ? "bg-primary text-white"
+                ? "bg-primary text-primary-foreground"
                 : "border border-border hover:bg-surface"
             }`}
             aria-current={item === currentPage ? "page" : undefined}
