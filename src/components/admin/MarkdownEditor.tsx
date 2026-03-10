@@ -6,8 +6,10 @@ import remarkRehype from "remark-rehype";
 import rehypeSanitize from "rehype-sanitize";
 import rehypeSlug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
+import { rehypeChartPlaceholder } from "@/lib/utils/rehype-chart-placeholder";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { ChartPickerDialog } from "./ChartPickerDialog";
 
 type EditorMode = "edit" | "split" | "preview";
 
@@ -20,6 +22,7 @@ export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
   const [mode, setMode] = useState<EditorMode>("edit");
   const [renderedHtml, setRenderedHtml] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [chartPickerOpen, setChartPickerOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -28,6 +31,7 @@ export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
       .use(remarkRehype)
       .use(rehypeSanitize)
       .use(rehypeSlug)
+      .use(rehypeChartPlaceholder)
       .use(rehypeStringify)
       .process(content);
     setRenderedHtml(result.toString());
@@ -80,6 +84,19 @@ export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
     }
   }
 
+  function handleChartSelect(chartId: string, _chartTitle: string) {
+    const placeholder = `[chart:${chartId}]`;
+    const textarea = textareaRef.current;
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const before = value.slice(0, start);
+      const after = value.slice(start);
+      onChange(before + placeholder + after);
+    } else {
+      onChange(value + "\n" + placeholder);
+    }
+  }
+
   const previewPanel = (
     <div
       className="prose dark:prose-invert max-w-none rounded border border-border p-4 overflow-auto"
@@ -124,12 +141,26 @@ export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
         >
           {uploading ? "Uploading..." : "Insert Image"}
         </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          disabled={mode === "preview"}
+          onClick={() => setChartPickerOpen(true)}
+        >
+          Insert Chart
+        </Button>
         <input
           ref={fileInputRef}
           type="file"
           accept="image/*"
           className="hidden"
           onChange={handleImageUpload}
+        />
+        <ChartPickerDialog
+          open={chartPickerOpen}
+          onOpenChange={setChartPickerOpen}
+          onSelect={handleChartSelect}
         />
       </div>
 

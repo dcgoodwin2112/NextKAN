@@ -9,6 +9,8 @@ import remarkRehype from "remark-rehype";
 import rehypeSanitize from "rehype-sanitize";
 import rehypeSlug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
+import { rehypeChartPlaceholder } from "@/lib/utils/rehype-chart-placeholder";
+import { PageChartHydrator } from "@/components/visualizations/PageChartHydrator";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -55,6 +57,7 @@ export default async function PublicPage({ params }: PageProps) {
     .use(remarkRehype)
     .use(rehypeSanitize)
     .use(rehypeSlug)
+    .use(rehypeChartPlaceholder)
     .use(rehypeStringify)
     .process(page.content);
   const contentHtml = processed.toString();
@@ -107,9 +110,13 @@ export default async function PublicPage({ params }: PageProps) {
 
       <h1 className="text-3xl font-bold mb-6">{page.title}</h1>
       <div
+        id="page-content"
         className="prose dark:prose-invert max-w-none"
         dangerouslySetInnerHTML={{ __html: contentHtml }}
       />
+      {contentHtml.includes("data-chart-id") && (
+        <PageChartHydrator containerSelector="#page-content" />
+      )}
 
       {/* Child page links */}
       {publishedChildren.length > 0 && (
