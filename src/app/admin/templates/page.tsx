@@ -3,6 +3,7 @@ import { listTemplates } from "@/lib/actions/templates";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { EmptyState } from "@/components/admin/EmptyState";
 import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -20,7 +21,7 @@ export default async function AdminTemplatesPage() {
     <div>
       <AdminPageHeader title="Templates">
         <Button asChild>
-          <Link href="/admin/templates/new">New Template</Link>
+          <Link href="/admin/templates/new"><Plus /> New Template</Link>
         </Button>
       </AdminPageHeader>
 

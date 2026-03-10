@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/admin/EmptyState";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { Pagination } from "@/components/ui/Pagination";
 import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -38,7 +39,7 @@ export default async function SeriesListPage({
     <div>
       <AdminPageHeader title="Dataset Series">
         <Button asChild>
-          <Link href="/admin/series/new">New Series</Link>
+          <Link href="/admin/series/new"><Plus /> New Series</Link>
         </Button>
       </AdminPageHeader>
 

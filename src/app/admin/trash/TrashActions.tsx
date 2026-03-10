@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { restoreDataset, purgeDataset } from "@/lib/actions/datasets";
+import { RotateCcw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -48,7 +49,7 @@ export function TrashActions({ datasetId, datasetTitle }: TrashActionsProps) {
   return (
     <div className="flex gap-2">
       <Button variant="outline" size="sm" onClick={handleRestore}>
-        Restore
+        <RotateCcw /> Restore
       </Button>
       <AlertDialog open={purgeOpen} onOpenChange={setPurgeOpen}>
         <Button
@@ -57,7 +58,7 @@ export function TrashActions({ datasetId, datasetTitle }: TrashActionsProps) {
           className="border-danger text-danger hover:bg-danger-subtle"
           onClick={() => setPurgeOpen(true)}
         >
-          Purge
+          <Trash2 /> Purge
         </Button>
         <AlertDialogContent>
           <AlertDialogHeader>

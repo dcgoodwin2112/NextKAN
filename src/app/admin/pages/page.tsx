@@ -3,6 +3,7 @@ import { listPages } from "@/lib/actions/pages";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { EmptyState } from "@/components/admin/EmptyState";
 import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import { AdminPageListClient } from "./AdminPageListClient";
 
 export default async function AdminPagesPage() {
@@ -49,7 +50,7 @@ export default async function AdminPagesPage() {
     <div>
       <AdminPageHeader title="Pages">
         <Button asChild size="sm">
-          <Link href="/admin/pages/new">New Page</Link>
+          <Link href="/admin/pages/new"><Plus /> New Page</Link>
         </Button>
       </AdminPageHeader>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { X, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -17,6 +18,7 @@ export interface BulkAction {
   label: string;
   onClick: () => void;
   variant?: "default" | "destructive";
+  icon?: LucideIcon;
   requiresConfirmation?: boolean;
   confirmTitle?: string;
   confirmDescription?: string;
@@ -62,10 +64,12 @@ export function BulkActionBar({
                   }
                 }}
               >
+                {action.icon && <action.icon />}
                 {action.label}
               </Button>
             ))}
             <Button variant="ghost" size="sm" onClick={onClear}>
+              <X />
               Clear selection
             </Button>
           </div>

@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/admin/EmptyState";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { Pagination } from "@/components/ui/Pagination";
 import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import {
   Table,
@@ -39,7 +40,7 @@ export default async function AdminHarvestPage({
     <div>
       <AdminPageHeader title="Harvest Sources">
         <Button asChild size="sm">
-          <Link href="/admin/harvest/new">New Source</Link>
+          <Link href="/admin/harvest/new"><Plus /> New Source</Link>
         </Button>
       </AdminPageHeader>
 

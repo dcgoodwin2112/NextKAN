@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Eye, Download, Database, Users } from "lucide-react";
 import Link from "next/link";
 
 interface Props {
@@ -63,25 +64,25 @@ export default async function AnalyticsDashboardPage({ searchParams }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <Card>
           <CardContent>
-            <p className="text-sm text-text-muted">Total Views</p>
+            <div className="flex items-center gap-2 text-sm text-text-muted"><Eye className="size-4" /> Total Views</div>
             <p className="text-2xl font-bold">{summary.totalViews.toLocaleString()}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent>
-            <p className="text-sm text-text-muted">Downloads</p>
+            <div className="flex items-center gap-2 text-sm text-text-muted"><Download className="size-4" /> Downloads</div>
             <p className="text-2xl font-bold">{summary.totalDownloads.toLocaleString()}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent>
-            <p className="text-sm text-text-muted">API Calls</p>
+            <div className="flex items-center gap-2 text-sm text-text-muted"><Database className="size-4" /> API Calls</div>
             <p className="text-2xl font-bold">{summary.totalApiCalls.toLocaleString()}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent>
-            <p className="text-sm text-text-muted">Unique Visitors</p>
+            <div className="flex items-center gap-2 text-sm text-text-muted"><Users className="size-4" /> Unique Visitors</div>
             <p className="text-2xl font-bold">{summary.uniqueVisitors.toLocaleString()}</p>
           </CardContent>
         </Card>

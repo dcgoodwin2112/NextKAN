@@ -3,6 +3,7 @@
 import { useState, useEffect, useTransition } from "react";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Label } from "@/components/ui/label";
+import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
 import {
@@ -163,7 +164,7 @@ export default function AdminImportPage() {
           onClick={handleImport}
           disabled={!file || !organizationId || isPending}
         >
-          {isPending ? "Importing..." : "Import"}
+          <Upload /> {isPending ? "Importing..." : "Import"}
         </Button>
 
         {error && (

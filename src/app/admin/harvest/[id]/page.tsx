@@ -9,6 +9,7 @@ import {
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { HarvestDeleteButton } from "./HarvestDeleteButton";
+import { Play, Power } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -63,7 +64,7 @@ export default async function HarvestSourceDetailPage({ params }: Props) {
       <AdminPageHeader title={source.name}>
         <form action={handleRunNow}>
           <Button type="submit" size="sm">
-            Run Now
+            <Play /> Run Now
           </Button>
         </form>
         <form action={handleToggle}>
@@ -77,7 +78,7 @@ export default async function HarvestSourceDetailPage({ params }: Props) {
                 : "border-success text-success hover:bg-success-subtle"
             }
           >
-            {source.enabled ? "Disable" : "Enable"}
+            <Power /> {source.enabled ? "Disable" : "Enable"}
           </Button>
         </form>
         <HarvestDeleteButton onDelete={handleDelete} />
