@@ -1,22 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  createChart,
-  listChartableDistributions,
-} from "@/lib/actions/charts";
+import { createChart } from "@/lib/actions/charts";
 import { ChartRenderer } from "@/components/visualizations/ChartRenderer";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import {
-  DistributionPicker,
-  type ChartableDistribution,
-} from "@/components/admin/DistributionPicker";
+  DistributionPickerDialog,
+} from "@/components/admin/DistributionPickerDialog";
+import type { ChartableDistribution } from "@/components/admin/DistributionPicker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { NativeSelect } from "@/components/ui/native-select";
+import { Check } from "lucide-react";
 
 const chartTypeOptions = [
   { value: "bar", label: "Bar Chart" },
@@ -30,13 +29,12 @@ interface ColumnInfo {
   type: string;
 }
 
-type ChartableDist = ChartableDistribution;
-
 export default function NewChartPage() {
   const router = useRouter();
 
-  const [distributions, setDistributions] = useState<ChartableDist[]>([]);
-  const [loadingDists, setLoadingDists] = useState(true);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [selectedDist, setSelectedDist] =
+    useState<ChartableDistribution | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,21 +47,15 @@ export default function NewChartPage() {
   const [data, setData] = useState<Record<string, unknown>[]>([]);
   const [loadingColumns, setLoadingColumns] = useState(false);
 
-  useEffect(() => {
-    listChartableDistributions().then((dists) => {
-      setDistributions(dists);
-      setLoadingDists(false);
-    });
-  }, []);
-
-  async function handleDistributionChange(distId: string) {
+  async function handleDistributionSelect(dist: ChartableDistribution) {
+    setSelectedDist(dist);
+    const distId = dist.distributionId;
     setDistributionId(distId);
     setColumns([]);
     setXColumn("");
     setYColumns([]);
     setData([]);
     setError(null);
-    if (!distId) return;
 
     setLoadingColumns(true);
     try {
@@ -128,15 +120,6 @@ export default function NewChartPage() {
     }
   }
 
-  if (loadingDists) {
-    return (
-      <div className="animate-pulse space-y-4">
-        <div className="h-8 w-48 rounded bg-surface-alt" />
-        <div className="h-64 rounded bg-surface-alt" />
-      </div>
-    );
-  }
-
   return (
     <div>
       <Breadcrumbs
@@ -148,138 +131,161 @@ export default function NewChartPage() {
       />
       <AdminPageHeader title="New Chart" />
 
-      {distributions.length === 0 ? (
-        <p className="text-text-muted">
-          No chartable distributions found. Import a CSV into a datastore first.
-        </p>
-      ) : (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {/* Config form */}
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Distribution</Label>
-              <DistributionPicker
-                distributions={distributions}
-                value={distributionId}
-                onChange={handleDistributionChange}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Chart title (optional)"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="chartType">Chart Type</Label>
-              <NativeSelect
-                id="chartType"
-                value={chartType}
-                onChange={(e) => setChartType(e.target.value)}
-              >
-                {chartTypeOptions.map((t) => (
-                  <option key={t.value} value={t.value}>
-                    {t.label}
-                  </option>
-                ))}
-              </NativeSelect>
-            </div>
-
-            {loadingColumns && (
-              <p className="text-sm text-text-muted">Loading columns...</p>
-            )}
-
-            {columns.length > 0 && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="xColumn">X Axis</Label>
-                  <NativeSelect
-                    id="xColumn"
-                    value={xColumn}
-                    onChange={(e) => setXColumn(e.target.value)}
-                  >
-                    {columns.map((c) => (
-                      <option key={c.name} value={c.name}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </NativeSelect>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Y Axis (numeric columns)</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {numericColumns.map((c) => (
-                      <label
-                        key={c.name}
-                        className="flex items-center gap-1 text-sm"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={yColumns.includes(c.name)}
-                          onChange={() => toggleYColumn(c.name)}
-                        />
-                        {c.name}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
-
-            <div className="flex gap-2">
-              <Button
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Config form */}
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Distribution</Label>
+            {selectedDist ? (
+              <button
                 type="button"
-                onClick={handlePreview}
-                variant="outline"
-                disabled={!xColumn || yColumns.length === 0}
+                onClick={() => setPickerOpen(true)}
+                className="flex w-full items-center gap-2 rounded border border-primary bg-primary-subtle px-3 py-2 text-sm text-left hover:opacity-90"
               >
-                Preview
-              </Button>
-              <Button
-                type="button"
-                onClick={handleCreate}
-                disabled={
-                  saving || !distributionId || !xColumn || yColumns.length === 0
-                }
-              >
-                {saving ? "Creating..." : "Create Chart"}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.push("/admin/charts")}
-              >
-                Cancel
-              </Button>
-            </div>
-
-            {error && <p className="text-sm text-danger">{error}</p>}
-          </div>
-
-          {/* Live preview */}
-          <div className="rounded border border-border p-4">
-            <h3 className="text-sm font-medium mb-3">Preview</h3>
-            {data.length > 0 ? (
-              <ChartRenderer
-                chartType={chartType}
-                data={data}
-                xColumn={xColumn}
-                yColumns={yColumns}
-              />
+                <Check className="h-4 w-4 shrink-0 text-primary" />
+                <span className="font-medium">{selectedDist.datasetTitle}</span>
+                <span className="text-text-muted">—</span>
+                <span>{selectedDist.distributionTitle}</span>
+                {selectedDist.format && (
+                  <Badge variant="secondary">{selectedDist.format}</Badge>
+                )}
+                <span className="ml-auto text-text-muted whitespace-nowrap">
+                  {selectedDist.rowCount} rows
+                </span>
+              </button>
             ) : (
-              <p className="text-sm text-text-muted">
-                Select a distribution and configure columns, then click Preview.
-              </p>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => setPickerOpen(true)}
+              >
+                Select Distribution…
+              </Button>
             )}
           </div>
+
+          <DistributionPickerDialog
+            open={pickerOpen}
+            onOpenChange={setPickerOpen}
+            onSelect={handleDistributionSelect}
+            selectedId={distributionId}
+          />
+
+          <div className="space-y-2">
+            <Label htmlFor="title">Title</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Chart title (optional)"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="chartType">Chart Type</Label>
+            <NativeSelect
+              id="chartType"
+              value={chartType}
+              onChange={(e) => setChartType(e.target.value)}
+            >
+              {chartTypeOptions.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
+              ))}
+            </NativeSelect>
+          </div>
+
+          {loadingColumns && (
+            <p className="text-sm text-text-muted">Loading columns...</p>
+          )}
+
+          {columns.length > 0 && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="xColumn">X Axis</Label>
+                <NativeSelect
+                  id="xColumn"
+                  value={xColumn}
+                  onChange={(e) => setXColumn(e.target.value)}
+                >
+                  {columns.map((c) => (
+                    <option key={c.name} value={c.name}>
+                      {c.name}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Y Axis (numeric columns)</Label>
+                <div className="flex flex-wrap gap-2">
+                  {numericColumns.map((c) => (
+                    <label
+                      key={c.name}
+                      className="flex items-center gap-1 text-sm"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={yColumns.includes(c.name)}
+                        onChange={() => toggleYColumn(c.name)}
+                      />
+                      {c.name}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              onClick={handlePreview}
+              variant="outline"
+              disabled={!xColumn || yColumns.length === 0}
+            >
+              Preview
+            </Button>
+            <Button
+              type="button"
+              onClick={handleCreate}
+              disabled={
+                saving || !distributionId || !xColumn || yColumns.length === 0
+              }
+            >
+              {saving ? "Creating..." : "Create Chart"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.push("/admin/charts")}
+            >
+              Cancel
+            </Button>
+          </div>
+
+          {error && <p className="text-sm text-danger">{error}</p>}
         </div>
-      )}
+
+        {/* Live preview */}
+        <div className="rounded border border-border p-4">
+          <h3 className="text-sm font-medium mb-3">Preview</h3>
+          {data.length > 0 ? (
+            <ChartRenderer
+              chartType={chartType}
+              data={data}
+              xColumn={xColumn}
+              yColumns={yColumns}
+            />
+          ) : (
+            <p className="text-sm text-text-muted">
+              Select a distribution and configure columns, then click Preview.
+            </p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
