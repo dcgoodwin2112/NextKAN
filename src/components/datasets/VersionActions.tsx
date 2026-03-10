@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,6 +33,8 @@ export function VersionActions({
     setComparing(true);
     try {
       await onCompare();
+    } catch {
+      toast.error("Failed to compare versions");
     } finally {
       setComparing(false);
     }
@@ -41,6 +44,8 @@ export function VersionActions({
     setReverting(true);
     try {
       await onRevert();
+    } catch {
+      toast.error("Failed to revert version");
     } finally {
       setReverting(false);
     }

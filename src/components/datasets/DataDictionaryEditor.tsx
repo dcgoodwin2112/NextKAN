@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useTransition } from "react";
+import { toast } from "sonner";
 import type { DataDictionaryField } from "@/generated/prisma/client";
 import {
   parseDictionaryCSV,
@@ -138,17 +139,22 @@ export function DataDictionaryEditor({
 
   function handleSave() {
     startTransition(async () => {
-      await onSave(
-        distributionId,
-        fields.map((f) => ({
-          name: f.name,
-          title: f.title || undefined,
-          type: f.type,
-          description: f.description || undefined,
-          format: f.format || undefined,
-          sortOrder: f.sortOrder,
-        }))
-      );
+      try {
+        await onSave(
+          distributionId,
+          fields.map((f) => ({
+            name: f.name,
+            title: f.title || undefined,
+            type: f.type,
+            description: f.description || undefined,
+            format: f.format || undefined,
+            sortOrder: f.sortOrder,
+          }))
+        );
+        toast.success("Data dictionary saved");
+      } catch {
+        toast.error("Failed to save data dictionary");
+      }
     });
   }
 
@@ -211,6 +217,7 @@ export function DataDictionaryEditor({
                       onChange={(e) => updateField(index, "name", e.target.value)}
                       className="w-full rounded border px-2 py-1 text-sm font-mono"
                       placeholder="field_name"
+                      aria-label={`Field ${index + 1} name`}
                     />
                   </td>
                   <td className="px-3 py-2">
@@ -220,6 +227,7 @@ export function DataDictionaryEditor({
                       onChange={(e) => updateField(index, "title", e.target.value)}
                       className="w-full rounded border px-2 py-1 text-sm"
                       placeholder="Display title"
+                      aria-label={`Field ${index + 1} title`}
                     />
                   </td>
                   <td className="px-3 py-2">
@@ -227,6 +235,7 @@ export function DataDictionaryEditor({
                       value={field.type}
                       onChange={(e) => updateField(index, "type", e.target.value)}
                       className="rounded border px-2 py-1 text-sm"
+                      aria-label={`Field ${index + 1} type`}
                     >
                       {fieldTypes.map((t) => (
                         <option key={t} value={t}>
@@ -244,6 +253,7 @@ export function DataDictionaryEditor({
                       }
                       className="w-full rounded border px-2 py-1 text-sm"
                       placeholder="Description"
+                      aria-label={`Field ${index + 1} description`}
                     />
                   </td>
                   <td className="px-3 py-2">
@@ -296,7 +306,7 @@ export function DataDictionaryEditor({
               type="button"
               onClick={handleSave}
               disabled={isPending}
-              className="rounded bg-primary px-4 py-2 text-sm text-white hover:bg-primary-hover disabled:opacity-50"
+              className="rounded bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary-hover disabled:opacity-50"
             >
               {isPending ? "Saving..." : "Save Data Dictionary"}
             </button>

@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
 import type { LicenseCreateInput } from "@/lib/schemas/license";
 
 interface LicenseData {
@@ -55,7 +57,9 @@ export function LicenseForm({ initialData, onSubmit }: LicenseFormProps) {
       router.push("/admin/licenses");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      const message = err instanceof Error ? err.message : "An error occurred";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -89,6 +93,7 @@ export function LicenseForm({ initialData, onSubmit }: LicenseFormProps) {
           onChange={(e) => setUrl(e.target.value)}
           placeholder="https://creativecommons.org/publicdomain/zero/1.0/"
         />
+        <p className="text-xs text-text-muted">Link to the full license text (stored in dataset metadata and data.json output).</p>
       </div>
 
       <div className="space-y-2">
@@ -102,16 +107,16 @@ export function LicenseForm({ initialData, onSubmit }: LicenseFormProps) {
       </div>
 
       <div className="flex items-center gap-2">
-        <input
+        <Checkbox
           id="isDefault"
-          type="checkbox"
           checked={isDefault}
-          onChange={(e) => setIsDefault(e.target.checked)}
+          onCheckedChange={(c) => setIsDefault(c === true)}
         />
         <label htmlFor="isDefault" className="text-sm font-medium">
           Default license
         </label>
       </div>
+      <p className="text-xs text-text-muted ml-6">Pre-selected when creating new datasets.</p>
 
       <div className="space-y-2">
         <Label htmlFor="sortOrder">Sort Order</Label>
@@ -123,6 +128,7 @@ export function LicenseForm({ initialData, onSubmit }: LicenseFormProps) {
           min={0}
           className="w-24"
         />
+        <p className="text-xs text-text-muted">Display order in the license dropdown (lower numbers appear first).</p>
       </div>
 
       <div className="flex gap-2">

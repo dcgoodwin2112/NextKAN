@@ -27,10 +27,10 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
+import { ConfirmDeleteButton } from "@/components/admin/ConfirmDeleteButton";
 import { BulkActionBar, type BulkAction } from "@/components/admin/BulkActionBar";
+import { StatusBadge } from "@/components/admin/StatusBadge";
 import { bulkUpdateUsers, bulkDeleteUsers, approveUser, rejectUser, bulkApproveUsers } from "@/lib/actions/users";
 
 interface User {
@@ -308,17 +308,7 @@ export function UserList({ users, organizations }: UserListProps) {
               <TableCell>{user.name || "-"}</TableCell>
               <TableCell>{user.role}</TableCell>
               <TableCell>
-                <Badge
-                  variant={
-                    user.status === "active"
-                      ? "default"
-                      : user.status === "pending"
-                        ? "secondary"
-                        : "outline"
-                  }
-                >
-                  {user.status}
-                </Badge>
+                <StatusBadge status={user.status} />
               </TableCell>
               <TableCell>{user.organization?.name || "-"}</TableCell>
               <TableCell>
@@ -332,30 +322,13 @@ export function UserList({ users, organizations }: UserListProps) {
                       >
                         Approve
                       </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="xs" className="text-destructive hover:text-destructive">
-                            Reject
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Reject User</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to reject {user.email}? This will delete the account.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              variant="destructive"
-                              onClick={() => handleReject(user.id)}
-                            >
-                              Reject
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                      <ConfirmDeleteButton
+                        entityName={user.email}
+                        onConfirm={() => handleReject(user.id)}
+                        size="xs"
+                        triggerVariant="ghost"
+                        triggerLabel="Reject"
+                      />
                     </>
                   )}
                   <Button variant="ghost" size="xs" asChild>
@@ -364,30 +337,12 @@ export function UserList({ users, organizations }: UserListProps) {
                   <Button variant="ghost" size="xs" asChild>
                     <Link href={`/admin/activity?userId=${user.id}`}>Activity</Link>
                   </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="xs" className="text-destructive hover:text-destructive">
-                        Delete
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete User</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete {user.email}? This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          variant="destructive"
-                          onClick={() => handleDelete(user.id)}
-                        >
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  <ConfirmDeleteButton
+                    entityName={user.email}
+                    onConfirm={() => handleDelete(user.id)}
+                    size="xs"
+                    triggerVariant="ghost"
+                  />
                 </div>
               </TableCell>
             </TableRow>

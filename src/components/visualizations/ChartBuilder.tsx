@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ChartRenderer } from "./ChartRenderer";
 
 const chartTypes = [
@@ -162,10 +163,9 @@ export function ChartBuilder({ distributionId }: ChartBuilderProps) {
         <div className="flex flex-wrap gap-2">
           {numericColumns.map((c) => (
             <label key={c.name} className="flex items-center gap-1 text-sm">
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={yColumns.includes(c.name)}
-                onChange={() => toggleYColumn(c.name)}
+                onCheckedChange={() => toggleYColumn(c.name)}
               />
               {c.name}
             </label>
@@ -178,7 +178,7 @@ export function ChartBuilder({ distributionId }: ChartBuilderProps) {
           type="button"
           onClick={loadPreview}
           disabled={loading || !xColumn || yColumns.length === 0}
-          className="rounded bg-primary px-4 py-2 text-sm text-white hover:bg-primary-hover disabled:opacity-50"
+          className="rounded bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary-hover disabled:opacity-50"
         >
           {loading ? "Loading..." : "Preview"}
         </button>

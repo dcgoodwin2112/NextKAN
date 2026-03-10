@@ -1,11 +1,6 @@
 import Link from "next/link";
 import { Checkbox } from "@/components/ui/checkbox";
-
-const statusStyles: Record<string, string> = {
-  draft: "bg-warning-subtle text-warning-text",
-  published: "bg-success-subtle text-success-text",
-  archived: "bg-surface-alt text-text-tertiary",
-};
+import { StatusBadge } from "@/components/admin/StatusBadge";
 
 interface DatasetCardProps {
   dataset: {
@@ -52,13 +47,9 @@ export function DatasetCard({
   const cardContent = (
     <>
       <div className="flex items-center gap-2">
-        <h3 className="font-semibold text-lg">{dataset.title}</h3>
+        <h2 className="font-semibold text-lg">{dataset.title}</h2>
         {adminView && (
-          <span
-            className={`rounded px-2 py-0.5 text-xs font-medium ${statusStyles[dataset.status] || "bg-surface-alt text-text-tertiary"}`}
-          >
-            {dataset.status}
-          </span>
+          <StatusBadge status={dataset.status} />
         )}
       </div>
       <p className="text-sm text-text-tertiary mt-1">{truncated}</p>

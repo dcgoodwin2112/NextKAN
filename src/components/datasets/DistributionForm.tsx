@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -47,7 +48,9 @@ export function DistributionForm({ onAdd, onCancel }: DistributionFormProps) {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Upload failed");
+        const msg = data.error || "Upload failed";
+        setError(msg);
+        toast.error(msg);
         return;
       }
 
@@ -57,8 +60,10 @@ export function DistributionForm({ onAdd, onCancel }: DistributionFormProps) {
       setFileName(data.fileName);
       setFileSize(data.fileSize);
       if (!title) setTitle(file.name);
+      toast.success("File uploaded");
     } catch {
       setError("Upload failed");
+      toast.error("Upload failed");
     } finally {
       setUploading(false);
     }
@@ -136,6 +141,7 @@ export function DistributionForm({ onAdd, onCancel }: DistributionFormProps) {
           onChange={(e) => setAccessURL(e.target.value)}
           placeholder="https://"
         />
+        <p className="text-xs text-text-muted">URL for an API endpoint or landing page (use Download URL for direct file links).</p>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
@@ -147,6 +153,7 @@ export function DistributionForm({ onAdd, onCancel }: DistributionFormProps) {
             onChange={(e) => setMediaType(e.target.value)}
             placeholder="text/csv"
           />
+          <p className="text-xs text-text-muted">IANA media type (e.g., text/csv, application/json, application/pdf).</p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="dist-format">Format</Label>

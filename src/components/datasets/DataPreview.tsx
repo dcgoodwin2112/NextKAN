@@ -158,13 +158,13 @@ function GeoJsonPreview({ data }: { data: GeoJsonPreviewData }) {
       <div className="flex gap-2 mb-3">
         <button
           onClick={() => setView("table")}
-          className={`px-3 py-1 text-sm rounded ${view === "table" ? "bg-primary text-white" : "bg-surface border border-border"}`}
+          className={`px-3 py-1 text-sm rounded ${view === "table" ? "bg-primary text-primary-foreground" : "bg-surface border border-border"}`}
         >
           Table
         </button>
         <button
           onClick={() => setView("map")}
-          className={`px-3 py-1 text-sm rounded ${view === "map" ? "bg-primary text-white" : "bg-surface border border-border"}`}
+          className={`px-3 py-1 text-sm rounded ${view === "map" ? "bg-primary text-primary-foreground" : "bg-surface border border-border"}`}
         >
           Map
         </button>

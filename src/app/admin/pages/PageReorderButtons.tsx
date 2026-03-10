@@ -4,6 +4,7 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface PageReorderButtonsProps {
   pageId: string;
@@ -21,9 +22,13 @@ export function PageReorderButtons({
 
   function handleReorder(direction: "up" | "down") {
     startTransition(async () => {
-      const { reorderPages } = await import("@/lib/actions/pages");
-      await reorderPages(pageId, direction);
-      router.refresh();
+      try {
+        const { reorderPages } = await import("@/lib/actions/pages");
+        await reorderPages(pageId, direction);
+        router.refresh();
+      } catch {
+        toast.error("Failed to reorder pages");
+      }
     });
   }
 

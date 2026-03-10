@@ -51,6 +51,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
               value={settings.SITE_NAME}
               onChange={(e) => update("SITE_NAME", e.target.value)}
             />
+            <p className="text-xs text-text-muted">Appears in the header, browser tabs, and catalog metadata.</p>
           </div>
 
           <div className="space-y-2">
@@ -70,6 +71,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
               value={settings.SITE_URL}
               onChange={(e) => update("SITE_URL", e.target.value)}
             />
+            <p className="text-xs text-text-muted">Base URL for absolute links in feeds, emails, and sitemaps (e.g., https://data.example.gov).</p>
           </div>
 
           <div className="space-y-2">
@@ -80,6 +82,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
               onChange={(e) => update("SITE_LOGO", e.target.value)}
               placeholder="Optional"
             />
+            <p className="text-xs text-text-muted">URL to a logo image shown in the site header.</p>
           </div>
 
           <div className="space-y-2">
@@ -90,6 +93,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
               onChange={(e) => update("HERO_TITLE", e.target.value)}
               placeholder="Falls back to Site Name"
             />
+            <p className="text-xs text-text-muted">Large headline on the homepage. Falls back to Site Name if blank.</p>
           </div>
 
           <div className="space-y-2">
@@ -100,6 +104,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
               onChange={(e) => update("HERO_DESCRIPTION", e.target.value)}
               placeholder="Falls back to Site Description"
             />
+            <p className="text-xs text-text-muted">Subheadline on the homepage. Falls back to Site Description if blank.</p>
           </div>
         </CardContent>
       </Card>
@@ -115,24 +120,28 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
             label="Enable Comments"
             value={settings.ENABLE_COMMENTS}
             onChange={(v) => update("ENABLE_COMMENTS", v)}
+            help="Allow public users to post comments on dataset pages."
           />
           <ToggleField
             id="setting-comment-moderation"
             label="Comment Moderation"
             value={settings.COMMENT_MODERATION}
             onChange={(v) => update("COMMENT_MODERATION", v)}
+            help="Require admin approval before comments appear publicly. Only applies when comments are enabled."
           />
           <ToggleField
             id="setting-enable-workflow"
             label="Enable Editorial Workflow"
             value={settings.ENABLE_WORKFLOW}
             onChange={(v) => update("ENABLE_WORKFLOW", v)}
+            help="Require datasets to go through review before publishing (draft → pending review → approved → published)."
           />
           <ToggleField
             id="setting-enable-plugins"
             label="Enable Plugins"
             value={settings.ENABLE_PLUGINS}
             onChange={(v) => update("ENABLE_PLUGINS", v)}
+            help="Load custom plugin modules from the ./plugins/ directory at server startup."
           />
 
           <div className="flex items-center justify-between">
@@ -147,6 +156,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
               <option value="approval">Requires Approval</option>
               <option value="open">Open</option>
             </NativeSelect>
+            <p className="text-xs text-text-muted">disabled: no public signup. approval: admin must approve new accounts. open: instant access after email verification.</p>
           </div>
 
           {settings.USER_REGISTRATION_MODE !== "disabled" && (
@@ -161,6 +171,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
                 <option value="viewer">Viewer</option>
                 <option value="editor">Editor</option>
               </NativeSelect>
+              <p className="text-xs text-text-muted">Role assigned to newly registered users. viewer: read-only. editor: can create and edit own datasets.</p>
             </div>
           )}
         </CardContent>
@@ -182,6 +193,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
               <option value="v1.1">v1.1</option>
               <option value="v3.0">v3.0</option>
             </NativeSelect>
+            <p className="text-xs text-text-muted">Schema version for the /data.json catalog endpoint. v3.0 adds versioning and series support.</p>
           </div>
 
           <div className="space-y-2">
@@ -192,6 +204,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
               onChange={(e) => update("HARVEST_API_KEY", e.target.value)}
               placeholder="Optional"
             />
+            <p className="text-xs text-text-muted">Sent as authorization header when fetching from password-protected harvest sources.</p>
           </div>
         </CardContent>
       </Card>
@@ -208,24 +221,29 @@ function ToggleField({
   label,
   value,
   onChange,
+  help,
 }: {
   id: string;
   label: string;
   value: string;
   onChange: (v: string) => void;
+  help?: string;
 }) {
   return (
-    <div className="flex items-center justify-between">
-      <Label htmlFor={id}>{label}</Label>
-      <NativeSelect
-        id={id}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-32"
-      >
-        <option value="true">Enabled</option>
-        <option value="false">Disabled</option>
-      </NativeSelect>
+    <div>
+      <div className="flex items-center justify-between">
+        <Label htmlFor={id}>{label}</Label>
+        <NativeSelect
+          id={id}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-32"
+        >
+          <option value="true">Enabled</option>
+          <option value="false">Disabled</option>
+        </NativeSelect>
+      </div>
+      {help && <p className="text-xs text-text-muted mt-1">{help}</p>}
     </div>
   );
 }

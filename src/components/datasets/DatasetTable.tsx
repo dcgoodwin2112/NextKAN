@@ -8,12 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-const statusStyles: Record<string, string> = {
-  draft: "bg-warning-subtle text-warning-text",
-  published: "bg-success-subtle text-success-text",
-  archived: "bg-surface-alt text-text-tertiary",
-};
+import { StatusBadge } from "@/components/admin/StatusBadge";
 
 interface DatasetTableProps {
   datasets: {
@@ -91,11 +86,7 @@ export function DatasetTable({
               </TableCell>
               <TableCell>{dataset.publisher.name}</TableCell>
               <TableCell>
-                <span
-                  className={`rounded px-2 py-0.5 text-xs font-medium ${statusStyles[dataset.status] || "bg-surface-alt text-text-tertiary"}`}
-                >
-                  {dataset.status}
-                </span>
+                <StatusBadge status={dataset.status} />
               </TableCell>
               <TableCell>
                 <div className="flex flex-wrap gap-1">

@@ -81,7 +81,7 @@ export default async function AdminDashboard() {
                   <ul className="space-y-2 text-sm">
                     {actionItems.pendingReview.map((d) => (
                       <li key={d.id} className="flex items-center justify-between">
-                        <Link href={`/admin/datasets/${d.id}/edit`} className="text-primary hover:underline truncate">
+                        <Link href={`/admin/datasets/${d.id}/edit`} className="text-link hover:underline truncate">
                           {d.title}
                         </Link>
                         {d.submittedAt && (
@@ -106,7 +106,7 @@ export default async function AdminDashboard() {
                   <p className="text-sm text-text-muted">
                     Oldest pending since {new Date(actionItems.pendingComments.oldestDate).toLocaleDateString()}
                   </p>
-                  <Link href="/admin/comments" className="text-sm text-primary hover:underline mt-2 inline-block">
+                  <Link href="/admin/comments" className="text-sm text-link hover:underline mt-2 inline-block">
                     Review comments
                   </Link>
                 </CardContent>
@@ -123,7 +123,7 @@ export default async function AdminDashboard() {
                   <ul className="space-y-2 text-sm">
                     {actionItems.failedHarvests.map((h) => (
                       <li key={h.sourceId} className="flex items-center justify-between">
-                        <Link href="/admin/harvest" className="text-primary hover:underline truncate">
+                        <Link href="/admin/harvest" className="text-link hover:underline truncate">
                           {h.sourceName}
                         </Link>
                       </li>
@@ -138,12 +138,12 @@ export default async function AdminDashboard() {
                 <CardContent>
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-medium">Lowest Quality</h3>
-                    <Link href="/admin/quality" className="text-xs text-primary hover:underline">View all</Link>
+                    <Link href="/admin/quality" className="text-xs text-link hover:underline">View all</Link>
                   </div>
                   <ul className="space-y-2 text-sm">
                     {actionItems.lowestQuality.map((d) => (
                       <li key={d.id} className="flex items-center justify-between">
-                        <Link href={`/admin/datasets/${d.id}/edit`} className="text-primary hover:underline truncate">
+                        <Link href={`/admin/datasets/${d.id}/edit`} className="text-link hover:underline truncate">
                           {d.title}
                         </Link>
                         <QualityBadge score={d.score} />
@@ -280,7 +280,7 @@ export default async function AdminDashboard() {
                     {trends.mostViewed.map((d) => (
                       <TableRow key={d.id}>
                         <TableCell>
-                          <Link href={`/admin/datasets/${d.id}/edit`} className="text-primary hover:underline">
+                          <Link href={`/admin/datasets/${d.id}/edit`} className="text-link hover:underline">
                             {d.title}
                           </Link>
                         </TableCell>
@@ -307,7 +307,7 @@ export default async function AdminDashboard() {
                     {trends.mostDownloaded.map((d) => (
                       <TableRow key={d.id}>
                         <TableCell>
-                          <Link href={`/admin/datasets/${d.id}/edit`} className="text-primary hover:underline">
+                          <Link href={`/admin/datasets/${d.id}/edit`} className="text-link hover:underline">
                             {d.title}
                           </Link>
                         </TableCell>

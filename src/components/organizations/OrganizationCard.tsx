@@ -23,7 +23,7 @@ export function OrganizationCard({
   return (
     <div className="rounded-lg border border-border p-4 hover:shadow-sm transition-shadow">
       <Link href={href} className="block">
-        <h3 className="font-semibold text-lg">{organization.name}</h3>
+        <h2 className="font-semibold text-lg">{organization.name}</h2>
         {organization.parent && (
           <p className="text-xs text-text-muted mt-0.5">
             Sub-organization of {organization.parent.name}

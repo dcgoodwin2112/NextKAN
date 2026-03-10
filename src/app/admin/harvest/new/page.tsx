@@ -89,6 +89,9 @@ export default function NewHarvestSourcePage() {
           {error}
         </div>
       )}
+      <p className="text-sm text-text-muted mb-6">
+        Configure a remote catalog to harvest datasets from. The harvester will create new datasets, update existing ones, and archive datasets that are no longer in the source catalog.
+      </p>
       <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl">
         <div className="space-y-2">
           <Label htmlFor="name">Name</Label>
@@ -109,6 +112,7 @@ export default function NewHarvestSourcePage() {
             onChange={(e) => setUrl(e.target.value)}
             placeholder="https://example.com/data.json"
           />
+          <p className="text-xs text-text-muted">Catalog endpoint to harvest from (e.g., https://example.com/data.json for DCAT-US, or CKAN API base URL).</p>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
@@ -121,6 +125,7 @@ export default function NewHarvestSourcePage() {
               <option value="dcat-us">DCAT-US</option>
               <option value="ckan">CKAN</option>
             </NativeSelect>
+            <p className="text-xs text-text-muted">DCAT-US: fetches a data.json catalog. CKAN: uses the CKAN Action API.</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="organizationId">Organization</Label>
@@ -135,6 +140,7 @@ export default function NewHarvestSourcePage() {
                 </option>
               ))}
             </NativeSelect>
+            <p className="text-xs text-text-muted">All harvested datasets will be assigned to this organization.</p>
           </div>
         </div>
         <div className="space-y-2">
@@ -146,9 +152,9 @@ export default function NewHarvestSourcePage() {
             onChange={(e) => setSchedule(e.target.value)}
             placeholder="0 2 * * *"
           />
-          {schedulePreview && (
-            <p className="text-xs text-text-muted">{schedulePreview}</p>
-          )}
+          <p className="text-xs text-text-muted">
+            {schedulePreview || "Standard 5-field cron expression (minute hour day month weekday). Leave blank for manual-only harvesting."}
+          </p>
         </div>
         <div className="flex gap-2">
           <Button type="submit" disabled={isPending}>

@@ -89,10 +89,23 @@ export default function AdminImportPage() {
     <div>
       <AdminPageHeader title="Bulk Import" />
 
+      <div className="text-sm text-text-muted mb-6 max-w-2xl space-y-2">
+        <p>
+          Import multiple datasets at once from a CSV or DCAT-US JSON file. All imported datasets will be assigned to the selected organization.
+        </p>
+        <p>
+          <strong>CSV format:</strong> must include <code>title</code>, <code>description</code>, <code>keywords</code> (semicolon-separated), and <code>accessLevel</code> columns. Additional columns are ignored.
+        </p>
+        <p>
+          <strong>JSON format:</strong> must be a valid DCAT-US data.json structure with a <code>dataset</code> array. Existing datasets with matching identifiers will be skipped.
+        </p>
+      </div>
+
       <div className="max-w-2xl space-y-4">
         <div className="space-y-2">
-          <Label>Organization</Label>
+          <Label htmlFor="organizationId">Organization</Label>
           <NativeSelect
+            id="organizationId"
             value={organizationId}
             onChange={(e) => setOrganizationId(e.target.value)}
           >
@@ -105,8 +118,9 @@ export default function AdminImportPage() {
         </div>
 
         <div className="space-y-2">
-          <Label>File (CSV or DCAT-US JSON)</Label>
+          <Label htmlFor="importFile">File (CSV or DCAT-US JSON)</Label>
           <input
+            id="importFile"
             type="file"
             accept=".csv,.json"
             onChange={handleFileChange}

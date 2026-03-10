@@ -28,9 +28,9 @@ export function VersionDetail({ snapshot }: VersionDetailProps) {
     <div className="space-y-6">
       {/* Core fields */}
       <section>
-        <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-3">
+        <h2 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-3">
           Core
-        </h3>
+        </h2>
         <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
           <div>
             <dt className="font-medium text-text-muted">Title</dt>
@@ -60,9 +60,9 @@ export function VersionDetail({ snapshot }: VersionDetailProps) {
       {/* Contact */}
       {contactPoint && (
         <section>
-          <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-3">
+          <h2 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-3">
             Contact Point
-          </h3>
+          </h2>
           <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
             <div>
               <dt className="font-medium text-text-muted">Name</dt>
@@ -79,9 +79,9 @@ export function VersionDetail({ snapshot }: VersionDetailProps) {
       {/* Publisher */}
       {publisher && (
         <section>
-          <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-3">
+          <h2 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-3">
             Publisher
-          </h3>
+          </h2>
           <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
             <div>
               <dt className="font-medium text-text-muted">Name</dt>
@@ -100,9 +100,9 @@ export function VersionDetail({ snapshot }: VersionDetailProps) {
       {/* Keywords */}
       {keywords.length > 0 && (
         <section>
-          <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-3">
+          <h2 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-3">
             Keywords
-          </h3>
+          </h2>
           <div className="flex flex-wrap gap-2">
             {keywords.map((kw) => (
               <Badge key={kw} variant="secondary">
@@ -116,9 +116,9 @@ export function VersionDetail({ snapshot }: VersionDetailProps) {
       {/* Themes */}
       {themes.length > 0 && (
         <section>
-          <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-3">
+          <h2 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-3">
             Themes
-          </h3>
+          </h2>
           <div className="flex flex-wrap gap-2">
             {themes.map((t) => (
               <Badge key={t} variant="default">
@@ -131,9 +131,9 @@ export function VersionDetail({ snapshot }: VersionDetailProps) {
 
       {/* Additional metadata */}
       <section>
-        <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-3">
+        <h2 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-3">
           Additional Metadata
-        </h3>
+        </h2>
         <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
           {snapshot.temporal && (
             <div>
@@ -149,7 +149,7 @@ export function VersionDetail({ snapshot }: VersionDetailProps) {
           )}
           {snapshot.accrualPeriodicity && (
             <div>
-              <dt className="font-medium text-text-muted">Accrual Periodicity</dt>
+              <dt className="font-medium text-text-muted">Update Frequency</dt>
               <dd>{renderValue(snapshot.accrualPeriodicity)}</dd>
             </div>
           )}
@@ -231,9 +231,9 @@ export function VersionDetail({ snapshot }: VersionDetailProps) {
       {/* Distributions */}
       {distributions.length > 0 && (
         <section>
-          <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-3">
+          <h2 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-3">
             Distributions
-          </h3>
+          </h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm border-collapse">
               <thead>

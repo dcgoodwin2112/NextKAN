@@ -72,7 +72,7 @@ export function LoginForm({ registrationEnabled }: LoginFormProps) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded bg-primary px-4 py-2 text-white hover:bg-primary-hover disabled:opacity-50"
+        className="w-full rounded bg-primary px-4 py-2 text-primary-foreground hover:bg-primary-hover disabled:opacity-50"
       >
         {loading ? "Signing in..." : "Sign In"}
       </button>

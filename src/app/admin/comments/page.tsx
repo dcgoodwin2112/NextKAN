@@ -8,6 +8,7 @@ import { SearchBar } from "@/components/ui/SearchBar";
 import { Pagination } from "@/components/ui/Pagination";
 import { CommentFilterBar } from "@/components/admin/CommentFilterBar";
 import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/admin/StatusBadge";
 import {
   Table,
   TableBody,
@@ -122,9 +123,10 @@ export default async function CommentsPage({
                   {comment.dataset?.title ?? "Unknown"}
                 </TableCell>
                 <TableCell>
-                  <span className={`text-xs font-medium ${comment.approved ? "text-success" : "text-warning"}`}>
-                    {comment.approved ? "Approved" : "Pending"}
-                  </span>
+                  <StatusBadge
+                    status={comment.approved ? "approved" : "pending"}
+                    label={comment.approved ? "Approved" : "Pending"}
+                  />
                 </TableCell>
                 <TableCell className="text-text-muted text-xs">
                   {new Date(comment.createdAt).toLocaleDateString()}
@@ -134,7 +136,7 @@ export default async function CommentsPage({
                     {!comment.approved && (
                       <form action={approveAction}>
                         <input type="hidden" name="id" value={comment.id} />
-                        <Button type="submit" size="xs" className="bg-success hover:bg-success/90">
+                        <Button type="submit" size="xs" variant="default" className="bg-success text-white hover:bg-success/90">
                           Approve
                         </Button>
                       </form>

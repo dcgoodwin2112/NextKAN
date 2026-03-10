@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { NAV_LOCATIONS, PAGE_TEMPLATES } from "@/lib/schemas/page";
 
 interface PageOption {
@@ -118,6 +119,7 @@ export default function NewPagePage() {
             onChange={(e) => setSlug(e.target.value)}
             placeholder="about-us"
           />
+          <p className="text-xs text-text-muted">URL path for this page (e.g., &quot;about-us&quot; → /pages/about-us).</p>
         </div>
         <div className="space-y-2">
           <Label>Content (Markdown)</Label>
@@ -141,6 +143,7 @@ export default function NewPagePage() {
                   </option>
                 ))}
               </NativeSelect>
+              <p className="text-xs text-text-muted">Where this page link appears: header navigation, footer, both, or hidden.</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="parentPage">Parent Page</Label>
@@ -156,6 +159,7 @@ export default function NewPagePage() {
                   </option>
                 ))}
               </NativeSelect>
+              <p className="text-xs text-text-muted">Nest under another page for breadcrumbs and sub-navigation.</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="template">Template</Label>
@@ -186,16 +190,17 @@ export default function NewPagePage() {
                 value={sortOrder}
                 onChange={(e) => setSortOrder(parseInt(e.target.value) || 0)}
               />
+              <p className="text-xs text-text-muted">Display order in navigation menus (lower numbers appear first).</p>
             </div>
           </div>
           <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={published}
-              onChange={(e) => setPublished(e.target.checked)}
+              onCheckedChange={(c) => setPublished(c === true)}
             />
             Published
           </label>
+          <p className="text-xs text-text-muted ml-6">Unchecked pages are drafts, visible only to admins.</p>
         </fieldset>
 
         {/* SEO section */}
@@ -210,6 +215,7 @@ export default function NewPagePage() {
               onChange={(e) => setMetaTitle(e.target.value)}
               maxLength={70}
             />
+            <p className="text-xs text-text-muted">Custom browser tab and search result title. Uses page title if blank.</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="metaDescription">Meta Description (max 160 chars)</Label>
@@ -220,6 +226,7 @@ export default function NewPagePage() {
               maxLength={160}
               rows={2}
             />
+            <p className="text-xs text-text-muted">Summary shown in search engine results and social media previews.</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="heroImage">Hero Image</Label>
@@ -253,6 +260,7 @@ export default function NewPagePage() {
                 </div>
               )}
             </div>
+            <p className="text-xs text-text-muted">Banner image displayed at the top of this page.</p>
           </div>
         </fieldset>
 

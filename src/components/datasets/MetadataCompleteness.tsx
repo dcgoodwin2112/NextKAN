@@ -42,7 +42,7 @@ export function MetadataCompleteness({ values }: MetadataCompletenessProps) {
   return (
     <div className="rounded border border-border p-4 bg-surface">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-semibold">Metadata Completeness</h3>
+        <h2 className="text-sm font-semibold">Metadata Completeness</h2>
         <span className="text-sm font-medium">{percentage}%</span>
       </div>
       <div className="w-full bg-surface-inset rounded-full h-2 mb-3">
@@ -52,6 +52,7 @@ export function MetadataCompleteness({ values }: MetadataCompletenessProps) {
           }`}
           style={{ width: `${percentage}%` }}
           role="progressbar"
+          aria-label="Metadata completeness"
           aria-valuenow={percentage}
           aria-valuemin={0}
           aria-valuemax={100}

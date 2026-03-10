@@ -1,8 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { toast } from "sonner";
 import { DataDictionaryEditor } from "./DataDictionaryEditor";
 import type { DataDictionaryField } from "@/generated/prisma/client";
+
+vi.mock("sonner", () => ({
+  toast: { success: vi.fn(), error: vi.fn() },
+}));
 
 describe("DataDictionaryEditor", () => {
   const mockFields = [
@@ -211,6 +216,44 @@ describe("DataDictionaryEditor", () => {
     await waitFor(() => {
       expect(screen.getByDisplayValue("jsonfield")).toBeInTheDocument();
       expect(screen.getByDisplayValue("JSON Field")).toBeInTheDocument();
+    });
+  });
+
+  it("shows success toast after saving", async () => {
+    const user = userEvent.setup();
+    const onSave = vi.fn().mockResolvedValue(undefined);
+
+    render(
+      <DataDictionaryEditor
+        distributionId="dist-1"
+        fields={mockFields}
+        onSave={onSave}
+      />
+    );
+
+    await user.click(screen.getByText("Save Data Dictionary"));
+
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith("Data dictionary saved");
+    });
+  });
+
+  it("shows error toast when save fails", async () => {
+    const user = userEvent.setup();
+    const onSave = vi.fn().mockRejectedValue(new Error("Save failed"));
+
+    render(
+      <DataDictionaryEditor
+        distributionId="dist-1"
+        fields={mockFields}
+        onSave={onSave}
+      />
+    );
+
+    await user.click(screen.getByText("Save Data Dictionary"));
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Failed to save data dictionary");
     });
   });
 

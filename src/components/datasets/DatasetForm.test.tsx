@@ -1,7 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { toast } from "sonner";
 import { DatasetForm } from "./DatasetForm";
+
+vi.mock("sonner", () => ({
+  toast: { success: vi.fn(), error: vi.fn() },
+}));
 
 const mockOrgs = [
   { id: "a1b2c3d4-e5f6-1234-a567-123456789abc", name: "Test Org" },
@@ -129,6 +134,36 @@ describe("DatasetForm", () => {
 
     await user.click(screen.getByText(/add distribution/i));
     expect(screen.getByTestId("distribution-form")).toBeInTheDocument();
+  });
+
+  it("shows toast error when distribution reorder fails", async () => {
+    const user = userEvent.setup();
+
+    // Mock the dynamic import of reorderDistributions to reject
+    vi.mock("@/lib/actions/datasets", () => ({
+      reorderDistributions: vi.fn().mockRejectedValue(new Error("fail")),
+    }));
+
+    const twoDistributions = [
+      { id: "dist-1", title: "First", downloadURL: "https://a.com/1.csv", accessURL: null, mediaType: "text/csv", format: "CSV", description: null },
+      { id: "dist-2", title: "Second", downloadURL: "https://a.com/2.csv", accessURL: null, mediaType: "text/csv", format: "CSV", description: null },
+    ];
+
+    render(
+      <DatasetForm
+        initialData={{ ...mockInitialData, distributions: twoDistributions }}
+        organizations={mockOrgs}
+        onSubmit={mockOnSubmit}
+      />
+    );
+
+    // Click "move down" on the first distribution
+    const moveDownBtn = screen.getByLabelText(/move distribution 1 down/i);
+    await user.click(moveDownBtn);
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Failed to reorder distributions");
+    });
   });
 
   it("can add and remove distribution entries", async () => {
