@@ -20,7 +20,7 @@ export default async function ThemesPage() {
         items={[{ label: "Home", href: "/" }, { label: "Themes" }]}
       />
 
-      <h1 className="text-3xl font-bold mb-2">Themes</h1>
+      <h1 className="text-4xl font-bold mb-2">Themes</h1>
       <p className="text-text-muted mb-8">Browse datasets organized by topic.</p>
 
       {themes.length > 0 ? (

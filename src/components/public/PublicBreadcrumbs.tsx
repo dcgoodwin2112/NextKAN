@@ -12,7 +12,7 @@ interface PublicBreadcrumbsProps {
 export function PublicBreadcrumbs({ items }: PublicBreadcrumbsProps) {
   return (
     <nav aria-label="Breadcrumb" className="mb-6">
-      <ol className="flex flex-wrap items-center gap-1 text-sm text-text-muted">
+      <ol className="flex flex-wrap items-center gap-1 text-base text-text-muted">
         {items.map((item, i) => (
           <li key={i} className="flex items-center gap-1">
             {i > 0 && (

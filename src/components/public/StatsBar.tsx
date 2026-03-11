@@ -19,10 +19,10 @@ export function StatsBar({ stats }: StatsBarProps) {
         {statItems.map(({ key, label, icon: Icon }) => (
           <div key={key} className="flex flex-col items-center gap-1">
             <Icon className="h-5 w-5 text-primary mb-1" />
-            <span className="text-2xl font-bold">
+            <span className="text-3xl font-bold">
               {stats[key].toLocaleString()}
             </span>
-            <span className="text-sm text-text-muted">{label}</span>
+            <span className="text-base text-text-muted">{label}</span>
           </div>
         ))}
       </div>

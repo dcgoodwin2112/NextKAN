@@ -23,15 +23,15 @@ export function PublicThemeCard({ theme }: PublicThemeCardProps) {
               className="h-3 w-3 rounded-full shrink-0"
               style={{ backgroundColor: theme.color || "#3b82f6" }}
             />
-            <h3 className="font-semibold text-sm leading-tight line-clamp-2">
+            <h3 className="font-semibold text-base leading-tight line-clamp-2">
               {theme.name}
             </h3>
           </div>
           {theme.description && (
-            <p className="text-xs text-text-muted line-clamp-2">{theme.description}</p>
+            <p className="text-sm text-text-muted line-clamp-2">{theme.description}</p>
           )}
           <div className="mt-auto">
-            <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+            <Badge variant="secondary" className="text-xs px-1.5 py-0">
               {theme.datasetCount} dataset{theme.datasetCount !== 1 ? "s" : ""}
             </Badge>
           </div>

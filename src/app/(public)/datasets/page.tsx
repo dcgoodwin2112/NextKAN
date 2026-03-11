@@ -60,7 +60,7 @@ export default async function DatasetsPage({
         items={[{ label: "Home", href: "/" }, { label: "Datasets" }]}
       />
 
-      <h1 className="text-3xl font-bold mb-6">Datasets</h1>
+      <h1 className="text-4xl font-bold mb-6">Datasets</h1>
 
       <div className="max-w-xl mb-6">
         <SearchBar />

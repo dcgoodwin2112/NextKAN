@@ -101,7 +101,7 @@ export default async function PublicPage({ params }: PageProps) {
         ]}
       />
 
-      <h1 className="text-3xl font-bold mb-6">{page.title}</h1>
+      <h1 className="text-4xl font-bold mb-6">{page.title}</h1>
       <div
         id="page-content"
         className="prose dark:prose-invert max-w-none"
@@ -114,7 +114,7 @@ export default async function PublicPage({ params }: PageProps) {
       {/* Child page links */}
       {publishedChildren.length > 0 && (
         <div className="mt-8 border-t border-border pt-6">
-          <h2 className="text-xl font-semibold mb-4">Related Pages</h2>
+          <h2 className="text-2xl font-semibold mb-4">Related Pages</h2>
           <ul className="space-y-2">
             {publishedChildren.map((child) => (
               <li key={child.id}>
@@ -141,7 +141,7 @@ export default async function PublicPage({ params }: PageProps) {
             <nav className="space-y-1" aria-label="Section navigation">
               <Link
                 href={`/pages/${page.parent.slug}`}
-                className="block text-sm font-semibold text-text-muted mb-2 hover:text-primary"
+                className="block text-base font-semibold text-text-muted mb-2 hover:text-primary"
               >
                 {page.parent.title}
               </Link>
@@ -149,7 +149,7 @@ export default async function PublicPage({ params }: PageProps) {
                 <Link
                   key={sibling.id}
                   href={`/pages/${sibling.slug}`}
-                  className={`block text-sm py-1 ${
+                  className={`block text-base py-1 ${
                     sibling.slug === page.slug
                       ? "font-bold text-primary"
                       : "text-text-secondary hover:text-primary"
@@ -164,14 +164,14 @@ export default async function PublicPage({ params }: PageProps) {
           {/* Children nav for parent pages */}
           {!page.parent && publishedChildren.length > 0 && (
             <nav className="space-y-1" aria-label="Page navigation">
-              <p className="text-sm font-semibold text-text-muted mb-2">
+              <p className="text-base font-semibold text-text-muted mb-2">
                 In this section
               </p>
               {publishedChildren.map((child) => (
                 <Link
                   key={child.id}
                   href={`/pages/${child.slug}`}
-                  className="block text-sm text-text-secondary hover:text-primary py-1"
+                  className="block text-base text-text-secondary hover:text-primary py-1"
                 >
                   {child.title}
                 </Link>
@@ -185,14 +185,14 @@ export default async function PublicPage({ params }: PageProps) {
               {(siblings.length > 0 || publishedChildren.length > 0) && (
                 <hr className="border-border" />
               )}
-              <p className="text-sm font-semibold text-text-muted mb-2">
+              <p className="text-base font-semibold text-text-muted mb-2">
                 On this page
               </p>
               {headings.map((heading) => (
                 <a
                   key={heading.id}
                   href={`#${heading.id}`}
-                  className={`block text-sm text-text-secondary hover:text-primary py-0.5 ${
+                  className={`block text-base text-text-secondary hover:text-primary py-0.5 ${
                     heading.level === 3 ? "pl-4" : ""
                   }`}
                 >

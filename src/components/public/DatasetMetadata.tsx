@@ -89,13 +89,13 @@ export function DatasetMetadata({ dataset, customFields = [] }: DatasetMetadataP
 
   return (
     <div className="rounded-lg border border-border bg-surface p-4">
-      <h2 className="text-sm font-semibold uppercase tracking-wider mb-3 text-text-muted">
+      <h2 className="text-base font-semibold uppercase tracking-wider mb-3 text-text-muted">
         Metadata
       </h2>
-      <dl className="space-y-3 text-sm">
+      <dl className="space-y-3 text-base">
         {items.map((item) => (
           <div key={item.label}>
-            <dt className="text-text-muted text-xs font-medium">{item.label}</dt>
+            <dt className="text-text-muted text-sm font-medium">{item.label}</dt>
             <dd className="mt-0.5">{item.value}</dd>
           </div>
         ))}

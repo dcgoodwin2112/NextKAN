@@ -51,7 +51,7 @@ export default async function OrganizationDetailPage({
     <div className="mx-auto max-w-7xl px-4 py-8">
       <PublicBreadcrumbs items={breadcrumbItems} />
 
-      <h1 className="text-3xl font-bold mb-2">{org.name}</h1>
+      <h1 className="text-4xl font-bold mb-2">{org.name}</h1>
       {org.description && (
         <p className="text-text-muted mb-4">{org.description}</p>
       )}
@@ -69,7 +69,7 @@ export default async function OrganizationDetailPage({
 
       {org.children && org.children.length > 0 && (
         <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Sub-organizations</h2>
+          <h2 className="text-2xl font-semibold mb-4">Sub-organizations</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {org.children.map((child) => (
               <PublicOrganizationCard key={child.id} organization={child} />

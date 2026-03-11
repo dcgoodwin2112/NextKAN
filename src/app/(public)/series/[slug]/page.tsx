@@ -41,7 +41,7 @@ export default async function SeriesDetailPage({ params }: Props) {
         ]}
       />
 
-      <h1 className="text-3xl font-bold mb-2">{series.title}</h1>
+      <h1 className="text-4xl font-bold mb-2">{series.title}</h1>
       {series.description && (
         <p className="text-text-muted mb-4">{series.description}</p>
       )}
@@ -52,7 +52,7 @@ export default async function SeriesDetailPage({ params }: Props) {
         </Badge>
       </div>
 
-      <h2 className="text-xl font-semibold mb-4">Datasets</h2>
+      <h2 className="text-2xl font-semibold mb-4">Datasets</h2>
       {publishedDatasets.length === 0 ? (
         <p className="text-text-muted">No published datasets in this series.</p>
       ) : (

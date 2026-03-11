@@ -19,10 +19,10 @@ export function TopicGrid({ topics }: TopicGridProps) {
   return (
     <section>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold">Topics</h2>
+        <h2 className="text-3xl font-semibold">Topics</h2>
         <Link
           href="/themes"
-          className="text-sm text-primary hover:underline font-medium"
+          className="text-base text-primary hover:underline font-medium"
         >
           View all
         </Link>
@@ -37,8 +37,8 @@ export function TopicGrid({ topics }: TopicGridProps) {
                   style={{ backgroundColor: topic.color || "#3b82f6" }}
                 />
                 <div className="min-w-0">
-                  <p className="font-medium text-sm truncate">{topic.name}</p>
-                  <p className="text-xs text-text-muted">
+                  <p className="font-medium text-base truncate">{topic.name}</p>
+                  <p className="text-sm text-text-muted">
                     {topic.datasetCount} dataset{topic.datasetCount !== 1 ? "s" : ""}
                   </p>
                 </div>

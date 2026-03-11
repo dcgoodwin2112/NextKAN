@@ -20,7 +20,7 @@ export default async function OrganizationsPage() {
         items={[{ label: "Home", href: "/" }, { label: "Organizations" }]}
       />
 
-      <h1 className="text-3xl font-bold mb-2">Organizations</h1>
+      <h1 className="text-4xl font-bold mb-2">Organizations</h1>
       <p className="text-text-muted mb-8">
         Browse datasets by publishing organization
       </p>

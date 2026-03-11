@@ -19,8 +19,8 @@ export function DatasetHeader({
 }: DatasetHeaderProps) {
   return (
     <div className="mb-6">
-      <h1 className="text-2xl md:text-3xl font-bold mb-3">{title}</h1>
-      <div className="flex flex-wrap items-center gap-2 text-sm">
+      <h1 className="text-3xl md:text-4xl font-bold mb-3">{title}</h1>
+      <div className="flex flex-wrap items-center gap-2 text-base">
         <Link
           href={`/datasets?org=${publisher.id}`}
           className="text-primary hover:underline"
@@ -29,13 +29,13 @@ export function DatasetHeader({
         </Link>
         {series && (
           <Link href={`/series/${series.slug}`}>
-            <Badge variant="secondary" className="text-xs">
+            <Badge variant="secondary" className="text-sm">
               Series: {series.title}
             </Badge>
           </Link>
         )}
         {accessLevel && (
-          <Badge variant="outline" className="text-xs capitalize">
+          <Badge variant="outline" className="text-sm capitalize">
             {accessLevel}
           </Badge>
         )}

@@ -134,12 +134,12 @@ export default async function DatasetDetailPage({
       {/* Keywords + Themes */}
       <div className="flex flex-wrap gap-2 mb-6">
         {dataset.keywords.map((k) => (
-          <Badge key={k.keyword} variant="outline" className="text-xs">
+          <Badge key={k.keyword} variant="outline" className="text-sm">
             {k.keyword}
           </Badge>
         ))}
         {dataset.themes.map((t) => (
-          <Badge key={t.theme.id} variant="secondary" className="text-xs">
+          <Badge key={t.theme.id} variant="secondary" className="text-sm">
             {t.theme.name}
           </Badge>
         ))}
@@ -171,7 +171,7 @@ export default async function DatasetDetailPage({
                       previewContent={
                         (dist.filePath || dist.downloadURL) ? (
                           <div>
-                            <h4 className="text-sm font-medium mb-2">
+                            <h4 className="text-base font-medium mb-2">
                               Data Preview
                             </h4>
                             <DataPreview
@@ -187,7 +187,7 @@ export default async function DatasetDetailPage({
                         extras?.dictionary &&
                         extras.dictionary.fields.length > 0 ? (
                           <div>
-                            <h4 className="text-sm font-medium mb-2">
+                            <h4 className="text-base font-medium mb-2">
                               Data Dictionary
                             </h4>
                             <DataDictionaryView
@@ -200,7 +200,7 @@ export default async function DatasetDetailPage({
                   );
                 })}
                 {dataset.distributions.length === 0 && (
-                  <p className="text-sm text-text-muted">
+                  <p className="text-base text-text-muted">
                     No resources available.
                   </p>
                 )}
@@ -210,7 +210,7 @@ export default async function DatasetDetailPage({
               <div className="space-y-6">
                 {dataset.spatial && (
                   <div>
-                    <h3 className="text-sm font-semibold mb-2">
+                    <h3 className="text-base font-semibold mb-2">
                       Spatial Coverage
                     </h3>
                     <SpatialPreview spatial={dataset.spatial} />
@@ -223,7 +223,7 @@ export default async function DatasetDetailPage({
                   if (extras?.datastoreTable?.status !== "ready") return null;
                   return (
                     <div key={dist.id}>
-                      <h3 className="text-sm font-semibold mb-2">
+                      <h3 className="text-base font-semibold mb-2">
                         {dist.title || "Chart Builder"}
                       </h3>
                       <ChartBuilder distributionId={dist.id} />
