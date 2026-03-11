@@ -28,19 +28,19 @@ export function PublicOrganizationCard({ organization }: PublicOrganizationCardP
         <CardContent className="px-4 py-0 flex flex-col gap-2">
           <div className="flex items-center gap-2">
             <Building2 className="h-4 w-4 text-text-muted shrink-0" />
-            <h3 className="font-semibold text-sm leading-tight line-clamp-2">
+            <h3 className="font-semibold text-base leading-tight line-clamp-2">
               {organization.name}
             </h3>
           </div>
           {truncated && (
-            <p className="text-xs text-text-muted line-clamp-2">{truncated}</p>
+            <p className="text-sm text-text-muted line-clamp-2">{truncated}</p>
           )}
           <div className="flex items-center gap-2 mt-auto">
-            <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+            <Badge variant="secondary" className="text-xs px-1.5 py-0">
               {datasetCount} dataset{datasetCount !== 1 ? "s" : ""}
             </Badge>
             {organization.parentId && (
-              <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+              <Badge variant="outline" className="text-xs px-1.5 py-0">
                 Sub-organization
               </Badge>
             )}

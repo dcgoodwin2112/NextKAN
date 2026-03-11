@@ -27,20 +27,20 @@ export function DatasetListHeader({
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
-      <p className="text-sm text-text-muted">
+      <p className="text-base text-text-muted">
         {total} dataset{total !== 1 ? "s" : ""} found
         {search ? ` for "${search}"` : ""}
         {hasFilters ? " (filtered)" : ""}
       </p>
       <div className="flex items-center gap-2">
-        <label htmlFor="sort-select" className="text-sm text-text-muted">
+        <label htmlFor="sort-select" className="text-base text-text-muted">
           Sort by:
         </label>
         <NativeSelect
           id="sort-select"
           value={currentSort}
           onChange={handleSortChange}
-          className="w-40 text-sm"
+          className="w-40 text-base"
         >
           <option value="modified_desc">Newest</option>
           <option value="modified_asc">Oldest</option>

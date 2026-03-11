@@ -38,16 +38,16 @@ export function ResourceCard({
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             {distribution.format && (
-              <Badge variant="default" className="shrink-0 text-xs">
+              <Badge variant="default" className="shrink-0 text-sm">
                 {distribution.format}
               </Badge>
             )}
             <div className="min-w-0">
-              <p className="font-medium text-sm truncate">
+              <p className="font-medium text-base truncate">
                 {distribution.title || `Resource ${index + 1}`}
               </p>
               {distribution.description && (
-                <p className="text-xs text-text-muted truncate">
+                <p className="text-sm text-text-muted truncate">
                   {distribution.description}
                 </p>
               )}
@@ -58,7 +58,7 @@ export function ResourceCard({
               <DownloadLink
                 href={distribution.downloadURL}
                 distributionId={distribution.id}
-                className="text-xs text-primary hover:underline"
+                className="text-sm text-primary hover:underline"
               >
                 Download
               </DownloadLink>
@@ -68,7 +68,7 @@ export function ResourceCard({
                 href={distribution.accessURL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-primary hover:underline"
+                className="text-sm text-primary hover:underline"
               >
                 Access
               </a>

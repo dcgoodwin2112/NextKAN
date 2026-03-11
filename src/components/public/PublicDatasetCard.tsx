@@ -34,18 +34,18 @@ export function PublicDatasetCard({ dataset }: PublicDatasetCardProps) {
     <Link href={`/datasets/${dataset.slug}`}>
       <Card className="hover:shadow-md transition-shadow h-full py-4">
         <CardContent className="px-4 py-0 flex flex-col gap-2">
-          <h3 className="font-semibold text-sm leading-tight line-clamp-2">
+          <h3 className="font-semibold text-base leading-tight line-clamp-2">
             {dataset.title}
           </h3>
-          <p className="text-xs text-text-muted line-clamp-2">{truncated}</p>
-          <p className="text-xs text-text-muted">{dataset.publisher.name}</p>
+          <p className="text-sm text-text-muted line-clamp-2">{truncated}</p>
+          <p className="text-sm text-text-muted">{dataset.publisher.name}</p>
           {formats.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {formats.slice(0, MAX_FORMAT_BADGES).map((f) => (
                 <Badge
                   key={f}
                   variant="secondary"
-                  className="text-[10px] px-1.5 py-0"
+                  className="text-xs px-1.5 py-0"
                 >
                   {f}
                 </Badge>
@@ -57,7 +57,7 @@ export function PublicDatasetCard({ dataset }: PublicDatasetCardProps) {
               )}
             </div>
           )}
-          <p className="text-[10px] text-text-muted mt-auto">
+          <p className="text-xs text-text-muted mt-auto">
             Updated {formatDate(dataset.modified)}
           </p>
         </CardContent>

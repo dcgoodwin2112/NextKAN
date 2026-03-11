@@ -47,7 +47,7 @@ export function ActiveFilters({ facets }: ActiveFiltersProps) {
 
   return (
     <div className="flex flex-wrap items-center gap-2 mb-4">
-      <span className="text-xs text-text-muted font-medium">Filters:</span>
+      <span className="text-sm text-text-muted font-medium">Filters:</span>
       {activeFilters.map((f) => (
         <button
           key={f.key}
@@ -67,7 +67,7 @@ export function ActiveFilters({ facets }: ActiveFiltersProps) {
       <Button
         variant="ghost"
         size="sm"
-        className="text-xs h-6"
+        className="text-sm h-6"
         onClick={clearAll}
       >
         Clear all

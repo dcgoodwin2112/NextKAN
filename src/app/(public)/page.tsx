@@ -76,7 +76,7 @@ export default async function HomePage() {
         {/* Recent datasets */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-semibold">Recent Datasets</h2>
+            <h2 className="text-3xl font-semibold">Recent Datasets</h2>
             {total > 8 && (
               <Link href="/datasets">
                 <Button variant="outline" size="sm">
@@ -100,7 +100,7 @@ export default async function HomePage() {
         {topOrgs.length > 0 && (
           <section>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-semibold">Organizations</h2>
+              <h2 className="text-3xl font-semibold">Organizations</h2>
               <Link href="/organizations">
                 <Button variant="outline" size="sm">
                   View all
@@ -114,8 +114,8 @@ export default async function HomePage() {
                   href={`/datasets?org=${org.id}`}
                   className="rounded-lg border border-border p-4 hover:shadow-md transition-shadow bg-card"
                 >
-                  <h3 className="font-semibold text-sm">{org.name}</h3>
-                  <p className="text-xs text-text-muted mt-1">
+                  <h3 className="font-semibold text-base">{org.name}</h3>
+                  <p className="text-sm text-text-muted mt-1">
                     {org._count.datasets} dataset{org._count.datasets !== 1 ? "s" : ""}
                   </p>
                 </Link>

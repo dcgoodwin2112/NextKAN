@@ -58,7 +58,7 @@ export function PublicHeader({
       </a>
 
       {bannerText && (
-        <div className="bg-hero-bg text-hero-text text-center text-xs py-1.5 px-4">
+        <div className="bg-hero-bg text-hero-text text-center text-sm py-1.5 px-4">
           {bannerText}
         </div>
       )}
@@ -75,7 +75,7 @@ export function PublicHeader({
               className="h-8 w-8 object-contain"
             />
           )}
-          <span className="text-xl font-bold text-foreground">{siteName}</span>
+          <span className="text-2xl font-bold text-foreground">{siteName}</span>
         </Link>
 
         {/* Desktop nav */}
@@ -87,7 +87,7 @@ export function PublicHeader({
             <Link
               key={link.href}
               href={link.href}
-              className="px-3 py-2 text-sm text-text-secondary hover:text-foreground hover:bg-surface rounded-md transition-colors"
+              className="px-3 py-2 text-base text-text-secondary hover:text-foreground hover:bg-surface rounded-md transition-colors"
             >
               {link.label}
             </Link>
@@ -158,7 +158,7 @@ export function PublicHeader({
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="block py-2 px-2 text-sm text-text-secondary hover:bg-surface rounded-md"
+                  className="block py-2 px-2 text-base text-text-secondary hover:bg-surface rounded-md"
                   onClick={() => setMenuOpen(false)}
                 >
                   {link.label}
@@ -166,7 +166,7 @@ export function PublicHeader({
               ))}
               <Link
                 href="/login"
-                className="block py-2 px-2 text-sm text-text-secondary hover:bg-surface rounded-md"
+                className="block py-2 px-2 text-base text-text-secondary hover:bg-surface rounded-md"
                 onClick={() => setMenuOpen(false)}
               >
                 Admin

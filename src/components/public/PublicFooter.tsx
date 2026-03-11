@@ -17,31 +17,31 @@ export function PublicFooter({
         <div className="grid gap-8 md:grid-cols-3">
           {/* Nav links */}
           <div>
-            <h2 className="text-sm font-semibold uppercase tracking-wider mb-3">
+            <h2 className="text-base font-semibold uppercase tracking-wider mb-3">
               Navigation
             </h2>
             <nav aria-label="Footer navigation" className="space-y-2">
               <Link
                 href="/datasets"
-                className="block text-sm text-footer-muted hover:text-footer-text transition-colors"
+                className="block text-base text-footer-muted hover:text-footer-text transition-colors"
               >
                 Datasets
               </Link>
               <Link
                 href="/themes"
-                className="block text-sm text-footer-muted hover:text-footer-text transition-colors"
+                className="block text-base text-footer-muted hover:text-footer-text transition-colors"
               >
                 Themes
               </Link>
               <Link
                 href="/organizations"
-                className="block text-sm text-footer-muted hover:text-footer-text transition-colors"
+                className="block text-base text-footer-muted hover:text-footer-text transition-colors"
               >
                 Organizations
               </Link>
               <Link
                 href="/api-docs"
-                className="block text-sm text-footer-muted hover:text-footer-text transition-colors"
+                className="block text-base text-footer-muted hover:text-footer-text transition-colors"
               >
                 API
               </Link>
@@ -49,7 +49,7 @@ export function PublicFooter({
                 <Link
                   key={page.slug}
                   href={`/pages/${page.slug}`}
-                  className="block text-sm text-footer-muted hover:text-footer-text transition-colors"
+                  className="block text-base text-footer-muted hover:text-footer-text transition-colors"
                 >
                   {page.title}
                 </Link>
@@ -59,20 +59,20 @@ export function PublicFooter({
 
           {/* About */}
           <div>
-            <h2 className="text-sm font-semibold uppercase tracking-wider mb-3">
+            <h2 className="text-base font-semibold uppercase tracking-wider mb-3">
               About
             </h2>
-            <p className="text-sm text-footer-muted leading-relaxed">
+            <p className="text-base text-footer-muted leading-relaxed">
               {footerAbout || `${siteName} is an open data catalog providing free access to public datasets.`}
             </p>
           </div>
 
           {/* Powered by */}
           <div>
-            <h2 className="text-sm font-semibold uppercase tracking-wider mb-3">
+            <h2 className="text-base font-semibold uppercase tracking-wider mb-3">
               Platform
             </h2>
-            <p className="text-sm text-footer-muted">
+            <p className="text-base text-footer-muted">
               Powered by{" "}
               <a
                 href="https://github.com/dcgoodwin2112/NextKAN"
@@ -87,7 +87,7 @@ export function PublicFooter({
           </div>
         </div>
 
-        <div className="mt-8 pt-6 border-t border-white/10 text-center text-xs text-footer-muted">
+        <div className="mt-8 pt-6 border-t border-white/10 text-center text-sm text-footer-muted">
           &copy; {new Date().getFullYear()} {siteName}
         </div>
       </div>
