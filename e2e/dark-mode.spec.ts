@@ -53,16 +53,17 @@ test.describe("Dark Mode", () => {
     await page.addInitScript(() => {
       localStorage.setItem("theme", "dark");
     });
-
-    // Check that dark class is applied before DOMContentLoaded
-    let hadDarkClassEarly = false;
-    page.on("domcontentloaded", async () => {
-      hadDarkClassEarly = await page.evaluate(() =>
-        document.documentElement.classList.contains("dark")
-      );
+    await page.addInitScript(() => {
+      (window as any).__darkClassEarly = false;
+      document.addEventListener("DOMContentLoaded", () => {
+        (window as any).__darkClassEarly =
+          document.documentElement.classList.contains("dark");
+      });
     });
-
     await page.goto("/");
+    const hadDarkClassEarly = await page.evaluate(
+      () => (window as any).__darkClassEarly
+    );
     expect(hadDarkClassEarly).toBe(true);
   });
 });

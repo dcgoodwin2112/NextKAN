@@ -309,6 +309,7 @@ export function DatasetForm({
       router.push("/admin/datasets");
       router.refresh();
     } catch (err) {
+      if ((err as any)?.digest?.startsWith("NEXT_REDIRECT")) throw err;
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);

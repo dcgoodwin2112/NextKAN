@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { createDataset, addDistribution } from "@/lib/actions/datasets";
 import { listOrganizations } from "@/lib/actions/organizations";
 import { listThemes } from "@/lib/actions/themes";
@@ -62,6 +63,8 @@ export default async function NewDatasetPage() {
         });
       }
     }
+
+    redirect("/admin/datasets");
   }
 
   return (
