@@ -14,9 +14,9 @@ export default function NotFound() {
       <div className="w-full max-w-md mb-6">
         <SearchBar placeholder="Search datasets..." />
       </div>
-      <Link href="/">
-        <Button variant="outline">Go to Home Page</Button>
-      </Link>
+      <Button variant="outline" asChild>
+        <Link href="/">Go to Home Page</Link>
+      </Button>
     </div>
   );
 }

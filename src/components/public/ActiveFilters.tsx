@@ -49,15 +49,20 @@ export function ActiveFilters({ facets }: ActiveFiltersProps) {
     <div className="flex flex-wrap items-center gap-2 mb-4">
       <span className="text-xs text-text-muted font-medium">Filters:</span>
       {activeFilters.map((f) => (
-        <Badge
+        <button
           key={f.key}
-          variant="secondary"
-          className="gap-1 cursor-pointer hover:opacity-80"
+          type="button"
           onClick={() => removeFilter(f.key)}
+          aria-label={`Remove filter: ${f.label}`}
         >
-          {f.label}
-          <X className="h-3 w-3" />
-        </Badge>
+          <Badge
+            variant="secondary"
+            className="gap-1 cursor-pointer hover:opacity-80"
+          >
+            {f.label}
+            <X className="h-3 w-3" />
+          </Badge>
+        </button>
       ))}
       <Button
         variant="ghost"

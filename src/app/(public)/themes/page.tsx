@@ -1,11 +1,15 @@
+import type { Metadata } from "next";
 import { listThemes } from "@/lib/actions/themes";
+import { siteConfig } from "@/lib/config";
 import { PublicBreadcrumbs } from "@/components/public/PublicBreadcrumbs";
 import { PublicThemeCard } from "@/components/public/PublicThemeCard";
 
-export const metadata = {
-  title: "Themes",
-  description: "Browse datasets by theme",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: `Themes | ${siteConfig.name}`,
+    description: "Browse datasets by theme",
+  };
+}
 
 export default async function ThemesPage() {
   const themes = await listThemes();

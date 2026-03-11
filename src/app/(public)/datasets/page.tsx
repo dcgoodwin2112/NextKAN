@@ -1,6 +1,8 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { listDatasets } from "@/lib/actions/datasets";
 import { getFacetCounts } from "@/lib/actions/facets";
+import { siteConfig } from "@/lib/config";
 import { PublicDatasetCard } from "@/components/public/PublicDatasetCard";
 import { PublicBreadcrumbs } from "@/components/public/PublicBreadcrumbs";
 import { DatasetListHeader } from "@/components/public/DatasetListHeader";
@@ -8,6 +10,13 @@ import { ActiveFilters } from "@/components/public/ActiveFilters";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { Pagination } from "@/components/ui/Pagination";
 import { FacetSidebar } from "@/components/search/FacetSidebar";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: `Datasets | ${siteConfig.name}`,
+    description: `Browse and search open datasets on ${siteConfig.name}`,
+  };
+}
 
 export default async function DatasetsPage({
   searchParams,

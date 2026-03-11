@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { listDatasets } from "@/lib/actions/datasets";
 import { getCatalogStats } from "@/lib/services/discovery";
@@ -8,6 +9,18 @@ import { StatsBar } from "@/components/public/StatsBar";
 import { TopicGrid } from "@/components/public/TopicGrid";
 import { PublicDatasetCard } from "@/components/public/PublicDatasetCard";
 import { Button } from "@/components/ui/button";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: siteConfig.name,
+    description: siteConfig.description,
+    openGraph: {
+      title: siteConfig.name,
+      description: siteConfig.description,
+      url: siteConfig.url,
+    },
+  };
+}
 
 export default async function HomePage() {
   const [{ datasets, total }, stats, themes, orgs] = await Promise.all([

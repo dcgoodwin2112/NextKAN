@@ -1,3 +1,5 @@
+import { formatDate } from "@/lib/utils/format";
+
 interface MetadataItem {
   label: string;
   value: React.ReactNode;
@@ -51,12 +53,12 @@ export function DatasetMetadata({ dataset, customFields = [] }: DatasetMetadataP
   if (dataset.issued) {
     items.push({
       label: "Release Date",
-      value: new Date(dataset.issued).toLocaleDateString(),
+      value: formatDate(dataset.issued),
     });
   }
   items.push({
     label: "Last Modified",
-    value: new Date(dataset.modified).toLocaleDateString(),
+    value: formatDate(dataset.modified),
   });
 
   for (const cf of customFields) {
@@ -78,6 +80,7 @@ export function DatasetMetadata({ dataset, customFields = [] }: DatasetMetadataP
           rel="noopener noreferrer"
         >
           {cf.value}
+          <span className="sr-only"> (opens in new tab)</span>
         </a>
       );
     }

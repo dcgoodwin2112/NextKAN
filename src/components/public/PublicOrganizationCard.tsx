@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Building2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { truncateText } from "@/lib/utils/format";
 
 interface PublicOrganizationCardProps {
   organization: {
@@ -16,9 +17,7 @@ interface PublicOrganizationCardProps {
 
 export function PublicOrganizationCard({ organization }: PublicOrganizationCardProps) {
   const truncated = organization.description
-    ? organization.description.length > 120
-      ? organization.description.slice(0, 120) + "..."
-      : organization.description
+    ? truncateText(organization.description, 120)
     : null;
 
   const datasetCount = organization._count?.datasets ?? 0;

@@ -4,12 +4,14 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowUp } from "lucide-react";
 
+const SCROLL_THRESHOLD = 300;
+
 export function BackToTop() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     function onScroll() {
-      setVisible(window.scrollY > 300);
+      setVisible(window.scrollY > SCROLL_THRESHOLD);
     }
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
