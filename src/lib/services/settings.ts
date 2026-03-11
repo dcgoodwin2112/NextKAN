@@ -16,6 +16,9 @@ const SETTING_DEFAULTS: Record<string, string> = {
   HARVEST_API_KEY: "",
   USER_REGISTRATION_MODE: "disabled",
   USER_DEFAULT_ROLE: "viewer",
+  ENABLE_PUBLIC_FRONTEND: "true",
+  BANNER_TEXT: "",
+  FOOTER_ABOUT: "",
 };
 
 export const SETTING_KEYS = Object.keys(SETTING_DEFAULTS);
@@ -100,6 +103,10 @@ export function getUserRegistrationMode(): "disabled" | "approval" | "open" {
 
 export function getUserDefaultRole(): string {
   return getSetting("USER_DEFAULT_ROLE", "viewer");
+}
+
+export function isPublicFrontendEnabled(): boolean {
+  return getSetting("ENABLE_PUBLIC_FRONTEND") === "true";
 }
 
 function invalidateCache(): void {

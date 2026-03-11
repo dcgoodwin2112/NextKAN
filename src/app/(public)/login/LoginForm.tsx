@@ -4,6 +4,9 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface LoginFormProps {
   registrationEnabled: boolean;
@@ -43,39 +46,29 @@ export function LoginForm({ registrationEnabled }: LoginFormProps) {
           {error}
         </div>
       )}
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium mb-1">
-          Email
-        </label>
-        <input
+      <div className="space-y-2">
+        <Label htmlFor="email">Email</Label>
+        <Input
           id="email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded border px-3 py-2"
           required
         />
       </div>
-      <div>
-        <label htmlFor="password" className="block text-sm font-medium mb-1">
-          Password
-        </label>
-        <input
+      <div className="space-y-2">
+        <Label htmlFor="password">Password</Label>
+        <Input
           id="password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded border px-3 py-2"
           required
         />
       </div>
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full rounded bg-primary px-4 py-2 text-primary-foreground hover:bg-primary-hover disabled:opacity-50"
-      >
+      <Button type="submit" className="w-full" disabled={loading}>
         {loading ? "Signing in..." : "Sign In"}
-      </button>
+      </Button>
 
       {registrationEnabled && (
         <p className="text-center text-sm">

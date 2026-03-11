@@ -3,8 +3,10 @@ import { test, expect } from "@playwright/test";
 test.describe("Search", () => {
   test("search returns matching datasets", async ({ page }) => {
     await page.goto("/datasets");
-    await page.getByRole("searchbox", { name: /search/i }).fill("E2E Published");
-    await page.getByRole("button", { name: "Search", exact: true }).click();
+    // Scope to main content to avoid header search
+    const main = page.locator("main");
+    await main.getByRole("searchbox", { name: /search/i }).fill("E2E Published");
+    await main.getByRole("button", { name: "Search", exact: true }).click();
 
     await expect(page).toHaveURL(/search=E2E/);
     await expect(page.getByText("E2E Published Dataset")).toBeVisible();
@@ -17,13 +19,15 @@ test.describe("Search", () => {
 
   test("search preserves query in URL", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("searchbox", { name: /search/i }).fill("testing");
-    await page.getByRole("button", { name: "Search", exact: true }).click();
+    // Use the hero search bar (main content area), not the header one
+    const main = page.locator("main");
+    await main.getByRole("searchbox", { name: /search/i }).fill("testing");
+    await main.getByRole("button", { name: "Search", exact: true }).click();
 
     await expect(page).toHaveURL(/search=testing/);
-    // Search input should preserve the query
+    // Search input on datasets page should preserve the query
     await expect(
-      page.getByRole("searchbox", { name: /search/i })
+      main.getByRole("searchbox", { name: /search/i })
     ).toHaveValue("testing");
   });
 });

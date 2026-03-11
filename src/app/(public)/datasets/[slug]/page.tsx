@@ -1,8 +1,6 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import type { Metadata } from "next";
 import { getDatasetBySlug } from "@/lib/actions/datasets";
-import { DistributionList } from "@/components/datasets/DistributionList";
 import { DataPreview } from "@/components/datasets/DataPreview";
 import { DataDictionaryView } from "@/components/datasets/DataDictionaryView";
 import { DatasetJsonLd } from "@/components/seo/DatasetJsonLd";
@@ -16,6 +14,12 @@ import { prisma } from "@/lib/db";
 import { getVersionHistory } from "@/lib/services/versioning";
 import { isCommentsEnabled } from "@/lib/services/comments";
 import { getCustomFieldsForDataset } from "@/lib/actions/custom-fields";
+import { PublicBreadcrumbs } from "@/components/public/PublicBreadcrumbs";
+import { DatasetHeader } from "@/components/public/DatasetHeader";
+import { DatasetMetadata } from "@/components/public/DatasetMetadata";
+import { DatasetTabs } from "@/components/public/DatasetTabs";
+import { ResourceCard } from "@/components/public/ResourceCard";
+import { Badge } from "@/components/ui/badge";
 
 interface DatasetDetailProps {
   params: Promise<{ slug: string }>;
@@ -61,17 +65,19 @@ export default async function DatasetDetailPage({
     notFound();
   }
 
-  const versions = await getVersionHistory(dataset.id);
-  const commentsEnabled = isCommentsEnabled();
+  const [versions, commentsEnabled, customFieldValues] = await Promise.all([
+    getVersionHistory(dataset.id),
+    Promise.resolve(isCommentsEnabled()),
+    getCustomFieldsForDataset(dataset.id),
+  ]);
 
-  // Load custom field values with definitions
-  const customFieldValues = await getCustomFieldsForDataset(dataset.id);
-  const customFieldDefs = Object.keys(customFieldValues).length > 0
-    ? await prisma.customFieldDefinition.findMany({
-        where: { name: { in: Object.keys(customFieldValues) } },
-        orderBy: { sortOrder: "asc" },
-      })
-    : [];
+  const customFieldDefs =
+    Object.keys(customFieldValues).length > 0
+      ? await prisma.customFieldDefinition.findMany({
+          where: { name: { in: Object.keys(customFieldValues) } },
+          orderBy: { sortOrder: "asc" },
+        })
+      : [];
 
   // Load data dictionaries and datastore tables for each distribution
   const distributionExtras = await Promise.all(
@@ -89,226 +95,166 @@ export default async function DatasetDetailPage({
     })
   );
 
+  const series = (dataset as any).series as
+    | { title: string; slug: string }
+    | undefined;
+
+  const hasVisualizations =
+    dataset.spatial ||
+    distributionExtras.some((e) => e.datastoreTable?.status === "ready");
+
+  // Build custom fields for metadata sidebar
+  const customFieldsMeta = customFieldDefs.map((def) => ({
+    label: def.label,
+    value: customFieldValues[def.name] || "",
+    type: def.type,
+  })).filter((f) => f.value);
+
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
+    <div className="mx-auto max-w-7xl px-4 py-8">
       <DatasetJsonLd dataset={dataset as any} />
       <PageViewTracker entityType="dataset" entityId={dataset.id} />
 
-      <h1 className="text-3xl font-bold mb-2">{dataset.title}</h1>
-      <p className="text-sm text-text-muted mb-2">
-        Published by {dataset.publisher.name}
+      <PublicBreadcrumbs
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Datasets", href: "/datasets" },
+          { label: dataset.title },
+        ]}
+      />
+
+      <DatasetHeader
+        title={dataset.title}
+        publisher={dataset.publisher}
+        series={series}
+        accessLevel={dataset.accessLevel}
+        modified={dataset.modified}
+      />
+
+      {/* Keywords + Themes */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {dataset.keywords.map((k) => (
+          <Badge key={k.keyword} variant="outline" className="text-xs">
+            {k.keyword}
+          </Badge>
+        ))}
+        {dataset.themes.map((t) => (
+          <Badge key={t.theme.id} variant="secondary" className="text-xs">
+            {t.theme.name}
+          </Badge>
+        ))}
+      </div>
+
+      {/* Description */}
+      <p className="text-text-secondary whitespace-pre-wrap mb-8">
+        {dataset.description}
       </p>
-      {(dataset as any).series && (
-        <p className="text-sm mb-6">
-          <Link
-            href={`/series/${(dataset as any).series.slug}`}
-            className="inline-flex items-center rounded bg-primary-subtle px-2 py-1 text-primary-subtle-text hover:opacity-80"
-          >
-            Part of series: {(dataset as any).series.title}
-          </Link>
-        </p>
-      )}
-      {!(dataset as any).series && <div className="mb-4" />}
 
-      <section className="mb-8">
-        <p className="text-text-secondary whitespace-pre-wrap">
-          {dataset.description}
-        </p>
-      </section>
-
-      {dataset.keywords.length > 0 && (
-        <section className="mb-6">
-          <h2 className="text-lg font-semibold mb-2">Keywords</h2>
-          <div className="flex flex-wrap gap-2">
-            {dataset.keywords.map((k) => (
-              <span
-                key={k.keyword}
-                className="rounded bg-surface-alt px-2 py-1 text-sm text-text-tertiary"
-              >
-                {k.keyword}
-              </span>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {dataset.themes.length > 0 && (
-        <section className="mb-6">
-          <h2 className="text-lg font-semibold mb-2">Themes</h2>
-          <div className="flex flex-wrap gap-2">
-            {dataset.themes.map((t) => (
-              <span
-                key={t.theme.id}
-                className="rounded bg-primary-subtle px-2 py-1 text-sm text-primary-subtle-text"
-              >
-                {t.theme.name}
-              </span>
-            ))}
-          </div>
-        </section>
-      )}
-
-      <section className="mb-6">
-        <h2 className="text-lg font-semibold mb-2">Distributions</h2>
-        <DistributionList distributions={dataset.distributions} />
-
-        {dataset.distributions.map((dist) => {
-          const extras = distributionExtras.find(
-            (e) => e.distributionId === dist.id
-          );
-          return (
-            <div key={dist.id} className="mt-6 space-y-4">
-              {(dist.filePath || dist.downloadURL) && (
-                <div>
-                  <h3 className="text-md font-semibold mb-2">Data Preview</h3>
-                  <DataPreview
-                    distributionId={dist.id}
-                    format={dist.format}
-                    filePath={dist.filePath}
-                    downloadURL={dist.downloadURL}
-                  />
-                </div>
-              )}
-
-              {extras?.dictionary && extras.dictionary.fields.length > 0 && (
-                <div>
-                  <h3 className="text-md font-semibold mb-2">
-                    Data Dictionary
-                    {dist.title ? ` — ${dist.title}` : ""}
-                  </h3>
-                  <DataDictionaryView fields={extras.dictionary.fields} />
-                </div>
-              )}
-
-              {extras?.datastoreTable?.status === "ready" && (
-                <ChartBuilder distributionId={dist.id} />
-              )}
-            </div>
-          );
-        })}
-      </section>
-
-      {dataset.spatial && (
-        <section className="mb-6">
-          <h2 className="text-lg font-semibold mb-2">Spatial Coverage</h2>
-          <SpatialPreview spatial={dataset.spatial} />
-        </section>
-      )}
-
-      <section className="border-t pt-6">
-        <h2 className="text-lg font-semibold mb-4">Metadata</h2>
-        <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
-          {dataset.accessLevel && (
-            <div>
-              <dt className="font-medium text-text-muted">Access Level</dt>
-              <dd>{dataset.accessLevel}</dd>
-            </div>
-          )}
-          {dataset.contactName && (
-            <div>
-              <dt className="font-medium text-text-muted">Contact</dt>
-              <dd>
-                {dataset.contactName}
-                {dataset.contactEmail && (
-                  <> ({dataset.contactEmail})</>
+      {/* Main content: tabs + sidebar */}
+      <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex-1 min-w-0">
+          <DatasetTabs
+            showVisualizations={!!hasVisualizations}
+            showHistory={versions.length > 0}
+            showComments={commentsEnabled}
+            resourcesContent={
+              <div className="space-y-3">
+                {dataset.distributions.map((dist, i) => {
+                  const extras = distributionExtras.find(
+                    (e) => e.distributionId === dist.id
+                  );
+                  return (
+                    <ResourceCard
+                      key={dist.id}
+                      distribution={dist}
+                      index={i}
+                      previewContent={
+                        (dist.filePath || dist.downloadURL) ? (
+                          <div>
+                            <h4 className="text-sm font-medium mb-2">
+                              Data Preview
+                            </h4>
+                            <DataPreview
+                              distributionId={dist.id}
+                              format={dist.format}
+                              filePath={dist.filePath}
+                              downloadURL={dist.downloadURL}
+                            />
+                          </div>
+                        ) : undefined
+                      }
+                      dictionaryContent={
+                        extras?.dictionary &&
+                        extras.dictionary.fields.length > 0 ? (
+                          <div>
+                            <h4 className="text-sm font-medium mb-2">
+                              Data Dictionary
+                            </h4>
+                            <DataDictionaryView
+                              fields={extras.dictionary.fields}
+                            />
+                          </div>
+                        ) : undefined
+                      }
+                    />
+                  );
+                })}
+                {dataset.distributions.length === 0 && (
+                  <p className="text-sm text-text-muted">
+                    No resources available.
+                  </p>
                 )}
-              </dd>
-            </div>
-          )}
-          {dataset.license && (
-            <div>
-              <dt className="font-medium text-text-muted">License</dt>
-              <dd>{dataset.license}</dd>
-            </div>
-          )}
-          {dataset.accrualPeriodicity && (
-            <div>
-              <dt className="font-medium text-text-muted">Update Frequency</dt>
-              <dd>{dataset.accrualPeriodicity}</dd>
-            </div>
-          )}
-          {dataset.temporal && (
-            <div>
-              <dt className="font-medium text-text-muted">Temporal Coverage</dt>
-              <dd>{dataset.temporal}</dd>
-            </div>
-          )}
-          {dataset.spatial && (
-            <div>
-              <dt className="font-medium text-text-muted">Spatial Coverage</dt>
-              <dd>{dataset.spatial}</dd>
-            </div>
-          )}
-          {dataset.issued && (
-            <div>
-              <dt className="font-medium text-text-muted">Release Date</dt>
-              <dd>{new Date(dataset.issued).toLocaleDateString()}</dd>
-            </div>
-          )}
-          <div>
-            <dt className="font-medium text-text-muted">Last Modified</dt>
-            <dd>{new Date(dataset.modified).toLocaleDateString()}</dd>
-          </div>
-        </dl>
-      </section>
-
-      {customFieldDefs.length > 0 && (
-        <section className="border-t pt-6 mt-6">
-          <h2 className="text-lg font-semibold mb-4">Additional Information</h2>
-          <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
-            {customFieldDefs.map((def) => {
-              const value = customFieldValues[def.name];
-              if (!value) return null;
-
-              let displayValue: React.ReactNode = value;
-              if (def.type === "boolean") {
-                displayValue = value === "true" ? "Yes" : "No";
-              } else if (def.type === "multiselect") {
-                try {
-                  displayValue = JSON.parse(value).join(", ");
-                } catch {
-                  displayValue = value;
-                }
-              } else if (def.type === "url") {
-                displayValue = (
-                  <a href={value} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
-                    {value}
-                  </a>
-                );
-              }
-
-              return (
-                <div key={def.id}>
-                  <dt className="font-medium text-text-muted">{def.label}</dt>
-                  <dd>{displayValue}</dd>
-                </div>
-              );
-            })}
-          </dl>
-        </section>
-      )}
-
-      {versions.length > 0 && (
-        <section className="border-t pt-6 mt-6">
-          <h2 className="text-lg font-semibold mb-4">Version History</h2>
-          <VersionHistory
-            datasetId={dataset.id}
-            versions={versions.map((v) => ({
-              id: v.id,
-              version: v.version,
-              changelog: v.changelog,
-              createdAt: v.createdAt.toISOString(),
-            }))}
+              </div>
+            }
+            visualizationsContent={
+              <div className="space-y-6">
+                {dataset.spatial && (
+                  <div>
+                    <h3 className="text-sm font-semibold mb-2">
+                      Spatial Coverage
+                    </h3>
+                    <SpatialPreview spatial={dataset.spatial} />
+                  </div>
+                )}
+                {dataset.distributions.map((dist) => {
+                  const extras = distributionExtras.find(
+                    (e) => e.distributionId === dist.id
+                  );
+                  if (extras?.datastoreTable?.status !== "ready") return null;
+                  return (
+                    <div key={dist.id}>
+                      <h3 className="text-sm font-semibold mb-2">
+                        {dist.title || "Chart Builder"}
+                      </h3>
+                      <ChartBuilder distributionId={dist.id} />
+                    </div>
+                  );
+                })}
+              </div>
+            }
+            historyContent={
+              <VersionHistory
+                datasetId={dataset.id}
+                versions={versions.map((v) => ({
+                  id: v.id,
+                  version: v.version,
+                  changelog: v.changelog,
+                  createdAt: v.createdAt.toISOString(),
+                }))}
+              />
+            }
+            commentsContent={<CommentSection datasetId={dataset.id} />}
           />
-        </section>
-      )}
+        </div>
 
-      {commentsEnabled && (
-        <section className="border-t pt-6 mt-6">
-          <h2 className="text-lg font-semibold mb-4">Comments</h2>
-          <CommentSection datasetId={dataset.id} />
-        </section>
-      )}
+        {/* Metadata sidebar */}
+        <div className="lg:w-[300px] shrink-0">
+          <DatasetMetadata
+            dataset={dataset}
+            customFields={customFieldsMeta}
+          />
+        </div>
+      </div>
     </div>
   );
 }

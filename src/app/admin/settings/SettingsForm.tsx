@@ -87,6 +87,28 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="setting-banner-text">Banner Text</Label>
+            <Input
+              id="setting-banner-text"
+              value={settings.BANNER_TEXT}
+              onChange={(e) => update("BANNER_TEXT", e.target.value)}
+              placeholder="Optional"
+            />
+            <p className="text-xs text-text-muted">Slim banner above the header (e.g., &quot;An official open data catalog&quot;). Leave blank to hide.</p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="setting-footer-about">Footer About Text</Label>
+            <Input
+              id="setting-footer-about"
+              value={settings.FOOTER_ABOUT}
+              onChange={(e) => update("FOOTER_ABOUT", e.target.value)}
+              placeholder="Optional"
+            />
+            <p className="text-xs text-text-muted">Short description displayed in the footer. Leave blank to hide.</p>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="setting-hero-title">Hero Title</Label>
             <Input
               id="setting-hero-title"
@@ -116,6 +138,13 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
           <CardTitle className="flex items-center gap-2"><Zap className="size-5" /> Features</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <ToggleField
+            id="setting-enable-public-frontend"
+            label="Public Frontend"
+            value={settings.ENABLE_PUBLIC_FRONTEND}
+            onChange={(v) => update("ENABLE_PUBLIC_FRONTEND", v)}
+            help="Enable the built-in public frontend. Disable to serve your own frontend while keeping the API and admin."
+          />
           <ToggleField
             id="setting-enable-comments"
             label="Enable Comments"

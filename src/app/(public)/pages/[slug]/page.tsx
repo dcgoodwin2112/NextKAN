@@ -11,6 +11,7 @@ import rehypeSlug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
 import { rehypeChartPlaceholder } from "@/lib/utils/rehype-chart-placeholder";
 import { PageChartHydrator } from "@/components/visualizations/PageChartHydrator";
+import { PublicBreadcrumbs } from "@/components/public/PublicBreadcrumbs";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -90,23 +91,15 @@ export default async function PublicPage({ params }: PageProps) {
         />
       )}
 
-      {/* Breadcrumbs for child pages */}
-      {page.parent && (
-        <nav className="text-sm text-text-muted mb-4" aria-label="Breadcrumb">
-          <Link href="/" className="hover:underline">
-            Home
-          </Link>
-          <span className="mx-2">&gt;</span>
-          <Link
-            href={`/pages/${page.parent.slug}`}
-            className="hover:underline"
-          >
-            {page.parent.title}
-          </Link>
-          <span className="mx-2">&gt;</span>
-          <span>{page.title}</span>
-        </nav>
-      )}
+      <PublicBreadcrumbs
+        items={[
+          { label: "Home", href: "/" },
+          ...(page.parent
+            ? [{ label: page.parent.title, href: `/pages/${page.parent.slug}` }]
+            : []),
+          { label: page.title },
+        ]}
+      />
 
       <h1 className="text-3xl font-bold mb-6">{page.title}</h1>
       <div

@@ -29,7 +29,7 @@ test.describe("Public pages", () => {
     await page.goto("/datasets/e2e-published-dataset");
     await expect(page.getByText("CSV Download")).toBeVisible();
     await expect(
-      page.getByRole("link", { name: /annual-budget\.csv/ })
+      page.getByRole("link", { name: /download/i }).first()
     ).toBeVisible();
   });
 
