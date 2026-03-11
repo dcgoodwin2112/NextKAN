@@ -145,34 +145,38 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
             help="Load custom plugin modules from the ./plugins/ directory at server startup."
           />
 
-          <div className="flex items-center justify-between">
-            <Label htmlFor="setting-registration-mode">User Registration</Label>
-            <NativeSelect
-              id="setting-registration-mode"
-              value={settings.USER_REGISTRATION_MODE}
-              onChange={(e) => update("USER_REGISTRATION_MODE", e.target.value)}
-              className="w-48"
-            >
-              <option value="disabled">Disabled</option>
-              <option value="approval">Requires Approval</option>
-              <option value="open">Open</option>
-            </NativeSelect>
-            <p className="text-xs text-text-muted">disabled: no public signup. approval: admin must approve new accounts. open: instant access after email verification.</p>
+          <div>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="setting-registration-mode">User Registration</Label>
+              <NativeSelect
+                id="setting-registration-mode"
+                value={settings.USER_REGISTRATION_MODE}
+                onChange={(e) => update("USER_REGISTRATION_MODE", e.target.value)}
+                className="w-48"
+              >
+                <option value="disabled">Disabled</option>
+                <option value="approval">Requires Approval</option>
+                <option value="open">Open</option>
+              </NativeSelect>
+            </div>
+            <p className="text-xs text-text-muted mt-1">disabled: no public signup. approval: admin must approve new accounts. open: instant access after email verification.</p>
           </div>
 
           {settings.USER_REGISTRATION_MODE !== "disabled" && (
-            <div className="flex items-center justify-between">
-              <Label htmlFor="setting-default-role">Default Registration Role</Label>
-              <NativeSelect
-                id="setting-default-role"
-                value={settings.USER_DEFAULT_ROLE}
-                onChange={(e) => update("USER_DEFAULT_ROLE", e.target.value)}
-                className="w-48"
-              >
-                <option value="viewer">Viewer</option>
-                <option value="editor">Editor</option>
-              </NativeSelect>
-              <p className="text-xs text-text-muted">Role assigned to newly registered users. viewer: read-only. editor: can create and edit own datasets.</p>
+            <div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="setting-default-role">Default Registration Role</Label>
+                <NativeSelect
+                  id="setting-default-role"
+                  value={settings.USER_DEFAULT_ROLE}
+                  onChange={(e) => update("USER_DEFAULT_ROLE", e.target.value)}
+                  className="w-48"
+                >
+                  <option value="viewer">Viewer</option>
+                  <option value="editor">Editor</option>
+                </NativeSelect>
+              </div>
+              <p className="text-xs text-text-muted mt-1">Role assigned to newly registered users. viewer: read-only. editor: can create and edit own datasets.</p>
             </div>
           )}
         </CardContent>
