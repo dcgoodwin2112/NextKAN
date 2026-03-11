@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/admin/EmptyState";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { Pagination } from "@/components/ui/Pagination";
 import { CommentFilterBar } from "@/components/admin/CommentFilterBar";
+import { hasPermission } from "@/lib/auth/roles";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/admin/StatusBadge";
@@ -26,7 +27,7 @@ export default async function CommentsPage({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const session = await auth();
-  if (!session?.user || (session.user as any).role !== "admin") {
+  if (!session?.user || !hasPermission((session.user as any).role, "user:manage")) {
     redirect("/admin");
   }
 
@@ -54,15 +55,13 @@ export default async function CommentsPage({
     "use server";
     const id = formData.get("id") as string;
     await moderateComment(id, true);
-    const { redirect: redir } = await import("next/navigation");
-    redir("/admin/comments");
+    redirect("/admin/comments");
   }
 
   async function deleteAction(id: string) {
     "use server";
     await deleteComment(id);
-    const { redirect: redir } = await import("next/navigation");
-    redir("/admin/comments");
+    redirect("/admin/comments");
   }
 
   return (
@@ -113,7 +112,7 @@ export default async function CommentsPage({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {comments.map((comment: any) => (
+            {comments.map((comment: { id: string; authorName: string; authorEmail: string; content: string; approved: boolean; createdAt: Date; dataset?: { title: string } | null }) => (
               <TableRow key={comment.id}>
                 <TableCell>
                   <div className="font-medium">{comment.authorName}</div>
@@ -137,7 +136,7 @@ export default async function CommentsPage({
                     {!comment.approved && (
                       <form action={approveAction}>
                         <input type="hidden" name="id" value={comment.id} />
-                        <Button type="submit" size="xs" variant="default" className="bg-success text-white hover:bg-success/90">
+                        <Button type="submit" size="xs" variant="outline" className="border-success text-success hover:bg-success-subtle">
                           <Check /> Approve
                         </Button>
                       </form>

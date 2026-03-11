@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
+import { toast } from "sonner";
 
 interface OrganizationFormProps {
   initialData?: Organization;
@@ -40,6 +41,12 @@ export function OrganizationForm({
     setError("");
     setLoading(true);
 
+    if (!name.trim()) {
+      setError("Name is required");
+      setLoading(false);
+      return;
+    }
+
     try {
       await onSubmit({
         name,
@@ -47,6 +54,7 @@ export function OrganizationForm({
         imageUrl: imageUrl || undefined,
         parentId: parentId || undefined,
       });
+      toast.success("Organization saved");
       router.push("/admin/organizations");
       router.refresh();
     } catch (err) {
@@ -70,7 +78,6 @@ export function OrganizationForm({
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          required
         />
       </div>
       <div className="space-y-2">

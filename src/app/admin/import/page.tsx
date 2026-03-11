@@ -125,7 +125,7 @@ export default function AdminImportPage() {
             type="file"
             accept=".csv,.json"
             onChange={handleFileChange}
-            className="mt-1"
+            className="block w-full text-sm file:mr-4 file:rounded-md file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-foreground hover:file:bg-primary/90 cursor-pointer"
           />
           <p className="text-xs text-text-muted">
             CSV: title, description, keywords (semicolon-separated), accessLevel columns required
