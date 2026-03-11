@@ -16,7 +16,7 @@
   --surface: #f8fafc;
   --surface-alt: #f1f5f9;
   --surface-inset: #e2e8f0;
-  --text-muted: #6b7280;
+  --text-muted: #636b78;
   --text-secondary: #374151;
   --text-tertiary: #4b5563;
   --border: #e5e7eb;
@@ -37,7 +37,7 @@
   --diff-remove-text: #991b1b;
   --hero-bg: #1e3a5f;
   --hero-text: #ffffff;
-  --hero-muted: #94a3b8;
+  --hero-muted: #a3b3c5;
   --footer-bg: #1e293b;
   --footer-text: #e2e8f0;
   --footer-muted: #94a3b8;
@@ -50,11 +50,11 @@
   --link: #1e40af;
   --primary-foreground: #ffffff;
   --muted: #f1f5f9;
-  --muted-foreground: #6b7280;
+  --muted-foreground: #636b78;
   --accent-foreground: #171717;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --secondary-foreground: #171717;
+  --secondary-foreground: #ffffff;
   --input: #d1d5db;
   --ring: #1e40af;
   --radius: 0.5rem;
@@ -102,10 +102,10 @@
   --diff-remove-text: #fca5a5;
   --hero-bg: #0f1d2e;
   --hero-text: #f1f5f9;
-  --hero-muted: #64748b;
+  --hero-muted: #8595a8;
   --footer-bg: #0a0a0a;
   --footer-text: #d1d5db;
-  --footer-muted: #6b7280;
+  --footer-muted: #828a96;
 
   /* shadcn variables */
   --card: #18181b;
