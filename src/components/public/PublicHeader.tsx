@@ -69,7 +69,7 @@ export function PublicHeader({
           {logo && (
             <Image
               src={logo}
-              alt=""
+              alt={`${siteName} logo`}
               width={32}
               height={32}
               className="h-8 w-8 object-contain"

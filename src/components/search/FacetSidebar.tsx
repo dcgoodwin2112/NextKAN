@@ -63,14 +63,19 @@ export function FacetSidebar({ facets }: FacetSidebarProps) {
           </h2>
           <div className="flex flex-wrap gap-1">
             {activeFilters.map((f) => (
-              <Badge
+              <button
                 key={f.key}
-                variant="secondary"
-                className="cursor-pointer hover:opacity-80 gap-1 text-xs"
+                type="button"
                 onClick={() => removeFilter(f.key)}
+                aria-label={`Remove filter: ${f.label}`}
               >
-                {f.label} &times;
-              </Badge>
+                <Badge
+                  variant="secondary"
+                  className="cursor-pointer hover:opacity-80 gap-1 text-xs"
+                >
+                  {f.label} &times;
+                </Badge>
+              </button>
             ))}
           </div>
         </div>

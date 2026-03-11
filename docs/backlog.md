@@ -19,12 +19,18 @@ Pending features and tasks for future implementation. See `docs/backlog-complete
 - Form inputs with associated labels
 - Responsive layout at all breakpoints
 
+#### Done in Phase 4
+
+- `aria-label` on filter badge remove buttons (ActiveFilters + FacetSidebar)
+- Badge `onClick` → `<button>` elements for keyboard accessibility
+- `aria-controls` + `id` on expandable ResourceCard content
+- Visually-hidden `(opens in new tab)` on external links in DatasetMetadata
+- Descriptive logo `alt` text in PublicHeader
+
 #### Remaining
 
 - Thorough color contrast audit (4.5:1 for normal text, 3:1 for large text)
 - Screen reader testing (NVDA/VoiceOver)
-- ARIA attributes where semantic HTML is insufficient
-- Skip navigation links
 - Error announcement for form validation
 - Focus management on route changes
 

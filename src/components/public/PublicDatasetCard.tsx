@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { truncateText, formatDate } from "@/lib/utils/format";
+
+const DESCRIPTION_MAX_LENGTH = 120;
+const MAX_FORMAT_BADGES = 3;
 
 interface PublicDatasetCardProps {
   dataset: {
@@ -16,10 +20,7 @@ interface PublicDatasetCardProps {
 }
 
 export function PublicDatasetCard({ dataset }: PublicDatasetCardProps) {
-  const truncated =
-    dataset.description.length > 120
-      ? dataset.description.slice(0, 120) + "..."
-      : dataset.description;
+  const truncated = truncateText(dataset.description, DESCRIPTION_MAX_LENGTH);
 
   const formats = [
     ...new Set(
@@ -40,7 +41,7 @@ export function PublicDatasetCard({ dataset }: PublicDatasetCardProps) {
           <p className="text-xs text-text-muted">{dataset.publisher.name}</p>
           {formats.length > 0 && (
             <div className="flex flex-wrap gap-1">
-              {formats.slice(0, 3).map((f) => (
+              {formats.slice(0, MAX_FORMAT_BADGES).map((f) => (
                 <Badge
                   key={f}
                   variant="secondary"
@@ -49,15 +50,15 @@ export function PublicDatasetCard({ dataset }: PublicDatasetCardProps) {
                   {f}
                 </Badge>
               ))}
-              {formats.length > 3 && (
+              {formats.length > MAX_FORMAT_BADGES && (
                 <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                  +{formats.length - 3}
+                  +{formats.length - MAX_FORMAT_BADGES}
                 </Badge>
               )}
             </div>
           )}
           <p className="text-[10px] text-text-muted mt-auto">
-            Updated {new Date(dataset.modified).toLocaleDateString()}
+            Updated {formatDate(dataset.modified)}
           </p>
         </CardContent>
       </Card>

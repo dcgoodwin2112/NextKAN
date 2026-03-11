@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { formatDate } from "@/lib/utils/format";
 
 interface DatasetHeaderProps {
   title: string;
@@ -39,7 +40,7 @@ export function DatasetHeader({
           </Badge>
         )}
         <span className="text-text-muted">
-          Updated {new Date(modified).toLocaleDateString()}
+          Updated {formatDate(modified)}
         </span>
       </div>
     </div>

@@ -1,11 +1,15 @@
+import type { Metadata } from "next";
 import { listOrganizations } from "@/lib/actions/organizations";
+import { siteConfig } from "@/lib/config";
 import { PublicBreadcrumbs } from "@/components/public/PublicBreadcrumbs";
 import { PublicOrganizationCard } from "@/components/public/PublicOrganizationCard";
 
-export const metadata = {
-  title: "Organizations",
-  description: "Browse datasets by publishing organization",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: `Organizations | ${siteConfig.name}`,
+    description: "Browse datasets by publishing organization",
+  };
+}
 
 export default async function OrganizationsPage() {
   const organizations = await listOrganizations();
