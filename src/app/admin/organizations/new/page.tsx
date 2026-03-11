@@ -1,5 +1,7 @@
 import { createOrganization, listOrganizations } from "@/lib/actions/organizations";
 import { OrganizationForm } from "@/components/organizations/OrganizationForm";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 
 export default async function NewOrganizationPage() {
   const organizations = await listOrganizations();
@@ -16,7 +18,14 @@ export default async function NewOrganizationPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">New Organization</h1>
+      <Breadcrumbs
+        items={[
+          { label: "Admin", href: "/admin" },
+          { label: "Organizations", href: "/admin/organizations" },
+          { label: "New" },
+        ]}
+      />
+      <AdminPageHeader title="New Organization" />
       <OrganizationForm organizations={organizations} onSubmit={handleCreate} />
     </div>
   );

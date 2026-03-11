@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { hasPermission } from "@/lib/auth/roles";
 import { getAnalyticsSummary } from "@/lib/services/analytics";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,7 +22,7 @@ interface Props {
 
 export default async function AnalyticsDashboardPage({ searchParams }: Props) {
   const session = await auth();
-  if (!session?.user || (session.user as any).role !== "admin") {
+  if (!session?.user || !hasPermission((session.user as any).role, "user:manage")) {
     redirect("/admin");
   }
 
