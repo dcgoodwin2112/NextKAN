@@ -1,9 +1,25 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
+import type { Metadata } from "next";
 import { getSeriesBySlug } from "@/lib/actions/series";
+import { siteConfig } from "@/lib/config";
+import { PublicBreadcrumbs } from "@/components/public/PublicBreadcrumbs";
+import { PublicDatasetCard } from "@/components/public/PublicDatasetCard";
+import { Badge } from "@/components/ui/badge";
 
 interface Props {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const series = await getSeriesBySlug(slug);
+  if (!series) {
+    return { title: "Series Not Found" };
+  }
+  return {
+    title: `${series.title} | ${siteConfig.name}`,
+    description: series.description || `Dataset series: ${series.title}`,
+  };
 }
 
 export default async function SeriesDetailPage({ params }: Props) {
@@ -16,38 +32,43 @@ export default async function SeriesDetailPage({ params }: Props) {
     .sort((a, b) => new Date(b.modified).getTime() - new Date(a.modified).getTime());
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
+    <div className="mx-auto max-w-7xl px-4 py-8">
+      <PublicBreadcrumbs
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Series", href: "/series" },
+          { label: series.title },
+        ]}
+      />
+
       <h1 className="text-3xl font-bold mb-2">{series.title}</h1>
       {series.description && (
-        <p className="text-text-secondary mb-6">{series.description}</p>
+        <p className="text-text-muted mb-4">{series.description}</p>
       )}
-      <p className="text-sm text-text-muted mb-6">
-        Identifier: {series.identifier}
-      </p>
+      <div className="flex gap-3 mb-8">
+        <Badge variant="outline">{series.identifier}</Badge>
+        <Badge variant="secondary">
+          {publishedDatasets.length} dataset{publishedDatasets.length !== 1 ? "s" : ""}
+        </Badge>
+      </div>
 
-      <h2 className="text-lg font-semibold mb-4">
-        Datasets ({publishedDatasets.length})
-      </h2>
+      <h2 className="text-xl font-semibold mb-4">Datasets</h2>
       {publishedDatasets.length === 0 ? (
         <p className="text-text-muted">No published datasets in this series.</p>
       ) : (
-        <ul className="space-y-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {publishedDatasets.map((d) => (
-            <li key={d.id} className="rounded border p-4">
-              <Link
-                href={`/datasets/${d.slug}`}
-                className="text-lg font-medium text-primary hover:underline"
-              >
-                {d.title}
-              </Link>
-              <p className="text-sm text-text-muted mt-1">
-                {d.publisher.name} &middot; Modified{" "}
-                {new Date(d.modified).toLocaleDateString()}
-                {d.version && <> &middot; v{d.version}</>}
-              </p>
-            </li>
+            <PublicDatasetCard
+              key={d.id}
+              dataset={{
+                ...d,
+                description: d.description || "",
+                distributions: [],
+                keywords: [],
+              }}
+            />
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );
