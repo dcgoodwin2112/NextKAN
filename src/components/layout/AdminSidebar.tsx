@@ -1,11 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Menu,
-  X,
   LayoutDashboard,
   Database,
   FileText,
@@ -30,8 +27,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { useAdminSidebar } from "@/lib/admin-sidebar-context";
 
 interface NavItem {
   href: string;
@@ -92,7 +89,7 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({ userRole }: AdminSidebarProps) {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
+  const { open, close, closeMobile } = useAdminSidebar();
 
   const visibleGroups = navGroups
     .map((group) => ({
@@ -105,29 +102,27 @@ export function AdminSidebar({ userRole }: AdminSidebarProps) {
 
   return (
     <>
-      {/* Mobile toggle */}
-      <Button
-        variant="outline"
-        size="icon"
-        className="md:hidden fixed top-4 left-4 z-50"
-        onClick={() => setCollapsed(!collapsed)}
-        aria-label="Toggle admin sidebar"
-      >
-        {collapsed ? <X className="size-5" /> : <Menu className="size-5" />}
-      </Button>
+      {/* Backdrop */}
+      {open && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          onClick={close}
+          aria-hidden="true"
+          data-testid="sidebar-backdrop"
+        />
+      )}
 
-      <aside
+      <nav
+        aria-label="Admin"
+        inert={!open ? true : undefined}
         className={cn(
-          "w-64 border-r border-sidebar-border bg-sidebar p-4 shrink-0",
-          collapsed ? "hidden" : "block",
-          "md:block"
+          "fixed inset-y-0 left-0 z-50 w-64 border-r border-sidebar-border bg-sidebar p-4 shrink-0 overflow-y-auto",
+          "transform transition-transform duration-200 ease-in-out md:transition-none",
+          open ? "translate-x-0 md:relative" : "-translate-x-full md:hidden"
         )}
       >
-        <Link href="/" className="block text-lg font-bold text-sidebar-foreground mb-6">
-          NextKAN
-        </Link>
-        <nav>
-          {visibleGroups.map((group, gi) => (
+        <div>
+          {visibleGroups.map((group) => (
             <div key={group.label ?? "top"}>
               {group.label && (
                 <>
@@ -147,6 +142,7 @@ export function AdminSidebar({ userRole }: AdminSidebarProps) {
                     <Link
                       key={item.href}
                       href={item.href}
+                      onClick={closeMobile}
                       className={cn(
                         "flex items-center gap-2 rounded px-3 py-2 text-sm",
                         isActive
@@ -162,8 +158,8 @@ export function AdminSidebar({ userRole }: AdminSidebarProps) {
               </div>
             </div>
           ))}
-        </nav>
-      </aside>
+        </div>
+      </nav>
     </>
   );
 }

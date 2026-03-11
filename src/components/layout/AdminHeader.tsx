@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { signOut } from "next-auth/react";
-import { User, LogOut, ArrowLeft, Key } from "lucide-react";
+import { User, LogOut, ArrowLeft, Key, Menu } from "lucide-react";
+import { useAdminSidebar } from "@/lib/admin-sidebar-context";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -19,9 +21,29 @@ interface AdminHeaderProps {
 }
 
 export function AdminHeader({ user }: AdminHeaderProps) {
+  const { toggle } = useAdminSidebar();
+
   return (
     <header className="border-b border-border bg-background px-6 py-3 flex items-center justify-between">
-      <h2 className="text-sm text-text-muted">Admin Panel</h2>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-2 focus:bg-background focus:text-foreground focus:border focus:border-border focus:rounded"
+      >
+        Skip to main content
+      </a>
+      <div className="flex items-center gap-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggle}
+          aria-label="Toggle sidebar menu"
+        >
+          <Menu className="size-5" />
+        </Button>
+        <Link href="/" className="text-lg font-bold">
+          NextKAN
+        </Link>
+      </div>
       <div className="flex items-center gap-2">
         <ThemeToggle />
         <NotificationBell />
