@@ -48,7 +48,8 @@ test.describe("Public pages", () => {
   });
 
   test("404 for non-existent dataset slug", async ({ page }) => {
-    const response = await page.goto("/datasets/does-not-exist-slug");
-    expect(response?.status()).toBe(404);
+    await page.goto("/datasets/does-not-exist-slug");
+    await expect(page.getByText("404")).toBeVisible();
+    await expect(page.getByText("Page Not Found")).toBeVisible();
   });
 });

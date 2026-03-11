@@ -31,11 +31,12 @@ test.describe("Harvest", () => {
     await page.getByRole("button", { name: /create/i }).click();
     await expect(page).toHaveURL(/\/admin\/harvest$/, { timeout: 10000 });
 
-    // Click to view details — scope to the row for this source
+    // Wait for table to render, then click to view details
+    await expect(page.getByText("E2E Detail Source")).toBeVisible({ timeout: 10000 });
     const sourceRow = page.getByRole("row", { name: /E2E Detail Source/ });
-    await sourceRow.getByText("Manage").click();
+    await sourceRow.getByRole("link", { name: "Manage" }).click();
     await expect(page.getByText("E2E Detail Source")).toBeVisible();
-    await expect(page.getByText("Run Now")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Run Now" })).toBeVisible();
   });
 
   test("harvest source list shows on admin page", async ({ page }) => {
