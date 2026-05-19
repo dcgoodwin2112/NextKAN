@@ -12,6 +12,18 @@ export interface BuildAppOptions {
   rateLimit?: ReturnType<typeof createRateLimit>;
   concurrency?: ReturnType<typeof createConcurrencyLimiter>;
   cache?: ReturnType<typeof createResultCache>;
+  /**
+   * Liveness/readiness probe for the `/health` endpoint. Returns `true` when
+   * DuckDB is reachable. The default is `() => true` so tests don't need to
+   * run a real probe; `mcp-server/index.ts` injects a real probe that runs
+   * once at startup and caches the result.
+   */
+  getDuckDbReady?: () => boolean;
+  /**
+   * Process uptime in seconds. Defaults to `process.uptime()`. Injected for
+   * deterministic tests.
+   */
+  uptime?: () => number;
 }
 
 /**
@@ -25,6 +37,8 @@ export function buildApp(opts: BuildAppOptions = {}) {
   const rateLimit = opts.rateLimit ?? createRateLimit();
   const concurrency = opts.concurrency ?? createConcurrencyLimiter();
   const cache = opts.cache ?? createResultCache();
+  const getDuckDbReady = opts.getDuckDbReady ?? (() => true);
+  const uptime = opts.uptime ?? (() => process.uptime());
 
   const app = new Hono();
 
@@ -46,13 +60,17 @@ export function buildApp(opts: BuildAppOptions = {}) {
     }),
   );
 
-  app.get("/health", (c) =>
-    c.json({
-      status: "ok",
+  app.get("/health", (c) => {
+    const duckdbReady = getDuckDbReady();
+    const body = {
+      status: duckdbReady ? ("ok" as const) : ("unhealthy" as const),
       service: SERVER_NAME,
       version: SERVER_VERSION,
-    }),
-  );
+      duckdb: duckdbReady ? ("ready" as const) : ("unhealthy" as const),
+      uptime: Math.floor(uptime()),
+    };
+    return c.json(body, duckdbReady ? 200 : 503);
+  });
 
   app.use("/mcp", rateLimit.middleware);
   app.use("/mcp", concurrency.middleware);

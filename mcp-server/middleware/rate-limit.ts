@@ -47,6 +47,19 @@ export function createRateLimit(opts: RateLimitOptions = {}): {
   const now = opts.now ?? Date.now;
   const buckets = new Map<string, Bucket>();
 
+  const setBudgetHeaders = (c: Context, bucket: Bucket) => {
+    c.header("X-RateLimit-Limit-Minute", String(perMinute));
+    c.header(
+      "X-RateLimit-Remaining-Minute",
+      String(Math.max(0, perMinute - bucket.minuteCount)),
+    );
+    c.header("X-RateLimit-Limit-Hour", String(perHour));
+    c.header(
+      "X-RateLimit-Remaining-Hour",
+      String(Math.max(0, perHour - bucket.hourCount)),
+    );
+  };
+
   const middleware: MiddlewareHandler = async (c, next) => {
     const ip = ipOf(c);
     const t = now();
@@ -75,14 +88,28 @@ export function createRateLimit(opts: RateLimitOptions = {}): {
         ? bucket.minuteResetAt - t
         : bucket.hourResetAt - t;
       c.header("Retry-After", String(Math.max(1, Math.ceil(retryMs / 1000))));
+      setBudgetHeaders(c, bucket);
+      // JSON-RPC envelope so MCP clients parse the error consistently with
+      // every other error response on /mcp. The middleware runs before the
+      // JSON-RPC body is parsed, so the request id is unknown — `null` is
+      // valid per JSON-RPC 2.0 in that case.
       return c.json(
-        { error: "Too Many Requests", code: "rate_limit_exceeded" },
+        {
+          jsonrpc: "2.0",
+          id: null,
+          error: {
+            code: -32000,
+            message: "Rate limit exceeded",
+            data: { errorType: "RATE_LIMIT_EXCEEDED" },
+          },
+        },
         429,
       );
     }
 
     bucket.minuteCount += 1;
     bucket.hourCount += 1;
+    setBudgetHeaders(c, bucket);
     await next();
   };
 

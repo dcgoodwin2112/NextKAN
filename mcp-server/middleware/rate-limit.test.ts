@@ -32,6 +32,39 @@ describe("createRateLimit", () => {
     expect(res.headers.get("Retry-After")).toBeTruthy();
   });
 
+  it("emits X-RateLimit-* headers on successful responses", async () => {
+    const { app } = makeApp({ perMinute: 5, perHour: 100 });
+    const headers = { "x-forwarded-for": "1.2.3.4" };
+    const res = await app.request("/", { headers });
+    expect(res.status).toBe(200);
+    expect(res.headers.get("X-RateLimit-Limit-Minute")).toBe("5");
+    // First request consumed 1 of 5 → remaining = 4.
+    expect(res.headers.get("X-RateLimit-Remaining-Minute")).toBe("4");
+    expect(res.headers.get("X-RateLimit-Limit-Hour")).toBe("100");
+    expect(res.headers.get("X-RateLimit-Remaining-Hour")).toBe("99");
+  });
+
+  it("returns a JSON-RPC error envelope on 429", async () => {
+    const { app } = makeApp({ perMinute: 1, perHour: 100 });
+    const headers = { "x-forwarded-for": "9.9.9.9" };
+    await app.request("/", { headers });
+    const res = await app.request("/", { headers });
+    expect(res.status).toBe(429);
+    const body = (await res.json()) as {
+      jsonrpc: string;
+      id: unknown;
+      error: { code: number; message: string; data?: { errorType?: string } };
+    };
+    expect(body.jsonrpc).toBe("2.0");
+    expect(body.id).toBeNull();
+    expect(body.error.code).toBe(-32000);
+    expect(body.error.message).toBe("Rate limit exceeded");
+    expect(body.error.data?.errorType).toBe("RATE_LIMIT_EXCEEDED");
+    // Spec: headers still accompany 429s.
+    expect(res.headers.get("X-RateLimit-Limit-Minute")).toBe("1");
+    expect(res.headers.get("X-RateLimit-Remaining-Minute")).toBe("0");
+  });
+
   it("counts independent buckets per IP", async () => {
     const { app } = makeApp({ perMinute: 1, perHour: 100 });
     await app.request("/", { headers: { "x-forwarded-for": "1.1.1.1" } });
