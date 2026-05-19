@@ -166,14 +166,6 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
             onChange={(v) => update("ENABLE_WORKFLOW", v)}
             help="Require datasets to go through review before publishing (draft → pending review → approved → published)."
           />
-          <ToggleField
-            id="setting-enable-plugins"
-            label="Enable Plugins"
-            value={settings.ENABLE_PLUGINS}
-            onChange={(v) => update("ENABLE_PLUGINS", v)}
-            help="Load custom plugin modules from the ./plugins/ directory at server startup."
-          />
-
           <div>
             <div className="flex items-center justify-between">
               <Label htmlFor="setting-registration-mode">User Registration</Label>

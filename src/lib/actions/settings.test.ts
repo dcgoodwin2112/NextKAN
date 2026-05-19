@@ -43,7 +43,6 @@ vi.mock("@/lib/services/settings", async () => {
       ENABLE_COMMENTS: "false",
       COMMENT_MODERATION: "true",
       ENABLE_WORKFLOW: "false",
-      ENABLE_PLUGINS: "false",
       DCAT_US_VERSION: "v1.1",
       HARVEST_API_KEY: "",
     }),
@@ -71,7 +70,7 @@ describe("settings actions", () => {
       const result = await getSettings();
       expect(result).toHaveProperty("SITE_NAME");
       expect(result).toHaveProperty("ENABLE_COMMENTS");
-      expect(Object.keys(result)).toHaveLength(12);
+      expect(Object.keys(result)).toHaveLength(11);
     });
   });
 

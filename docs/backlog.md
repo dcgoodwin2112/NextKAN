@@ -89,7 +89,7 @@ Documented but not committed to a schedule. Apply going forward; do not retrofit
 
 ## Developer Experience
 
-### Extension & Plugin Developer Guide
+### Extension & MCP Developer Guide
 
 **Priority:** Medium
 **Reason:** Architecture overview, dev setup, and testing patterns are now covered by `README.md`, `CLAUDE.md`, and `docs/testing-setup.md`. What's still missing is contributor-facing guidance on extending the platform.
@@ -97,7 +97,6 @@ Documented but not committed to a schedule. Apply going forward; do not retrofit
 #### Scope
 
 - **Extension guide:** Adding new API endpoints, creating server actions, adding admin pages, writing Zod schemas
-- **Plugin development:** Hook API reference (`src/lib/plugins/`), example plugin walkthrough
 - **MCP tool authoring:** How to add a seventh MCP tool to `mcp-server/tools/` — schema, helpers, registration, tests
 - **Deployment:** Production configuration, PostgreSQL migration, Docker Compose admin + MCP topology
 

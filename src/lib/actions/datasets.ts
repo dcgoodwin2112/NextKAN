@@ -13,8 +13,6 @@ import { distributionSchema, type DistributionInput } from "@/lib/schemas/distri
 import { logActivity, computeDiff } from "@/lib/services/activity";
 import { getEmailService } from "@/lib/services/email";
 import { datasetCreatedEmail } from "@/lib/email-templates/dataset-created";
-import { hooks } from "@/lib/plugins/hooks";
-import { isPluginsEnabled } from "@/lib/plugins/loader";
 import { validateCustomFieldValue } from "@/lib/schemas/custom-field";
 import { silentCatch } from "@/lib/utils/log";
 
@@ -37,10 +35,6 @@ export async function createDataset(
 ) {
   const data = datasetCreateSchema.parse(input);
   const slug = await ensureUniqueSlug(generateSlug(data.title));
-
-  if (isPluginsEnabled()) {
-    silentCatch(hooks.run("dataset:beforeCreate", data), "hooks:dataset:beforeCreate");
-  }
 
   const result = await prisma.$transaction(async (tx) => {
     const dataset = await tx.dataset.create({
@@ -130,10 +124,6 @@ export async function createDataset(
     userId: createdById,
   }), "activity");
 
-  if (isPluginsEnabled()) {
-    silentCatch(hooks.run("dataset:afterCreate", result), "hooks:dataset:afterCreate");
-  }
-
   if (result.status === "published") {
     const siteUrl = process.env.SITE_URL || "http://localhost:3000";
     const email = datasetCreatedEmail({
@@ -184,10 +174,6 @@ export async function updateDataset(id: string, input: DatasetUpdateInput, custo
   if (data.versionNotes !== undefined) updateData.versionNotes = data.versionNotes || null;
   if (data.seriesId !== undefined) updateData.seriesId = data.seriesId || null;
   if (data.previousVersion !== undefined) updateData.previousVersion = data.previousVersion || null;
-
-  if (isPluginsEnabled()) {
-    silentCatch(hooks.run("dataset:beforeUpdate", id, data), "hooks:dataset:beforeUpdate");
-  }
 
   // Fetch before-state for diff
   const before = await prisma.dataset.findUnique({ where: { id } });
@@ -252,10 +238,6 @@ export async function updateDataset(id: string, input: DatasetUpdateInput, custo
     });
   });
 
-  if (isPluginsEnabled()) {
-    silentCatch(hooks.run("dataset:afterUpdate", result), "hooks:dataset:afterUpdate");
-  }
-
   // Fire-and-forget: activity log
   if (before) {
     const diff = computeDiff(
@@ -278,10 +260,6 @@ export async function deleteDataset(id: string) {
   const dataset = await prisma.dataset.findUnique({ where: { id } });
   if (!dataset || dataset.deletedAt) return;
 
-  if (isPluginsEnabled()) {
-    silentCatch(hooks.run("dataset:beforeDelete", id), "hooks:dataset:beforeDelete");
-  }
-
   await prisma.dataset.update({
     where: { id },
     data: { deletedAt: new Date() },
@@ -293,10 +271,6 @@ export async function deleteDataset(id: string) {
     entityId: id,
     entityName: dataset.title,
   }), "activity");
-
-  if (isPluginsEnabled()) {
-    silentCatch(hooks.run("dataset:afterDelete", id, dataset.title), "hooks:dataset:afterDelete");
-  }
 }
 
 export async function getDataset(id: string) {
@@ -472,10 +446,6 @@ export async function bulkUpdateDatasets(
           entityName: dataset.title,
           details: { bulk: true, ...validated.update },
         }), "activity");
-
-        if (isPluginsEnabled()) {
-          silentCatch(hooks.run("dataset:afterUpdate", { ...dataset, ...validated.update }), "hooks:dataset:afterUpdate");
-        }
       } catch (err) {
         errors.push(`Dataset ${id}: ${err instanceof Error ? err.message : "unknown error"}`);
       }
@@ -507,10 +477,6 @@ export async function bulkDeleteDatasets(ids: string[]) {
       entityName: dataset.title,
       details: { bulk: true },
     }), "activity");
-
-    if (isPluginsEnabled()) {
-      silentCatch(hooks.run("dataset:afterDelete", dataset.id, dataset.title), "hooks:dataset:afterDelete");
-    }
   }
 
   return {
