@@ -4,23 +4,6 @@ Pending features and tasks for future implementation. See `docs/backlog-complete
 
 ---
 
-## Agent-First Pivot — Follow-up Verification
-
-The Tier 1.5 pivot shipped on 2026-05-19. MCP live verification and the E2E re-baseline closed out in PRs #51, #52, and the follow-up E2E PR — see `docs/backlog-completed.md`. The profiling boundary work still needs a real-data harness rather than the unit-fixture path.
-
-### Profiling boundary tests
-
-**Priority:** Medium
-**Reason:** The 100 MB CSV upper bound and worker-thread isolation behavior are only verified by unit fixtures (small files, in-process).
-
-#### Scope
-
-- Profile ~95 MB CSV: verify success near the limit, `Distribution.status = "ready"`.
-- Profile ~120 MB CSV: verify graceful failure path with `status = "failed"` and `statusError` populated.
-- Run profiling concurrently with admin API requests to verify the Next.js event loop stays responsive (worker-thread isolation).
-
----
-
 ## Known Debt
 
 Documented but not committed to a schedule. Apply going forward; do not retrofit in-place.
