@@ -34,7 +34,7 @@ All planning docs are in the `docs/` directory. **Read the relevant doc before s
 | Document | Purpose | When to Read |
 |----------|---------|--------------|
 | `docs/pivot-context.md` | The 2026-05 agent-first pivot: why, what changed, what's locked | **Read first** before any Tier 1.5+ work |
-| `docs/tier-1.5-agent-first.md` | Agent-first MVP: column metadata, profiling, AI features, MCP server | **Current focus.** Start here for new feature work. |
+| `docs/tier-1.5-agent-first.md` | Agent-first MVP: column metadata, profiling, AI features, MCP server | **Status: COMPLETE.** Reference for the agent-first contract; see `docs/backlog.md` for outstanding verification. |
 | `docs/mcp-server-spec.md` | Authoritative MCP server spec: tools, schemas, behavior, errors | While implementing or modifying the MCP server |
 | `docs/features.md` | Research summary + 40-feature prioritized roadmap | Background context only |
 | `docs/tier-1-implementation.md` | MVP implementation plan (10 features) | **Status: COMPLETE.** Reference for foundations Tier 1.5 builds on. |
@@ -47,7 +47,7 @@ All planning docs are in the `docs/` directory. **Read the relevant doc before s
 
 ## Pivot status (2026-05)
 
-NextKAN is mid-pivot from human-first catalog to agent-first catalog. The phased integration plan lives at `~/.claude/plans/users-dgoodwin-downloads-cluade-nextkan-radiant-giraffe.md`. Three locked decisions from that plan:
+The agent-first pivot landed on 2026-05-19. All eleven Tier 1.5 features are implemented, tested, and merged. Outstanding follow-up verification (MCP Inspector live test, profiling boundary, E2E re-baseline) is tracked in `docs/backlog.md`. The phased integration plan lives at `~/.claude/plans/users-dgoodwin-downloads-cluade-nextkan-radiant-giraffe.md`. Three locked decisions from that plan:
 
 1. **Extend `Distribution` + `DataDictionaryField`** — do not create new `Resource` / `Column` models. The pivot docs' "Resource" is a semantic alias for the existing `Distribution`; "Column" maps onto `DataDictionaryField`.
 2. **Add Parquet+DuckDB alongside the existing SQLite datastore** — do not replace it. The existing `/api/datastore/sql` keeps working against SQLite. The MCP server queries Parquet via DuckDB. Consolidation is later work.

@@ -1,10 +1,11 @@
 # Tier 1.5: Agent-First MVP Implementation
 
-**Status:** In progress — implement after Tier 1 is complete.
+> **Status: COMPLETE** (2026-05-19) — All 11 features delivered across phases 1–10 plus follow-up phases A–D. 1360 unit/component/integration tests passing. See [docs/backlog.md](backlog.md) for outstanding follow-up verification (MCP Inspector live test, E2E re-baseline, profiling boundary tests).
+
 **Prerequisite:** `docs/pivot-context.md`. Read it first if you haven't.
 **Tests required:** See per-feature test sections below and `docs/testing-addenda.md`.
 
-This document specifies the concrete work to extend NextKAN from a human-first catalog (Tier 1) to an agent-first catalog. Each feature includes file paths, schemas, dependencies, and acceptance criteria.
+This document specifies the concrete work that extended NextKAN from a human-first catalog (Tier 1) to an agent-first catalog. Each feature includes file paths, schemas, dependencies, and acceptance criteria.
 
 ## Codebase reconciliation (added 2026-05-18)
 
