@@ -79,8 +79,21 @@ describe("rate-limit middleware (live)", () => {
     const retryAfter = res.headers.get("Retry-After");
     expect(retryAfter).not.toBeNull();
     expect(Number(retryAfter)).toBeGreaterThan(0);
-    const body = (await res.json()) as { code: string };
-    expect(body.code).toBe("rate_limit_exceeded");
+    // Spec: 429 returns a JSON-RPC error envelope with code -32000.
+    const body = (await res.json()) as {
+      jsonrpc: string;
+      id: unknown;
+      error: { code: number; message: string; data?: { errorType?: string } };
+    };
+    expect(body.jsonrpc).toBe("2.0");
+    expect(body.id).toBeNull();
+    expect(body.error.code).toBe(-32000);
+    expect(body.error.message).toMatch(/rate limit/i);
+    expect(body.error.data?.errorType).toBe("RATE_LIMIT_EXCEEDED");
+    // Spec: rate-limit headers accompany every response, including 429.
+    expect(res.headers.get("X-RateLimit-Limit-Minute")).toBe("3");
+    expect(res.headers.get("X-RateLimit-Remaining-Minute")).toBe("0");
+    expect(res.headers.get("X-RateLimit-Limit-Hour")).toBe("100");
   });
 
   it("isolates buckets per IP", async () => {
@@ -211,5 +224,43 @@ describe("result cache (live)", () => {
     });
 
     expect(prismaMock.dataset.findMany).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("/health endpoint", () => {
+  it("returns 200 with the spec'd superset shape when duckdb is ready", async () => {
+    const { app } = buildApp({
+      getDuckDbReady: () => true,
+      uptime: () => 42.7,
+    });
+    const res = await app.request("/health");
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      status: string;
+      service: string;
+      version: string;
+      duckdb: string;
+      uptime: number;
+    };
+    expect(body.status).toBe("ok");
+    expect(body.service).toBe("nextkan-mcp");
+    expect(typeof body.version).toBe("string");
+    expect(body.duckdb).toBe("ready");
+    expect(body.uptime).toBe(42);
+  });
+
+  it("returns 503 when duckdb readiness probe failed", async () => {
+    const { app } = buildApp({
+      getDuckDbReady: () => false,
+      uptime: () => 1,
+    });
+    const res = await app.request("/health");
+    expect(res.status).toBe(503);
+    const body = (await res.json()) as {
+      status: string;
+      duckdb: string;
+    };
+    expect(body.status).toBe("unhealthy");
+    expect(body.duckdb).toBe("unhealthy");
   });
 });

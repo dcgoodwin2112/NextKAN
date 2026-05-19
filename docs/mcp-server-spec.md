@@ -81,7 +81,7 @@ Single endpoint: `POST /mcp`
 
 A `GET /mcp` request returns 405 Method Not Allowed with a brief description, since stateless mode doesn't need GET upgrade.
 
-A `GET /health` endpoint returns `{ status: "ok", duckdb: "ready" }` for liveness checks.
+A `GET /health` endpoint returns `{ status, service, version, duckdb, uptime }` for liveness checks. See [Health](#health) for the full contract.
 
 ## Tool surface
 
@@ -399,8 +399,8 @@ When exceeded:
 
 - Return HTTP 429.
 - Include `Retry-After` header with seconds until next allowed request.
-- Include `X-RateLimit-*` headers per the standard.
-- Body: JSON-RPC error with code `-32000` and message `"Rate limit exceeded"`.
+- Include `X-RateLimit-*` headers per the standard (also emitted on every successful response).
+- Body: JSON-RPC error envelope with `id: null` (the request body is not parsed before the limiter fires), `error.code: -32000`, `error.message: "Rate limit exceeded"`, and `error.data.errorType: "RATE_LIMIT_EXCEEDED"`.
 
 Implementation: simple in-memory token bucket via Hono middleware. Keyed on `X-Forwarded-For` (first value) or `RemoteAddr`. Document in README that production deployments should put a real proxy in front for IP determination.
 
@@ -528,7 +528,28 @@ Handle SIGTERM and SIGINT gracefully:
 
 ### Health
 
-`GET /health` returns 200 with `{ status: "ok", duckdb: "ready", uptime: <seconds> }` once startup completes. Returns 503 during shutdown.
+`GET /health` returns 200 with the following shape once startup completes:
+
+```json
+{
+  "status": "ok",
+  "service": "nextkan-mcp",
+  "version": "0.1.0",
+  "duckdb": "ready",
+  "uptime": 142
+}
+```
+
+Field meanings:
+
+- `status` — `"ok"` when the DuckDB readiness probe succeeded; `"unhealthy"` otherwise.
+- `service` / `version` — server identity, useful for monitoring dashboards differentiating MCP instances.
+- `duckdb` — `"ready"` when a `SELECT 1` probe succeeded at startup; `"unhealthy"` if the probe failed. The probe runs once at startup and is cached; no per-request DuckDB work happens for `/health`.
+- `uptime` — process uptime in whole seconds.
+
+When the DuckDB probe failed, `/health` returns **HTTP 503** with `status: "unhealthy"` and `duckdb: "unhealthy"` (other fields unchanged). The MCP server keeps running so the operator can decide what to do via the load balancer rather than crash-looping.
+
+Returns 503 during shutdown.
 
 ## Deployment
 
