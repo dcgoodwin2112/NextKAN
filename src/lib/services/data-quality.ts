@@ -1,4 +1,5 @@
-import type { DatasetWithRelations } from "@/lib/schemas/dcat-us";
+import type { DatasetWithRelations, DistributionWithDictionary } from "@/lib/schemas/dcat-us";
+import { detectPii } from "@/lib/profiling/pii";
 
 export interface QualityBreakdown {
   category: string;
@@ -9,6 +10,7 @@ export interface QualityBreakdown {
 
 export interface QualityScore {
   overall: number;
+  maxScore: number;
   breakdown: QualityBreakdown[];
   suggestions: string[];
 }
@@ -16,7 +18,13 @@ export interface QualityScore {
 interface QualityCheck {
   category: string;
   maxScore: number;
+  /** If provided and returns false for a dataset, the check is skipped (not counted in max). */
+  applicable?: (dataset: DatasetWithRelations) => boolean;
   evaluate: (dataset: DatasetWithRelations) => { score: number; details: string };
+}
+
+function hasProfiledColumns(dataset: DatasetWithRelations): boolean {
+  return dataset.distributions.some((dist) => (dist.dataDictionary?.fields?.length ?? 0) > 0);
 }
 
 const QUALITY_CHECKS: QualityCheck[] = [
@@ -142,6 +150,79 @@ const QUALITY_CHECKS: QualityCheck[] = [
       return { score: 0, details: "No themes assigned" };
     },
   },
+  {
+    category: "Agent: Column Documentation",
+    maxScore: 5,
+    applicable: hasProfiledColumns,
+    evaluate: (d) => {
+      const fields = collectDictionaryFields(d);
+      const documented = fields.filter(
+        (f) => (f.description ?? "").trim().length > 0 && hasUnit(f),
+      ).length;
+      if (documented === fields.length) {
+        return { score: 5, details: "All columns have description and unit" };
+      }
+      const ratio = documented / fields.length;
+      const score = Math.round(ratio * 5);
+      return {
+        score,
+        details: `${documented}/${fields.length} columns have both description and unit`,
+      };
+    },
+  },
+  {
+    category: "Agent: Filterable Documentation",
+    maxScore: 5,
+    applicable: hasProfiledColumns,
+    evaluate: (d) => {
+      const fields = collectDictionaryFields(d);
+      const filterable = fields.filter((f) => f.filterable);
+      if (filterable.length === 0) {
+        return { score: 5, details: "N/A — no filterable columns" };
+      }
+      const documented = filterable.filter(
+        (f) => (f.description ?? "").trim().length > 0,
+      ).length;
+      if (documented === filterable.length) {
+        return { score: 5, details: "All filterable columns have descriptions" };
+      }
+      const ratio = documented / filterable.length;
+      const score = Math.round(ratio * 5);
+      return {
+        score,
+        details: `${documented}/${filterable.length} filterable columns have descriptions`,
+      };
+    },
+  },
+  {
+    category: "Agent: PII Safety",
+    maxScore: 5,
+    applicable: hasProfiledColumns,
+    evaluate: (d) => {
+      const fields = collectDictionaryFields(d);
+      const unflagged: string[] = [];
+      const flagged: string[] = [];
+      for (const f of fields) {
+        const samples = parseJsonArray(f.sampleValues);
+        const detected = samples.length > 0 && detectPii(samples);
+        if (detected && !f.isPii) unflagged.push(f.name);
+        if (f.isPii) flagged.push(f.name);
+      }
+      if (unflagged.length > 0) {
+        return {
+          score: 0,
+          details: `PII detected but not flagged: ${unflagged.join(", ")}`,
+        };
+      }
+      if (flagged.length > 0) {
+        return {
+          score: 3,
+          details: `${flagged.length} PII column(s) flagged correctly`,
+        };
+      }
+      return { score: 5, details: "No PII detected" };
+    },
+  },
 ];
 
 export function calculateQualityScore(dataset: DatasetWithRelations): QualityScore {
@@ -149,6 +230,7 @@ export function calculateQualityScore(dataset: DatasetWithRelations): QualitySco
   const suggestions: string[] = [];
 
   for (const check of QUALITY_CHECKS) {
+    if (check.applicable && !check.applicable(dataset)) continue;
     const { score, details } = check.evaluate(dataset);
     breakdown.push({
       category: check.category,
@@ -162,13 +244,58 @@ export function calculateQualityScore(dataset: DatasetWithRelations): QualitySco
   }
 
   const overall = breakdown.reduce((sum, b) => sum + b.score, 0);
-  return { overall, breakdown, suggestions };
+  const maxScore = breakdown.reduce((sum, b) => sum + b.maxScore, 0);
+  return { overall, maxScore, breakdown, suggestions };
 }
 
-export function getQualityTier(score: number): { label: string; color: string } {
-  if (score >= 90) return { label: "A", color: "text-success-text" };
-  if (score >= 80) return { label: "B", color: "text-primary" };
-  if (score >= 70) return { label: "C", color: "text-warning-text" };
-  if (score >= 60) return { label: "D", color: "text-warning-text" };
+/**
+ * Returns a letter tier from a percentage in 0-100. Callers that have a raw
+ * score should divide by `QualityScore.maxScore` first.
+ */
+export function getQualityTier(percent: number): { label: string; color: string } {
+  if (percent >= 90) return { label: "A", color: "text-success-text" };
+  if (percent >= 80) return { label: "B", color: "text-primary" };
+  if (percent >= 70) return { label: "C", color: "text-warning-text" };
+  if (percent >= 60) return { label: "D", color: "text-warning-text" };
   return { label: "F", color: "text-danger-text" };
+}
+
+type DictionaryField = NonNullable<DistributionWithDictionary["dataDictionary"]>["fields"][number];
+
+function collectDictionaryFields(dataset: DatasetWithRelations): DictionaryField[] {
+  const out: DictionaryField[] = [];
+  for (const dist of dataset.distributions) {
+    const dict = dist.dataDictionary;
+    if (!dict?.fields?.length) continue;
+    for (const f of dict.fields) out.push(f);
+  }
+  return out;
+}
+
+const UNIT_PATTERN = /\(unit:\s*[^)]+\)/i;
+
+function hasUnit(field: { description: string | null; extensions: string | null }): boolean {
+  if (field.description && UNIT_PATTERN.test(field.description)) return true;
+  if (field.extensions) {
+    try {
+      const parsed = JSON.parse(field.extensions);
+      if (parsed && typeof parsed === "object" && "unit" in parsed) {
+        const v = (parsed as Record<string, unknown>).unit;
+        if (typeof v === "string" && v.trim().length > 0) return true;
+      }
+    } catch {
+      // ignore malformed JSON
+    }
+  }
+  return false;
+}
+
+function parseJsonArray(raw: string | null): unknown[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
 }

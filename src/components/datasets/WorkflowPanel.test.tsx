@@ -1,19 +1,22 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { ComponentProps } from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 import { WorkflowPanel } from "./WorkflowPanel";
+
+type OnTransition = ComponentProps<typeof WorkflowPanel>["onTransition"];
 
 vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }));
 
 describe("WorkflowPanel", () => {
-  let mockOnTransition: ReturnType<typeof vi.fn>;
+  let mockOnTransition: ReturnType<typeof vi.fn<OnTransition>>;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockOnTransition = vi.fn().mockResolvedValue(undefined);
+    mockOnTransition = vi.fn<OnTransition>().mockResolvedValue(undefined);
   });
 
   it("renders current status and available transitions", () => {

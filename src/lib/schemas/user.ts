@@ -25,7 +25,7 @@ export const registerUserSchema = z.object({
   name: z.string().min(1).max(200).trim(),
 });
 
-export type RegisterUserInput = z.infer<typeof registerUserSchema>;
-export type CreateUserInput = z.infer<typeof createUserSchema>;
-export type UpdateUserInput = z.infer<typeof updateUserSchema>;
-export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+export type RegisterUserInput = z.input<typeof registerUserSchema>;
+export type CreateUserInput = z.input<typeof createUserSchema>;
+export type UpdateUserInput = z.input<typeof updateUserSchema>;
+export type ResetPasswordInput = z.input<typeof resetPasswordSchema>;

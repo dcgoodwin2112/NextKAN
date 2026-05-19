@@ -26,11 +26,11 @@ export const customFieldDefinitionCreateSchema = z.object({
   organizationId: z.string().uuid().optional().or(z.literal("")),
 });
 
-export type CustomFieldDefinitionCreateInput = z.infer<typeof customFieldDefinitionCreateSchema>;
+export type CustomFieldDefinitionCreateInput = z.input<typeof customFieldDefinitionCreateSchema>;
 
 export const customFieldDefinitionUpdateSchema = customFieldDefinitionCreateSchema.partial();
 
-export type CustomFieldDefinitionUpdateInput = z.infer<typeof customFieldDefinitionUpdateSchema>;
+export type CustomFieldDefinitionUpdateInput = z.input<typeof customFieldDefinitionUpdateSchema>;
 
 /** Validates a single custom field value against its definition. Returns error string or null. */
 export function validateCustomFieldValue(

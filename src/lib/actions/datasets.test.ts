@@ -213,6 +213,55 @@ describe("updateDataset", () => {
       data: [{ keyword: "new-keyword", datasetId: "ds-1" }],
     });
   });
+
+  it("preserves status on partial update without status field", async () => {
+    prismaMock.dataset.findUnique.mockResolvedValue({
+      ...mockDataset,
+      status: "published",
+    } as any);
+    prismaMock.dataset.update.mockResolvedValue(mockDataset as any);
+    prismaMock.dataset.findUniqueOrThrow.mockResolvedValue(mockDataset as any);
+
+    await updateDataset("ds-1", { title: "Updated Title" });
+    const updateCall = prismaMock.dataset.update.mock.calls[0][0];
+    expect(updateCall.data.status).toBeUndefined();
+  });
+
+  it("preserves accessLevel on partial update without accessLevel field", async () => {
+    prismaMock.dataset.findUnique.mockResolvedValue({
+      ...mockDataset,
+      accessLevel: "non-public",
+    } as any);
+    prismaMock.dataset.update.mockResolvedValue(mockDataset as any);
+    prismaMock.dataset.findUniqueOrThrow.mockResolvedValue(mockDataset as any);
+
+    await updateDataset("ds-1", { title: "Updated Title" });
+    const updateCall = prismaMock.dataset.update.mock.calls[0][0];
+    expect(updateCall.data.accessLevel).toBeUndefined();
+  });
+
+  it("preserves language on partial update without language field", async () => {
+    prismaMock.dataset.findUnique.mockResolvedValue({
+      ...mockDataset,
+      language: "fr-fr",
+    } as any);
+    prismaMock.dataset.update.mockResolvedValue(mockDataset as any);
+    prismaMock.dataset.findUniqueOrThrow.mockResolvedValue(mockDataset as any);
+
+    await updateDataset("ds-1", { title: "Updated Title" });
+    const updateCall = prismaMock.dataset.update.mock.calls[0][0];
+    expect(updateCall.data.language).toBeUndefined();
+  });
+
+  it("still applies status when explicitly provided", async () => {
+    prismaMock.dataset.findUnique.mockResolvedValue(mockDataset as any);
+    prismaMock.dataset.update.mockResolvedValue(mockDataset as any);
+    prismaMock.dataset.findUniqueOrThrow.mockResolvedValue(mockDataset as any);
+
+    await updateDataset("ds-1", { status: "archived" });
+    const updateCall = prismaMock.dataset.update.mock.calls[0][0];
+    expect(updateCall.data.status).toBe("archived");
+  });
 });
 
 describe("deleteDataset", () => {
@@ -262,7 +311,10 @@ describe("getDatasetBySlug", () => {
       where: { slug: "test-dataset" },
       include: {
         publisher: { include: { parent: true } },
-        distributions: { orderBy: { sortOrder: "asc" } },
+        distributions: {
+          orderBy: { sortOrder: "asc" },
+          include: { dataDictionary: { include: { fields: true } } },
+        },
         keywords: true,
         themes: { include: { theme: true } },
         series: true,

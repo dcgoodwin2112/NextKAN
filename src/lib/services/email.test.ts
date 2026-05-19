@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const mockSendMail = vi.fn().mockResolvedValue({});
 
-vi.mock(import("nodemailer"), async () => {
+vi.mock("nodemailer", async () => {
   return {
     default: {
       createTransport: vi.fn(() => ({ sendMail: mockSendMail })),

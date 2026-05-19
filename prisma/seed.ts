@@ -216,7 +216,7 @@ async function importSeedFiles(): Promise<void> {
   let imported = 0;
 
   for (const dist of distributions) {
-    if (!IMPORTABLE_TYPES.has(dist.mediaType)) continue;
+    if (!dist.mediaType || !IMPORTABLE_TYPES.has(dist.mediaType)) continue;
 
     const existing = await prisma.datastoreTable.findUnique({
       where: { distributionId: dist.id },

@@ -35,7 +35,7 @@ export async function updateOrganization(
   id: string,
   input: Partial<OrganizationInput>
 ) {
-  await requireOrgPermission("org:edit", id);
+  await requireOrgPermission("org:update", id);
   const data = organizationSchema.partial().parse(input);
   const updateData: Record<string, unknown> = {};
 

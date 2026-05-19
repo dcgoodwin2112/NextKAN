@@ -33,17 +33,20 @@ export async function GET(
 
     if (format === "csv") {
       const csvRows = results.flatMap((r) =>
-        (r.schema?.fields || []).map((f) => ({
-          distributionTitle: r.title,
-          name: f.name,
-          type: f.type,
-          ...(f.title !== undefined && { title: f.title }),
-          ...(f.description !== undefined && { description: f.description }),
-          ...(f.format !== undefined && { format: f.format }),
-          ...(f.constraints !== undefined && {
-            constraints: JSON.stringify(f.constraints),
-          }),
-        }))
+        (r.schema?.fields || []).map((f) => {
+          const constraints = "constraints" in f ? f.constraints : undefined;
+          return {
+            distributionTitle: r.title,
+            name: f.name,
+            type: f.type,
+            ...(f.title !== undefined && { title: f.title }),
+            ...(f.description !== undefined && { description: f.description }),
+            ...(f.format !== undefined && { format: f.format }),
+            ...(constraints !== undefined && {
+              constraints: JSON.stringify(constraints),
+            }),
+          };
+        })
       );
 
       const csv = Papa.unparse(csvRows, {

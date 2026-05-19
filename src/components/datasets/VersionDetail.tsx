@@ -13,6 +13,10 @@ function renderValue(value: unknown): string {
   return String(value);
 }
 
+function has(value: unknown): boolean {
+  return value !== undefined && value !== null && value !== "";
+}
+
 export function VersionDetail({ snapshot }: VersionDetailProps) {
   const publisher = snapshot.publisher as
     | { name?: string; subOrganizationOf?: { name?: string } }
@@ -135,85 +139,85 @@ export function VersionDetail({ snapshot }: VersionDetailProps) {
           Additional Metadata
         </h2>
         <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
-          {snapshot.temporal && (
+          {has(snapshot.temporal) && (
             <div>
               <dt className="font-medium text-text-muted">Temporal Coverage</dt>
               <dd>{renderValue(snapshot.temporal)}</dd>
             </div>
           )}
-          {snapshot.spatial && (
+          {has(snapshot.spatial) && (
             <div>
               <dt className="font-medium text-text-muted">Spatial Coverage</dt>
               <dd>{renderValue(snapshot.spatial)}</dd>
             </div>
           )}
-          {snapshot.accrualPeriodicity && (
+          {has(snapshot.accrualPeriodicity) && (
             <div>
               <dt className="font-medium text-text-muted">Update Frequency</dt>
               <dd>{renderValue(snapshot.accrualPeriodicity)}</dd>
             </div>
           )}
-          {snapshot.license && (
+          {has(snapshot.license) && (
             <div>
               <dt className="font-medium text-text-muted">License</dt>
               <dd>{renderValue(snapshot.license)}</dd>
             </div>
           )}
-          {snapshot.rights && (
+          {has(snapshot.rights) && (
             <div>
               <dt className="font-medium text-text-muted">Rights</dt>
               <dd>{renderValue(snapshot.rights)}</dd>
             </div>
           )}
-          {snapshot.conformsTo && (
+          {has(snapshot.conformsTo) && (
             <div>
               <dt className="font-medium text-text-muted">Conforms To</dt>
               <dd>{renderValue(snapshot.conformsTo)}</dd>
             </div>
           )}
-          {snapshot.describedBy && (
+          {has(snapshot.describedBy) && (
             <div>
               <dt className="font-medium text-text-muted">Described By</dt>
               <dd>{renderValue(snapshot.describedBy)}</dd>
             </div>
           )}
-          {snapshot.isPartOf && (
+          {has(snapshot.isPartOf) && (
             <div>
               <dt className="font-medium text-text-muted">Is Part Of</dt>
               <dd>{renderValue(snapshot.isPartOf)}</dd>
             </div>
           )}
-          {snapshot.landingPage && (
+          {has(snapshot.landingPage) && (
             <div>
               <dt className="font-medium text-text-muted">Landing Page</dt>
               <dd>{renderValue(snapshot.landingPage)}</dd>
             </div>
           )}
-          {snapshot.issued && (
+          {has(snapshot.issued) && (
             <div>
               <dt className="font-medium text-text-muted">Issued</dt>
               <dd>{renderValue(snapshot.issued)}</dd>
             </div>
           )}
-          {snapshot.language && (
+          {has(snapshot.language) && (
             <div>
               <dt className="font-medium text-text-muted">Language</dt>
               <dd>{renderValue(snapshot.language)}</dd>
             </div>
           )}
-          {snapshot.bureauCode && (
+          {has(snapshot.bureauCode) && (
             <div>
               <dt className="font-medium text-text-muted">Bureau Code</dt>
               <dd>{renderValue(snapshot.bureauCode)}</dd>
             </div>
           )}
-          {snapshot.programCode && (
+          {has(snapshot.programCode) && (
             <div>
               <dt className="font-medium text-text-muted">Program Code</dt>
               <dd>{renderValue(snapshot.programCode)}</dd>
             </div>
           )}
-          {snapshot.systemOfRecords && (
+          {has(snapshot.systemOfRecords) && (
             <div>
               <dt className="font-medium text-text-muted">System of Records</dt>
               <dd>{renderValue(snapshot.systemOfRecords)}</dd>

@@ -1,8 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { ComponentProps } from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 import { DatasetForm } from "./DatasetForm";
+
+type OnSubmit = ComponentProps<typeof DatasetForm>["onSubmit"];
 
 vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn() },
@@ -54,10 +57,10 @@ const mockInitialData = {
 };
 
 describe("DatasetForm", () => {
-  let mockOnSubmit: ReturnType<typeof vi.fn>;
+  let mockOnSubmit: ReturnType<typeof vi.fn<OnSubmit>>;
 
   beforeEach(() => {
-    mockOnSubmit = vi.fn().mockResolvedValue(undefined);
+    mockOnSubmit = vi.fn<OnSubmit>().mockResolvedValue(undefined);
   });
 
   it("renders all required field inputs", () => {

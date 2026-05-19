@@ -517,6 +517,3 @@ export async function bulkApproveUsers(ids: string[]) {
 
   return { success, errors };
 }
-
-/** @deprecated Use updateUser() instead */
-export const updateUserRole = updateUser;

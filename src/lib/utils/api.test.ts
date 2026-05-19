@@ -8,7 +8,7 @@ describe("handleApiError", () => {
       {
         code: "invalid_type",
         expected: "string",
-        received: "undefined",
+        input: undefined,
         path: ["title"],
         message: "Required",
       },

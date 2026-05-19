@@ -20,7 +20,10 @@ import { silentCatch } from "@/lib/utils/log";
 
 const datasetIncludes = {
   publisher: { include: { parent: true } },
-  distributions: { orderBy: { sortOrder: "asc" as const } },
+  distributions: {
+    orderBy: { sortOrder: "asc" as const },
+    include: { dataDictionary: { include: { fields: true } } },
+  },
   keywords: true,
   themes: { include: { theme: true } },
   series: true,
@@ -556,6 +559,20 @@ export async function addDistribution(datasetId: string, input: DistributionInpu
     ) {
       const { importExcelToDatastore } = await import("@/lib/services/datastore");
       await importExcelToDatastore(distribution);
+    }
+
+    // Agent-first profiling sidecar. Runs after the SQLite import so a
+    // profile failure can't break the legacy datastore path. Only tabular
+    // formats DuckDB can read are profiled; Excel goes through SQLite only.
+    const profilable =
+      data.mediaType === "text/csv" ||
+      data.mediaType === "application/json" ||
+      data.mediaType === "application/geo+json";
+    if (profilable) {
+      const { profileDistribution } = await import(
+        "@/lib/services/profile-distribution"
+      );
+      silentCatch(profileDistribution(distribution.id), "profile-distribution");
     }
   }
 

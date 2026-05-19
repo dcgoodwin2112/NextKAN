@@ -1,5 +1,8 @@
 # Tier 2 — Core Experience Implementation Plan
 
+> ⚠️ **Historical — read [docs/pivot-context.md](pivot-context.md) first.**
+> This document describes work completed before the 2026-05 agent-first pivot. The features here are largely shipped, but the framing (Resource/Column models, datastore-row design, faceted-search UI investment) does not reflect current direction. **Do not implement new work from this doc** — start at [docs/tier-1.5-agent-first.md](tier-1.5-agent-first.md) instead.
+>
 > **Status: COMPLETE** — All features implemented and tested. 226 unit/component/integration tests passing, 24 E2E tests passing.
 >
 > **Adjustments from original spec:**

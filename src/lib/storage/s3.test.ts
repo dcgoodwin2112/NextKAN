@@ -3,8 +3,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const mockSend = vi.fn().mockResolvedValue({});
 
-vi.mock(import("@aws-sdk/client-s3"), async (importOriginal) => {
-  const actual = await importOriginal();
+vi.mock("@aws-sdk/client-s3", async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>;
   return {
     ...actual,
     S3Client: class MockS3Client {
@@ -14,7 +14,7 @@ vi.mock(import("@aws-sdk/client-s3"), async (importOriginal) => {
   };
 });
 
-vi.mock(import("@aws-sdk/s3-request-presigner"), async () => {
+vi.mock("@aws-sdk/s3-request-presigner", async () => {
   return {
     getSignedUrl: vi.fn().mockResolvedValue("https://signed-url.example.com/file.csv"),
   };

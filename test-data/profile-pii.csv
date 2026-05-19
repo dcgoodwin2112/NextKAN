@@ -1,0 +1,6 @@
+id,email,ssn,phone,role
+1,alice@example.com,123-45-6789,(202) 555-0101,admin
+2,bob@example.com,987-65-4321,202-555-0102,editor
+3,carol@example.com,555-55-5555,(202) 555 0103,viewer
+4,dan@example.com,111-22-3333,202.555.0104,viewer
+5,eve@example.com,444-55-6666,(202)555-0105,admin

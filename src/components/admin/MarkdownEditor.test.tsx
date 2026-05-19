@@ -1,7 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { ComponentProps } from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MarkdownEditor } from "./MarkdownEditor";
+
+type OnChange = ComponentProps<typeof MarkdownEditor>["onChange"];
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
@@ -16,11 +19,11 @@ vi.mock("./ChartPickerDialog", () => ({
 }));
 
 describe("MarkdownEditor", () => {
-  let onChange: ReturnType<typeof vi.fn>;
+  let onChange: ReturnType<typeof vi.fn<OnChange>>;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    onChange = vi.fn();
+    onChange = vi.fn<OnChange>();
   });
 
   it("renders editor with mode buttons", () => {

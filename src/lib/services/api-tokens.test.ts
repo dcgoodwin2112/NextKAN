@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { asMock } from "@/__mocks__/prisma";
 import { generateToken, hashToken, validateTokenFromHeader } from "./api-tokens";
 
 vi.mock("@/lib/db", () => ({
@@ -78,12 +79,12 @@ describe("validateTokenFromHeader", () => {
   });
 
   it("returns null when token not found in DB", async () => {
-    mockPrisma.apiToken.findUnique.mockResolvedValue(null);
+    asMock(mockPrisma.apiToken.findUnique).mockResolvedValue(null);
     expect(await validateTokenFromHeader("Bearer nkan_abc")).toBeNull();
   });
 
   it("returns null for expired token", async () => {
-    mockPrisma.apiToken.findUnique.mockResolvedValue({
+    asMock(mockPrisma.apiToken.findUnique).mockResolvedValue({
       id: "token-1",
       userId: "user-1",
       name: "test",
@@ -98,7 +99,7 @@ describe("validateTokenFromHeader", () => {
   });
 
   it("returns user for valid token", async () => {
-    mockPrisma.apiToken.findUnique.mockResolvedValue({
+    asMock(mockPrisma.apiToken.findUnique).mockResolvedValue({
       id: "token-1",
       userId: "user-1",
       name: "test",
@@ -109,7 +110,7 @@ describe("validateTokenFromHeader", () => {
       createdAt: new Date(),
       user: mockUser,
     } as any);
-    mockPrisma.apiToken.update.mockResolvedValue({} as any);
+    asMock(mockPrisma.apiToken.update).mockResolvedValue({} as any);
 
     const result = await validateTokenFromHeader("Bearer nkan_abc");
     expect(result).toEqual({
@@ -122,7 +123,7 @@ describe("validateTokenFromHeader", () => {
   });
 
   it("updates lastUsedAt on valid token", async () => {
-    mockPrisma.apiToken.findUnique.mockResolvedValue({
+    asMock(mockPrisma.apiToken.findUnique).mockResolvedValue({
       id: "token-1",
       userId: "user-1",
       name: "test",
@@ -133,7 +134,7 @@ describe("validateTokenFromHeader", () => {
       createdAt: new Date(),
       user: mockUser,
     } as any);
-    mockPrisma.apiToken.update.mockResolvedValue({} as any);
+    asMock(mockPrisma.apiToken.update).mockResolvedValue({} as any);
 
     await validateTokenFromHeader("Bearer nkan_abc");
 

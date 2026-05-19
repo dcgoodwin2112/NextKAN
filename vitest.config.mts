@@ -8,15 +8,20 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
-    include: ["src/**/*.{test,spec}.{ts,tsx}"],
+    include: [
+      "src/**/*.{test,spec}.{ts,tsx}",
+      "mcp-server/**/*.{test,spec}.{ts,tsx}",
+    ],
     exclude: ["node_modules", ".next", "e2e/**"],
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "lcov"],
-      include: ["src/**/*.{ts,tsx}"],
+      include: ["src/**/*.{ts,tsx}", "mcp-server/**/*.{ts,tsx}"],
       exclude: [
         "src/**/*.test.{ts,tsx}",
         "src/**/*.spec.{ts,tsx}",
+        "mcp-server/**/*.test.{ts,tsx}",
+        "mcp-server/**/*.spec.{ts,tsx}",
         "src/types/**",
         "src/**/*.d.ts",
         "src/generated/**",

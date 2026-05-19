@@ -6,7 +6,7 @@ import type { DatasetWithRelations } from "@/lib/schemas/dcat-us";
 
 const datasetIncludes = {
   publisher: { include: { parent: true } },
-  distributions: true,
+  distributions: { include: { dataDictionary: { include: { fields: true } } } },
   keywords: true,
   themes: { include: { theme: true } },
 } as const;
@@ -359,10 +359,14 @@ export async function getDashboardData(): Promise<DashboardData> {
     orderBy: { title: "asc" },
   })) as unknown as DatasetWithRelations[];
 
-  // Score all datasets once
+  // Score all datasets once. Stored as percentage (0-100) so consumers can
+  // average and sort on a single scale regardless of which checks were
+  // applicable to a given dataset.
   const qualityScores = new Map<string, number>();
   for (const d of allDatasets) {
-    qualityScores.set(d.id, calculateQualityScore(d).overall);
+    const q = calculateQualityScore(d);
+    const percent = q.maxScore > 0 ? Math.round((q.overall / q.maxScore) * 100) : 0;
+    qualityScores.set(d.id, percent);
   }
 
   const [stats, actionItems, catalogHealth, trends, recentActivity] = await Promise.all([

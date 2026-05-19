@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { listDatasets } from "@/lib/actions/datasets";
-import { getCatalogStats } from "@/lib/services/discovery";
 import { siteConfig } from "@/lib/config";
 import { prisma } from "@/lib/db";
 import { HeroSection } from "@/components/public/HeroSection";
@@ -9,6 +8,8 @@ import { StatsBar } from "@/components/public/StatsBar";
 import { TopicGrid } from "@/components/public/TopicGrid";
 import { PublicDatasetCard } from "@/components/public/PublicDatasetCard";
 import { Button } from "@/components/ui/button";
+
+const publishedFilter = { status: "published", deletedAt: null } as const;
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -23,14 +24,28 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const [{ datasets, total }, stats, themes, orgs] = await Promise.all([
+  const [
+    { datasets, total },
+    datasetCount,
+    organizationCount,
+    distributionCount,
+    formatGroups,
+    themes,
+    orgs,
+  ] = await Promise.all([
     listDatasets({ limit: 8, status: "published" }),
-    getCatalogStats(),
+    prisma.dataset.count({ where: publishedFilter }),
+    prisma.organization.count(),
+    prisma.distribution.count({ where: { dataset: publishedFilter } }),
+    prisma.distribution.groupBy({
+      by: ["format"],
+      where: { format: { not: null }, dataset: publishedFilter },
+    }),
     prisma.theme.findMany({
       include: {
         _count: {
           select: {
-            datasets: { where: { dataset: { status: "published", deletedAt: null } } },
+            datasets: { where: { dataset: publishedFilter } },
           },
         },
       },
@@ -40,13 +55,20 @@ export default async function HomePage() {
     prisma.organization.findMany({
       include: {
         _count: {
-          select: { datasets: { where: { status: "published", deletedAt: null } } },
+          select: { datasets: { where: publishedFilter } },
         },
       },
       orderBy: { name: "asc" },
       take: 6,
     }),
   ]);
+
+  const stats = {
+    datasets: datasetCount,
+    organizations: organizationCount,
+    distributions: distributionCount,
+    formats: formatGroups.length,
+  };
 
   const topTopics = themes
     .filter((t) => t._count.datasets > 0)

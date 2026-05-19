@@ -189,9 +189,19 @@ model Distribution {
 
   // Internal fields
   fileName  String? // original uploaded filename
-  filePath  String? // server-side path to uploaded file
+  filePath  String? // legacy server-side path under public/uploads (pre-pivot)
   fileSize  Int?    // bytes
   sortOrder Int     @default(0)
+
+  // Agent-first storage (post-pivot). Paths are relative to NEXTKAN_STORAGE_PATH.
+  // `originalPath` is the original-of-record (e.g., resources/<id>/original.csv).
+  // `parquetPath` is null for non-tabular distributions; presence gates MCP queryability.
+  originalPath  String?
+  parquetPath   String?
+  rowCount      Int?
+  profiledAt    DateTime?
+  profileStatus String   @default("none") // "none" | "pending" | "processing" | "ready" | "failed"
+  profileError  String?
 
   datasetId String
   dataset   Dataset @relation(fields: [datasetId], references: [id], onDelete: Cascade)
@@ -204,6 +214,7 @@ model Distribution {
   updatedAt DateTime @updatedAt
 
   @@index([datasetId])
+  @@index([profileStatus])
 }
 
 model DatastoreTable {
@@ -255,6 +266,30 @@ model DataDictionaryField {
   format       String?
   constraints  String?  // JSON
   sortOrder    Int      @default(0)
+
+  // Profiling stats (populated by the DuckDB profiler).
+  duckdbType    String?
+  rowCount      Int?
+  nullCount     Int?
+  distinctCount Int?
+  min           String?
+  max           String?
+  sampleValues  String?  // JSON array of representative values
+  enumValues    String?  // JSON array; non-null when distinctCount is small
+
+  // Agent-readiness flags (consumed by the MCP server).
+  filterable    Boolean  @default(false)
+  aggregatable  Boolean  @default(false)
+  isPii         Boolean  @default(false)
+  isGeometry    Boolean  @default(false)
+  crs           String?
+
+  // Provenance
+  descriptionSource String?   // "manual" | "ai_generated" | "imported"
+  profiledAt        DateTime?
+  extensions        String?   // JSON escape hatch for future Frictionless/DCAT fields
+
+  @@unique([dictionaryId, name])
   @@index([dictionaryId])
 }
 

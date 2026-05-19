@@ -198,7 +198,7 @@ describe("searchOrganizations", () => {
 
     await searchOrganizations({ search: "health data" });
 
-    const call = prismaMock.organization.findMany.mock.calls[0][0];
+    const call = prismaMock.organization.findMany.mock.calls[0][0]!;
     expect(call.where).toEqual({
       AND: [
         { OR: [{ name: { contains: "health" } }, { description: { contains: "health" } }] },
@@ -213,7 +213,7 @@ describe("searchOrganizations", () => {
 
     await searchOrganizations({ sort: "datasets_desc" });
 
-    const call = prismaMock.organization.findMany.mock.calls[0][0];
+    const call = prismaMock.organization.findMany.mock.calls[0][0]!;
     expect(call.orderBy).toEqual({ datasets: { _count: "desc" } });
   });
 
@@ -223,7 +223,7 @@ describe("searchOrganizations", () => {
 
     await searchOrganizations();
 
-    const call = prismaMock.organization.findMany.mock.calls[0][0];
+    const call = prismaMock.organization.findMany.mock.calls[0][0]!;
     expect(call.orderBy).toEqual({ name: "asc" });
   });
 

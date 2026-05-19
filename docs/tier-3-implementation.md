@@ -1,5 +1,8 @@
 # Tier 3 — Differentiation Implementation Plan
 
+> ⚠️ **Historical — read [docs/pivot-context.md](pivot-context.md) first.**
+> This document describes work completed before the 2026-05 agent-first pivot. Several features here (charts, analytics dashboard, link checker, themes admin UI) are now **deprioritized** per [CLAUDE.md](../CLAUDE.md#deprioritized-features). **Do not implement new work from this doc** — start at [docs/tier-1.5-agent-first.md](tier-1.5-agent-first.md) instead.
+>
 > **Status: COMPLETE** — All 10 features implemented. 316 unit/component/integration tests, 6 E2E tests passing.
 
 ## Prerequisites

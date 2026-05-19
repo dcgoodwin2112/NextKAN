@@ -21,6 +21,10 @@ import { VersionHistory } from "@/components/datasets/VersionHistory";
 import { CreateVersionForm } from "@/components/datasets/CreateVersionForm";
 import { DistributionPreviewPanel } from "@/components/admin/DistributionPreviewPanel";
 import { SaveAsTemplateButton } from "@/components/datasets/SaveAsTemplateButton";
+import { AiMetadataPanel } from "@/components/datasets/AiMetadataPanel";
+import { AgentPreviewPanel } from "@/components/datasets/AgentPreviewPanel";
+import { isAiAvailable } from "@/lib/ai";
+import type { PreviewDataset } from "@/lib/agent-preview";
 import { CollapsibleSection } from "@/components/admin/CollapsibleSection";
 import { DatasetDeleteButton } from "./DatasetDeleteButton";
 import { listCustomFieldDefinitions, getCustomFieldsForDataset } from "@/lib/actions/custom-fields";
@@ -124,6 +128,47 @@ export default async function EditDatasetPage({ params }: Props) {
     hasDictionary: dictionaries.some((d) => d.distributionId === dist.id && d.dictionary),
   }));
 
+  const mcpUrl =
+    process.env.NEXT_PUBLIC_NEXTKAN_MCP_URL ?? "http://localhost:3001/mcp";
+  const agentPreviewDataset: PreviewDataset = {
+    id: dataset.id,
+    identifier: dataset.identifier,
+    title: dataset.title,
+    resources: dataset.distributions.map((dist) => {
+      const dict = dictionaries.find((d) => d.distributionId === dist.id);
+      return {
+        id: dist.id,
+        name: dist.title ?? dist.fileName ?? dist.id,
+        queryable: dist.parquetPath != null,
+        rowCount: dist.rowCount ?? null,
+        columns: (dict?.dictionary?.fields ?? []).map((f) => ({
+          name: f.name,
+          type: f.type,
+          filterable: f.filterable,
+          aggregatable: f.aggregatable,
+          min: f.min,
+          max: f.max,
+          sampleValues: f.sampleValues ? safeParseArray(f.sampleValues) : undefined,
+          enumValues: f.enumValues ? safeParseArray(f.enumValues) : undefined,
+        })),
+      };
+    }),
+  };
+
+  const aiAvailable = isAiAvailable();
+  const aiPanels = aiAvailable
+    ? dataset.distributions.map((dist) => {
+        const dict = dictionaries.find((d) => d.distributionId === dist.id);
+        return {
+          distributionId: dist.id,
+          distributionLabel:
+            dist.title || dist.fileName || dist.id.slice(0, 8),
+          canDraft: dist.profileStatus === "ready",
+          canAnnotate: (dict?.dictionary?.fields?.length ?? 0) > 0,
+        };
+      })
+    : [];
+
   async function handleUpdate(
     data: DatasetCreateInput & {
       distributions?: {
@@ -226,7 +271,7 @@ export default async function EditDatasetPage({ params }: Props) {
         ]}
       />
       <AdminPageHeader title="Edit Dataset">
-        <QualityBadge score={qualityScore.overall} />
+        <QualityBadge score={qualityScore.overall} maxScore={qualityScore.maxScore} />
         <SaveAsTemplateButton datasetFields={dataset} organizations={organizations} />
         <DatasetDeleteButton onDelete={handleDelete} />
       </AdminPageHeader>
@@ -258,6 +303,31 @@ export default async function EditDatasetPage({ params }: Props) {
         <div className="mt-8">
           <CollapsibleSection title="Distribution Previews">
             <DistributionPreviewPanel distributions={distributionPreviews} />
+          </CollapsibleSection>
+        </div>
+      )}
+
+      <div className="mt-8">
+        <CollapsibleSection title="Agent preview (MCP)">
+          <AgentPreviewPanel dataset={agentPreviewDataset} mcpUrl={mcpUrl} />
+        </CollapsibleSection>
+      </div>
+
+      {aiPanels.length > 0 && (
+        <div className="mt-8">
+          <CollapsibleSection title="AI metadata authoring">
+            <div className="space-y-3">
+              {aiPanels.map((panel) => (
+                <AiMetadataPanel
+                  key={panel.distributionId}
+                  datasetId={dataset.id}
+                  distributionId={panel.distributionId}
+                  distributionLabel={panel.distributionLabel}
+                  canDraft={panel.canDraft}
+                  canAnnotate={panel.canAnnotate}
+                />
+              ))}
+            </div>
           </CollapsibleSection>
         </div>
       )}
@@ -297,4 +367,13 @@ export default async function EditDatasetPage({ params }: Props) {
       </div>
     </div>
   );
+}
+
+function safeParseArray(raw: string): unknown[] | undefined {
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
 }

@@ -1,7 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { ComponentProps } from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CustomFieldForm } from "./CustomFieldForm";
+
+type OnSubmit = ComponentProps<typeof CustomFieldForm>["onSubmit"];
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
@@ -16,10 +19,10 @@ const mockOrgs = [
 ];
 
 describe("CustomFieldForm", () => {
-  let onSubmit: ReturnType<typeof vi.fn>;
+  let onSubmit: ReturnType<typeof vi.fn<OnSubmit>>;
 
   beforeEach(() => {
-    onSubmit = vi.fn().mockResolvedValue(undefined);
+    onSubmit = vi.fn<OnSubmit>().mockResolvedValue(undefined);
   });
 
   it("renders all form fields", () => {

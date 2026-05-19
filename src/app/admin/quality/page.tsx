@@ -24,7 +24,7 @@ import type { DatasetWithRelations } from "@/lib/schemas/dcat-us";
 
 const datasetIncludes = {
   publisher: { include: { parent: true } },
-  distributions: true,
+  distributions: { include: { dataDictionary: { include: { fields: true } } } },
   keywords: true,
   themes: { include: { theme: true } },
 } as const;
@@ -84,10 +84,15 @@ export default async function QualityReportPage({
     quality: calculateQualityScore(d as unknown as DatasetWithRelations),
   }));
 
-  // Apply score-range filter
+  // Apply score-range filter (ranges are percentages)
   if (scoreFilter && scoreRanges[scoreFilter]) {
     const [min, max] = scoreRanges[scoreFilter];
-    scored = scored.filter((s) => s.quality.overall >= min && s.quality.overall <= max);
+    scored = scored.filter((s) => {
+      const pct = s.quality.maxScore > 0
+        ? Math.round((s.quality.overall / s.quality.maxScore) * 100)
+        : 0;
+      return pct >= min && pct <= max;
+    });
   }
 
   // Sort
@@ -110,7 +115,16 @@ export default async function QualityReportPage({
   const total = scored.length;
   const avgScore =
     total > 0
-      ? Math.round(scored.reduce((sum, s) => sum + s.quality.overall, 0) / total)
+      ? Math.round(
+          scored.reduce(
+            (sum, s) =>
+              sum +
+              (s.quality.maxScore > 0
+                ? (s.quality.overall / s.quality.maxScore) * 100
+                : 0),
+            0,
+          ) / total,
+        )
       : 0;
 
   const missingCounts: Record<string, number> = {};
@@ -158,7 +172,7 @@ export default async function QualityReportPage({
         <Card>
           <CardContent>
             <div className="flex items-center gap-2 text-sm text-text-muted"><BarChart3 className="size-4" /> Average Quality Score</div>
-            <p className="text-2xl font-bold">{avgScore}/100</p>
+            <p className="text-2xl font-bold">{avgScore}%</p>
           </CardContent>
         </Card>
         <Card>
@@ -224,9 +238,9 @@ export default async function QualityReportPage({
                   </Link>
                 </TableCell>
                 <TableCell className="text-text-tertiary">{dataset.publisher.name}</TableCell>
-                <TableCell className="font-mono">{quality.overall}/100</TableCell>
+                <TableCell className="font-mono">{quality.overall}/{quality.maxScore}</TableCell>
                 <TableCell>
-                  <QualityBadge score={quality.overall} showScore={false} />
+                  <QualityBadge score={quality.overall} maxScore={quality.maxScore} showScore={false} />
                 </TableCell>
                 <TableCell className="text-text-muted text-xs">
                   {quality.suggestions[0] || "Complete"}

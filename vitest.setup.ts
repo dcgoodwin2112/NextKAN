@@ -2,6 +2,13 @@ import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
 import { afterEach, vi } from "vitest";
 
+// Silence pino logs in tests unless the developer explicitly raises the level.
+// Negative tests that exercise mcp-server error paths otherwise spam stderr
+// with full stack traces.
+if (!process.env.LOG_LEVEL) {
+  process.env.LOG_LEVEL = "silent";
+}
+
 // Radix UI primitives (Checkbox, etc.) use ResizeObserver internally
 if (typeof globalThis.ResizeObserver === "undefined") {
   globalThis.ResizeObserver = class {
