@@ -43,18 +43,16 @@ test.describe("Dataset admin workflow", () => {
     await page.getByRole("button", { name: /create/i }).click();
     await expect(page).toHaveURL(/\/admin\/datasets/, { timeout: 10000 });
 
-    // Navigate to the edit page via the dataset's slug
+    // Use the admin search to find the dataset deterministically. Pagination
+    // ordering shifts under parallel test execution, so filtering by title is
+    // the robust path.
     await page.goto("/admin/datasets");
     await page.waitForLoadState("networkidle");
-    // The newly created dataset uses slug "e2e-edit-target"
-    // Find it on the page — it should be on page 1 sorted by modified desc
-    const datasetLink = page.getByText("E2E Edit Target").first();
-    // If not visible on page 1, try page 2
-    if (!(await datasetLink.isVisible({ timeout: 3000 }).catch(() => false))) {
-      await page.getByRole("button", { name: "Next" }).click();
-      await page.waitForLoadState("networkidle");
-    }
-    await datasetLink.click();
+    const searchBox = page.getByRole("searchbox", { name: /search datasets/i });
+    await searchBox.fill("E2E Edit Target");
+    await searchBox.press("Enter");
+    await page.waitForLoadState("networkidle");
+    await page.getByText("E2E Edit Target").first().click();
     await expect(page).toHaveURL(/\/admin\/datasets\/.*\/edit/, {
       timeout: 10000,
     });
@@ -82,15 +80,15 @@ test.describe("Dataset admin workflow", () => {
     await page.getByRole("button", { name: /create/i }).click();
     await expect(page).toHaveURL(/\/admin\/datasets/, { timeout: 10000 });
 
-    // Navigate to datasets list and find the dataset
+    // Filter by title via the admin search box — pagination ordering shifts
+    // under parallel test execution.
     await page.goto("/admin/datasets");
     await page.waitForLoadState("networkidle");
-    const datasetLink = page.getByText("E2E Delete Target").first();
-    if (!(await datasetLink.isVisible({ timeout: 3000 }).catch(() => false))) {
-      await page.getByRole("button", { name: "Next" }).click();
-      await page.waitForLoadState("networkidle");
-    }
-    await datasetLink.click();
+    const searchBox = page.getByRole("searchbox", { name: /search datasets/i });
+    await searchBox.fill("E2E Delete Target");
+    await searchBox.press("Enter");
+    await page.waitForLoadState("networkidle");
+    await page.getByText("E2E Delete Target").first().click();
     await expect(page).toHaveURL(/\/admin\/datasets\/.*\/edit/, {
       timeout: 10000,
     });

@@ -1,6 +1,6 @@
 # Tier 1.5: Agent-First MVP Implementation
 
-> **Status: COMPLETE** (2026-05-19) — All 11 features delivered across phases 1–10 plus follow-up phases A–D. 1360 unit/component/integration tests passing. See [docs/backlog.md](backlog.md) for outstanding follow-up verification (MCP Inspector live test, E2E re-baseline, profiling boundary tests).
+> **Status: COMPLETE** (2026-05-19) — All 11 features delivered across phases 1–10 plus follow-up phases A–D. 1373 unit/component/integration tests passing, 39 Playwright E2E specs passing. MCP live verification and E2E re-baseline closed out (see `docs/backlog-completed.md`); see [docs/backlog.md](backlog.md) for the remaining profiling boundary work.
 
 **Prerequisite:** `docs/pivot-context.md`. Read it first if you haven't.
 **Tests required:** See per-feature test sections below and `docs/testing-addenda.md`.
