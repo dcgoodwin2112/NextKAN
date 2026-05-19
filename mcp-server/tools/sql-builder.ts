@@ -9,6 +9,8 @@ import {
   type ResourceWithColumns,
 } from "./helpers";
 
+const ORDERABLE_ALIAS_PATTERN = /^[A-Za-z_][A-Za-z0-9_]{0,59}$/;
+
 export type FilterOperator =
   | "="
   | "!="
@@ -39,7 +41,10 @@ const STRING_ONLY_OPERATORS: FilterOperator[] = ["contains", "starts_with"];
 /**
  * Build the WHERE clause from validated filters. Each column is checked
  * against the resource's `filterable: true` set and the operator must be
- * compatible with the column's canonical type.
+ * compatible with the column's canonical type. PII columns are rejected
+ * with COLUMN_IS_PII unless `includePii` is true — without this check,
+ * agents could enumerate PII values via repeated `contains` / `starts_with`
+ * probes without ever projecting the column.
  *
  * Returns the WHERE fragment (without the `WHERE` keyword) or `null` when
  * no filters are present. All values are inlined via `escapeSqlLiteral` —
@@ -49,11 +54,13 @@ const STRING_ONLY_OPERATORS: FilterOperator[] = ["contains", "starts_with"];
 export function buildWhereClause(
   resource: ResourceWithColumns,
   filters: Filter[] | undefined,
+  includePii: boolean,
 ): string | null {
   if (!filters || filters.length === 0) return null;
 
   const parts: string[] = [];
   for (const f of filters) {
+    requireNonPii(resource, f.column, includePii);
     const col = requireFilterable(resource, f.column);
     assertOperatorCompatible(col, f.operator);
     parts.push(renderFilter(col, f));
@@ -152,13 +159,33 @@ function formatValueLiteral(col: ColumnView, value: unknown): string {
   return escapeSqlLiteral(String(value));
 }
 
-/** Render ORDER BY using only known columns; unknown column throws COLUMN_NOT_FOUND. */
+/**
+ * Render ORDER BY using only known columns; unknown column throws COLUMN_NOT_FOUND.
+ *
+ * `knownAliases` lets `aggregate_dataset` accept ORDER BY on its computed
+ * metric aliases (e.g. `ORDER BY total DESC` when one of the metrics has
+ * `alias: "total"`). Aliases are validated against a strict identifier
+ * pattern before emission since they're written as bare identifiers — but
+ * the only path that reaches this code with a non-empty set is constructed
+ * server-side from validated metric specs, so the regex is belt-and-braces.
+ */
 export function buildOrderClause(
   resource: ResourceWithColumns,
   orderBy: OrderBy[] | undefined,
+  knownAliases?: ReadonlySet<string>,
 ): string | null {
   if (!orderBy || orderBy.length === 0) return null;
   const parts = orderBy.map((o) => {
+    const direction = o.direction === "desc" ? "DESC" : "ASC";
+    if (knownAliases?.has(o.column)) {
+      if (!ORDERABLE_ALIAS_PATTERN.test(o.column)) {
+        throw toolError({
+          errorType: "INVALID_INPUT",
+          message: `Invalid metric alias for ORDER BY: ${o.column}`,
+        });
+      }
+      return `${escapeSqlIdentifier(o.column)} ${direction}`;
+    }
     const col = resource.columns.find((c) => c.name === o.column);
     if (!col) {
       throw toolError({
@@ -166,7 +193,7 @@ export function buildOrderClause(
         message: `Order-by column not found: ${o.column}`,
       });
     }
-    return `${escapeSqlIdentifier(col.name)} ${o.direction === "desc" ? "DESC" : "ASC"}`;
+    return `${escapeSqlIdentifier(col.name)} ${direction}`;
   });
   return parts.join(", ");
 }

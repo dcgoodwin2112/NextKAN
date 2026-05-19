@@ -42,28 +42,34 @@ function resWithPii(): ResourceWithColumns {
   };
 }
 
+// Local helper: most existing tests don't care about includePii (no PII
+// columns in the fixture). Pass `true` when exercising PII opt-in.
+function wc(r: ResourceWithColumns, f: Filter[] | undefined, includePii = false) {
+  return buildWhereClause(r, f, includePii);
+}
+
 describe("buildWhereClause", () => {
   it("returns null with no filters", () => {
-    expect(buildWhereClause(res(), undefined)).toBeNull();
-    expect(buildWhereClause(res(), [])).toBeNull();
+    expect(wc(res(), undefined)).toBeNull();
+    expect(wc(res(), [])).toBeNull();
   });
 
   it("renders simple equality with proper escaping", () => {
-    const sql = buildWhereClause(res(), [
+    const sql = wc(res(), [
       { column: "name", operator: "=", value: "O'Hara" },
     ]);
     expect(sql).toBe(`"name" = 'O''Hara'`);
   });
 
   it("renders numeric comparisons without quoting", () => {
-    const sql = buildWhereClause(res(), [
+    const sql = wc(res(), [
       { column: "id", operator: ">", value: 100 },
     ]);
     expect(sql).toBe(`"id" > 100`);
   });
 
   it("renders IN with a value list", () => {
-    const sql = buildWhereClause(res(), [
+    const sql = wc(res(), [
       { column: "name", operator: "in", value: ["a", "b"] },
     ]);
     expect(sql).toBe(`"name" IN ('a', 'b')`);
@@ -71,21 +77,21 @@ describe("buildWhereClause", () => {
 
   it("renders IS NULL / IS NOT NULL without a value", () => {
     expect(
-      buildWhereClause(res(), [{ column: "name", operator: "is_null" }]),
+      wc(res(), [{ column: "name", operator: "is_null" }]),
     ).toBe(`"name" IS NULL`);
     expect(
-      buildWhereClause(res(), [{ column: "name", operator: "is_not_null" }]),
+      wc(res(), [{ column: "name", operator: "is_not_null" }]),
     ).toBe(`"name" IS NOT NULL`);
   });
 
   it("renders contains and starts_with", () => {
     expect(
-      buildWhereClause(res(), [
+      wc(res(), [
         { column: "name", operator: "contains", value: "ali" },
       ]),
     ).toBe(`"name" LIKE '%ali%'`);
     expect(
-      buildWhereClause(res(), [
+      wc(res(), [
         { column: "name", operator: "starts_with", value: "Al" },
       ]),
     ).toBe(`"name" LIKE 'Al%'`);
@@ -93,7 +99,7 @@ describe("buildWhereClause", () => {
 
   it("rejects filters on non-filterable columns", () => {
     expect(() =>
-      buildWhereClause(res(), [
+      wc(res(), [
         { column: "free_text", operator: "=", value: "x" },
       ]),
     ).toThrow(/not filterable/);
@@ -101,7 +107,7 @@ describe("buildWhereClause", () => {
 
   it("rejects ordering operators on string columns", () => {
     expect(() =>
-      buildWhereClause(res(), [
+      wc(res(), [
         { column: "name", operator: ">", value: "x" },
       ]),
     ).toThrow(/Operator '>' is not valid/);
@@ -109,7 +115,7 @@ describe("buildWhereClause", () => {
 
   it("rejects starts_with on non-string columns", () => {
     expect(() =>
-      buildWhereClause(res(), [
+      wc(res(), [
         { column: "joined_at", operator: "starts_with", value: "2024" },
       ]),
     ).toThrow(/only valid on string columns/);
@@ -117,7 +123,7 @@ describe("buildWhereClause", () => {
 
   it("rejects unknown columns", () => {
     expect(() =>
-      buildWhereClause(res(), [
+      wc(res(), [
         { column: "ghost", operator: "=", value: 1 } as Filter,
       ]),
     ).toThrow(/not found/i);
@@ -125,8 +131,26 @@ describe("buildWhereClause", () => {
 
   it("rejects empty IN value", () => {
     expect(() =>
-      buildWhereClause(res(), [{ column: "name", operator: "in", value: [] }]),
+      wc(res(), [{ column: "name", operator: "in", value: [] }]),
     ).toThrow(/non-empty value array/);
+  });
+
+  it("rejects filters on PII columns when includePii is false", () => {
+    expect(() =>
+      wc(resWithPii(), [
+        { column: "email", operator: "contains", value: "alice" },
+      ]),
+    ).toThrow(/flagged as PII/);
+  });
+
+  it("allows filters on PII columns when includePii is true", () => {
+    expect(
+      wc(
+        resWithPii(),
+        [{ column: "email", operator: "contains", value: "alice" }],
+        true,
+      ),
+    ).toBe(`"email" LIKE '%alice%'`);
   });
 });
 
@@ -147,6 +171,39 @@ describe("buildOrderClause", () => {
   it("rejects unknown columns", () => {
     expect(() =>
       buildOrderClause(res(), [{ column: "ghost", direction: "asc" }]),
+    ).toThrow(/not found/i);
+  });
+
+  it("allows ORDER BY on a known metric alias", () => {
+    expect(
+      buildOrderClause(
+        res(),
+        [{ column: "total", direction: "desc" }],
+        new Set(["total"]),
+      ),
+    ).toBe(`"total" DESC`);
+  });
+
+  it("mixes alias and column ordering in a single clause", () => {
+    expect(
+      buildOrderClause(
+        res(),
+        [
+          { column: "total", direction: "desc" },
+          { column: "name", direction: "asc" },
+        ],
+        new Set(["total"]),
+      ),
+    ).toBe(`"total" DESC, "name" ASC`);
+  });
+
+  it("rejects ORDER BY on an unknown alias when alias set provided", () => {
+    expect(() =>
+      buildOrderClause(
+        res(),
+        [{ column: "mystery", direction: "asc" }],
+        new Set(["total"]),
+      ),
     ).toThrow(/not found/i);
   });
 });

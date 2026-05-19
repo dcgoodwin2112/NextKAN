@@ -241,6 +241,19 @@ describe("aggregate_dataset tool", () => {
       (env.result?.structuredContent as { errorType: string }).errorType,
     ).toBe("COLUMN_NOT_FILTERABLE");
   });
+
+  it("orders results by a metric alias", async () => {
+    const { app } = buildApp();
+    const env = await callTool(app, "aggregate_dataset", {
+      resourceId: "dist-1",
+      groupBy: ["region"],
+      metrics: [{ column: "amount", function: "sum", alias: "total" }],
+      orderBy: [{ column: "total", direction: "desc" }],
+    });
+    const result = unpack<AggregateResult>(env);
+    expect(result.rowCount).toBe(3);
+    expect(result.groups.map((g) => g.region)).toEqual(["East", "West", "North"]);
+  });
 });
 
 describe("sample_dataset tool", () => {
@@ -336,6 +349,45 @@ describe("PII enforcement", () => {
       resourceId: "dist-pii",
       groupBy: ["email"],
       metrics: [{ function: "count_all" }],
+    });
+    expect(
+      (env.result?.structuredContent as { errorType: string }).errorType,
+    ).toBe("COLUMN_IS_PII");
+  });
+
+  it("query_dataset rejects filters on PII columns without opt-in", async () => {
+    const { app } = buildApp();
+    const env = await callTool(app, "query_dataset", {
+      resourceId: "dist-pii",
+      filters: [{ column: "email", operator: "contains", value: "alice" }],
+    });
+    expect(env.result?.isError).toBe(true);
+    expect(
+      (env.result?.structuredContent as { errorType: string }).errorType,
+    ).toBe("COLUMN_IS_PII");
+  });
+
+  it("query_dataset allows filters on PII columns when includePii=true", async () => {
+    const { app } = buildApp();
+    const env = await callTool(app, "query_dataset", {
+      resourceId: "dist-pii",
+      columns: ["id", "region"],
+      filters: [{ column: "email", operator: "contains", value: "alice" }],
+      includePii: true,
+    });
+    const result = unpack<QueryResult>(env);
+    expect(result.rowCount).toBe(1);
+    expect(result.rows[0]).toMatchObject({ id: "1", region: "East" });
+    expect(result.rows[0]).not.toHaveProperty("email");
+  });
+
+  it("aggregate_dataset rejects filters on PII columns without opt-in", async () => {
+    const { app } = buildApp();
+    const env = await callTool(app, "aggregate_dataset", {
+      resourceId: "dist-pii",
+      groupBy: ["region"],
+      metrics: [{ function: "count_all" }],
+      filters: [{ column: "email", operator: "contains", value: "alice" }],
     });
     expect(
       (env.result?.structuredContent as { errorType: string }).errorType,
