@@ -82,7 +82,7 @@ async function run(args: {
   }
 
   const projection = buildProjection(resource, args.columns, includePii);
-  const where = buildWhereClause(resource, args.filters);
+  const where = buildWhereClause(resource, args.filters, includePii);
   const order = buildOrderClause(resource, args.orderBy);
 
   const sql = assembleSql({
@@ -135,7 +135,10 @@ async function runSelect(sql: string): Promise<Record<string, unknown>[]> {
 export const __test_only = {
   resourceParquetPath,
   assembleSql,
-  buildWhereClause: (resource: ResourceWithColumns, filters?: Filter[]) =>
-    buildWhereClause(resource, filters),
+  buildWhereClause: (
+    resource: ResourceWithColumns,
+    filters?: Filter[],
+    includePii = false,
+  ) => buildWhereClause(resource, filters, includePii),
   escapeSqlLiteral,
 };

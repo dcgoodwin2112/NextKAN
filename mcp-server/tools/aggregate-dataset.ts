@@ -115,8 +115,8 @@ async function run(args: {
   });
   const metricExprs = args.metrics.map((m) => renderMetric(resource, m, includePii));
 
-  const where = buildWhereClause(resource, args.filters);
-  const order = buildOrderClause(resource, args.orderBy);
+  const where = buildWhereClause(resource, args.filters, includePii);
+  const order = buildOrderClause(resource, args.orderBy, new Set(metricExprs.map((m) => m.alias)));
 
   const projectionParts = [
     ...groupByCols.map((c) => escapeSqlIdentifier(c.name)),
