@@ -6,33 +6,7 @@ Pending features and tasks for future implementation. See `docs/backlog-complete
 
 ## Agent-First Pivot — Follow-up Verification
 
-The Tier 1.5 pivot shipped on 2026-05-19 with unit/component/integration coverage (1360 tests). These items need a different harness than vitest and were deferred from the implementation pass.
-
-### MCP server live verification
-
-**Priority:** High
-**Reason:** The MCP contract is co-equal with `/data.json` per the pivot thesis but has only been exercised by the browser-side "Try it" button, not by a real MCP client handshake.
-
-#### Scope
-
-- Connect MCP Inspector (`npx @modelcontextprotocol/inspector`) and run each of the six tools against seeded data.
-- Connect Claude Desktop via Custom Connector and run the same tool list.
-- Confirm rate-limit headers (`X-RateLimit-*`, `Retry-After`) and error responses match `docs/mcp-server-spec.md`.
-
----
-
-### E2E Playwright re-baseline
-
-**Priority:** High
-**Reason:** Playwright specs were last green pre-pivot. Schema extensions (`Distribution.parquetPath`, etc.), AI feature additions, and UI changes from phases 1–10 may have shifted selectors or flows.
-
-#### Scope
-
-- Run `npm run test:e2e` against current main.
-- Fix any specs broken by post-pivot changes (selector drift, new fields, etc.).
-- Re-document the expected E2E count in `docs/tier-1.5-agent-first.md`.
-
----
+The Tier 1.5 pivot shipped on 2026-05-19. MCP live verification and the E2E re-baseline closed out in PRs #51, #52, and the follow-up E2E PR — see `docs/backlog-completed.md`. The profiling boundary work still needs a real-data harness rather than the unit-fixture path.
 
 ### Profiling boundary tests
 

@@ -40,9 +40,16 @@ test.describe("Content Pages", () => {
   test("navigation includes published pages", async ({ page }) => {
     // Create a published page
     await page.goto("/admin/pages/new");
+    // Wait for hydration before interacting with Radix Checkbox — without this
+    // the .check() can fire before React attaches the onCheckedChange handler,
+    // so `published` stays false and the page never appears in the public nav.
+    await page.waitForLoadState("networkidle");
+
     await page.getByLabel("Title", { exact: true }).fill("E2E Nav Page");
     await page.locator("textarea").first().fill("Nav test content");
-    await page.getByLabel(/published/i).check();
+    const publishedCheckbox = page.getByLabel(/published/i);
+    await publishedCheckbox.check();
+    await expect(publishedCheckbox).toBeChecked();
     await page.getByRole("button", { name: /create/i }).click();
     await expect(page).toHaveURL(/\/admin\/pages/, { timeout: 10000 });
 
