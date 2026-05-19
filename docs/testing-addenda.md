@@ -480,13 +480,7 @@ For each feature, tests are categorized:
 
 ### Feature 40: Plugin / Extension System
 
-**Unit tests** — `src/lib/plugins/hooks.test.ts`:
-- `register` adds callback to hook
-- `run` executes all registered callbacks in order
-- `run` passes arguments to callbacks
-- `run` returns array of results
-- `run` handles async callbacks
-- `run` returns empty array for unregistered hook name
+> **Retired 2026-05.** See `docs/backlog-completed.md`. Section retained as history.
 
 ---
 

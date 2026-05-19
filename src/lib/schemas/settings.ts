@@ -10,7 +10,6 @@ export const settingsUpdateSchema = z.object({
   ENABLE_COMMENTS: z.enum(["true", "false"]).optional(),
   COMMENT_MODERATION: z.enum(["true", "false"]).optional(),
   ENABLE_WORKFLOW: z.enum(["true", "false"]).optional(),
-  ENABLE_PLUGINS: z.enum(["true", "false"]).optional(),
   DCAT_US_VERSION: z.enum(["v1.1", "v3.0"]).optional(),
   HARVEST_API_KEY: z.string().max(500).optional(),
   USER_REGISTRATION_MODE: z.enum(["disabled", "approval", "open"]).optional(),

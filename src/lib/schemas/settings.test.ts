@@ -54,7 +54,6 @@ describe("settingsUpdateSchema", () => {
       ENABLE_COMMENTS: "false",
       COMMENT_MODERATION: "true",
       ENABLE_WORKFLOW: "false",
-      ENABLE_PLUGINS: "false",
     });
     expect(result.ENABLE_COMMENTS).toBe("false");
     expect(result.COMMENT_MODERATION).toBe("true");

@@ -625,6 +625,8 @@ model DatasetTranslation {
 
 ## Feature 40: Plugin / Extension System
 
+> **Retired 2026-05.** Code removed because the agent-first pivot makes MCP tools the canonical extension point, not admin-CRUD lifecycle hooks. See `docs/backlog-completed.md`. The section below is retained as history.
+
 ### Task 40.1: Hook System
 
 Create `src/lib/plugins/hooks.ts`:

@@ -36,14 +36,6 @@ vi.mock("@/lib/actions/datasets", () => ({
   updateDataset: (...args: unknown[]) => mockUpdateDataset(...args),
 }));
 
-vi.mock("@/lib/plugins/hooks", () => ({
-  hooks: { run: vi.fn().mockResolvedValue(undefined) },
-}));
-
-vi.mock("@/lib/plugins/loader", () => ({
-  isPluginsEnabled: vi.fn().mockReturnValue(false),
-}));
-
 import {
   createVersion,
   compareVersions,

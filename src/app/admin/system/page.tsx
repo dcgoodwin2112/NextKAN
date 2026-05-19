@@ -98,14 +98,6 @@ export default async function SystemInfoPage() {
                     </Badge>
                   }
                 />
-                <InfoRow
-                  label="Plugins"
-                  value={
-                    <Badge variant={info.features.plugins ? "default" : "secondary"}>
-                      {info.features.plugins ? "Enabled" : "Disabled"}
-                    </Badge>
-                  }
-                />
               </TableBody>
             </Table>
           </CardContent>

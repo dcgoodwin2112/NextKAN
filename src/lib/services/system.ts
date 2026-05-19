@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/db";
 import { isWorkflowEnabled } from "@/lib/services/workflow";
 import { isCommentsEnabled } from "@/lib/services/comments";
-import { isPluginsEnabled } from "@/lib/plugins/loader";
 
 export interface SystemInfo {
   node: string;
@@ -18,7 +17,6 @@ export interface SystemInfo {
   features: {
     workflow: boolean;
     comments: boolean;
-    plugins: boolean;
   };
   lastHarvestTime: Date | null;
 }
@@ -52,7 +50,6 @@ export async function getSystemInfo(): Promise<SystemInfo> {
     features: {
       workflow: isWorkflowEnabled(),
       comments: isCommentsEnabled(),
-      plugins: isPluginsEnabled(),
     },
     lastHarvestTime: lastJob?.startedAt ?? null,
   };

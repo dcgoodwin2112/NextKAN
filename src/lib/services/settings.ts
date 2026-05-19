@@ -11,7 +11,6 @@ const SETTING_DEFAULTS: Record<string, string> = {
   ENABLE_COMMENTS: "false",
   COMMENT_MODERATION: "true",
   ENABLE_WORKFLOW: "false",
-  ENABLE_PLUGINS: "false",
   DCAT_US_VERSION: "v1.1",
   HARVEST_API_KEY: "",
   USER_REGISTRATION_MODE: "disabled",
