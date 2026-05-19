@@ -4,6 +4,58 @@ Pending features and tasks for future implementation. See `docs/backlog-complete
 
 ---
 
+## Agent-First Pivot — Follow-up Verification
+
+The Tier 1.5 pivot shipped on 2026-05-19 with unit/component/integration coverage (1360 tests). These items need a different harness than vitest and were deferred from the implementation pass.
+
+### MCP server live verification
+
+**Priority:** High
+**Reason:** The MCP contract is co-equal with `/data.json` per the pivot thesis but has only been exercised by the browser-side "Try it" button, not by a real MCP client handshake.
+
+#### Scope
+
+- Connect MCP Inspector (`npx @modelcontextprotocol/inspector`) and run each of the six tools against seeded data.
+- Connect Claude Desktop via Custom Connector and run the same tool list.
+- Confirm rate-limit headers (`X-RateLimit-*`, `Retry-After`) and error responses match `docs/mcp-server-spec.md`.
+
+---
+
+### E2E Playwright re-baseline
+
+**Priority:** High
+**Reason:** Playwright specs were last green pre-pivot. Schema extensions (`Distribution.parquetPath`, etc.), AI feature additions, and UI changes from phases 1–10 may have shifted selectors or flows.
+
+#### Scope
+
+- Run `npm run test:e2e` against current main.
+- Fix any specs broken by post-pivot changes (selector drift, new fields, etc.).
+- Re-document the expected E2E count in `docs/tier-1.5-agent-first.md`.
+
+---
+
+### Profiling boundary tests
+
+**Priority:** Medium
+**Reason:** The 100 MB CSV upper bound and worker-thread isolation behavior are only verified by unit fixtures (small files, in-process).
+
+#### Scope
+
+- Profile ~95 MB CSV: verify success near the limit, `Distribution.status = "ready"`.
+- Profile ~120 MB CSV: verify graceful failure path with `status = "failed"` and `statusError` populated.
+- Run profiling concurrently with admin API requests to verify the Next.js event loop stays responsive (worker-thread isolation).
+
+---
+
+## Known Debt
+
+Documented but not committed to a schedule. Apply going forward; do not retrofit in-place.
+
+- **Date formatting** — `toLocaleDateString()`, manual ISO slicing, ad-hoc "X ago" math are scattered across `src/components/**`. There is no shared formatter. New code prefers `toLocaleDateString()` for human-facing dates and ISO strings for machine-facing ones. See [CLAUDE.md](../CLAUDE.md#date-formatting-known-debt).
+- **Server action return shapes** — `src/lib/actions/**` mixes raw Prisma rows, hand-picked subsets, and `{success, data}` envelopes. New actions return a shaped object (`{ id, … }`) with only the fields the caller needs. See [CLAUDE.md](../CLAUDE.md#server-action-return-shapes).
+
+---
+
 ## Public UI/UX
 
 ### Full WCAG 2.1 AA Audit
@@ -80,19 +132,17 @@ Pending features and tasks for future implementation. See `docs/backlog-complete
 
 ## Developer Experience
 
-### Developer Documentation
+### Extension & Plugin Developer Guide
 
-**Priority:** High
-**Reason:** No contributor-facing docs exist beyond `CLAUDE.md`. Developers need guidance on architecture, extending the platform, and contributing.
+**Priority:** Medium
+**Reason:** Architecture overview, dev setup, and testing patterns are now covered by `README.md`, `CLAUDE.md`, and `docs/testing-setup.md`. What's still missing is contributor-facing guidance on extending the platform.
 
 #### Scope
 
-- **Architecture overview:** App Router structure, data flow (server actions → Prisma → DB), auth model
-- **Development setup:** Prerequisites, environment variables, database options (SQLite vs PostgreSQL)
 - **Extension guide:** Adding new API endpoints, creating server actions, adding admin pages, writing Zod schemas
-- **Plugin development:** Hook API reference, example plugin walkthrough
-- **Testing guide:** How to write unit tests (Vitest mocks, Prisma mock pattern), integration tests (real DB), E2E tests (Playwright page objects)
-- **Deployment:** Production configuration, PostgreSQL migration, environment variable reference
+- **Plugin development:** Hook API reference (`src/lib/plugins/`), example plugin walkthrough
+- **MCP tool authoring:** How to add a seventh MCP tool to `mcp-server/tools/` — schema, helpers, registration, tests
+- **Deployment:** Production configuration, PostgreSQL migration, Docker Compose admin + MCP topology
 
 ---
 

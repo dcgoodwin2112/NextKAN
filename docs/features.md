@@ -1,5 +1,8 @@
 # NextKAN — Prioritized Feature List
 
+> ⚠️ **Historical — pre-pivot research.** Read [docs/pivot-context.md](pivot-context.md) for current direction.
+> This doc captured the original 40-feature roadmap before the 2026-05 agent-first pivot. Tiers 1, 1.5, 2, 3, and 4 are largely shipped; remaining work is tracked in [docs/backlog.md](backlog.md). Useful as background context on the DCAT-US / CKAN / DKAN comparison; not authoritative for current priorities.
+
 A lightweight, Next.js-based open data catalog designed as a modern alternative to CKAN and DKAN. Features are organized into priority tiers based on what's needed to ship a useful, DCAT-US compliant product versus what can be layered on over time.
 
 ---
