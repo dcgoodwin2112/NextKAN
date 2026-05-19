@@ -181,3 +181,50 @@ describe("profileResource (failure surfaces)", () => {
     expect(result.columns.length).toBeGreaterThan(0);
   });
 });
+
+describe("profileResource (boundary — at-scale inputs)", () => {
+  it("profiles a 10k-row CSV and produces correct rowCount, types, and Parquet", async () => {
+    // Existing tests use 5-row fixtures. The Tier 1.5 documented architecture
+    // assumes profiling works on inputs up to the 100 MB upload limit, so we
+    // exercise a non-trivial row count here. ~10k rows is the sweet spot:
+    // big enough to catch streaming / memory regressions, small enough that
+    // a regular `npm run test:run` doesn't slow down. Generates ~270 KB of CSV.
+    const dir = await mkdtemp(path.join(tmpRoot, "scale-"));
+    cleanup.push(dir);
+    const sourcePath = path.join(dir, "scale.csv");
+    const target = path.join(dir, "scale.parquet");
+
+    const rows = ["id,region,amount,is_active"];
+    const regions = ["North", "South", "East", "West"];
+    for (let i = 1; i <= 10_000; i++) {
+      rows.push(
+        `${i},${regions[i % regions.length]},${(i % 100) + 0.5},${i % 2 === 0}`,
+      );
+    }
+    await writeFile(sourcePath, rows.join("\n") + "\n", "utf-8");
+
+    const result = await profileResource({ sourcePath, parquetTargetPath: target });
+
+    expect(result.rowCount).toBe(10_000);
+    expect(existsSync(target)).toBe(true);
+    expect(statSync(target).size).toBeGreaterThan(0);
+
+    const byName = new Map(result.columns.map((c) => [c.name, c]));
+    expect(byName.get("id")?.type).toBe("integer");
+    expect(byName.get("region")?.type).toBe("string");
+    expect(byName.get("amount")?.type).toBe("number");
+    expect(byName.get("is_active")?.type).toBe("boolean");
+
+    // region has 4 distinct values → low-cardinality enum is collected.
+    // enumValues is derived from random samples (sampleSize default ~5), so
+    // we assert distinctCount strictly and enumValues only loosely.
+    expect(byName.get("region")?.distinctCount).toBe(4);
+    expect((byName.get("region")?.enumValues ?? []).length).toBeGreaterThan(0);
+
+    // amount is aggregatable; region is filterable but not aggregatable; the
+    // integer id is aggregatable. Stable contract for MCP `aggregate_dataset`.
+    expect(byName.get("amount")?.aggregatable).toBe(true);
+    expect(byName.get("region")?.aggregatable).toBe(false);
+    expect(byName.get("id")?.aggregatable).toBe(true);
+  });
+});

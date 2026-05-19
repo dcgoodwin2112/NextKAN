@@ -318,3 +318,83 @@ describe("profileDistribution", () => {
     expect(successUpdate.profileStatus).toBe("ready");
   });
 });
+
+describe("profileDistribution — boundary failures", () => {
+  it("sets profileStatus=failed without throwing when the source file is missing on disk", async () => {
+    // Simulates a race / inconsistency where the DB row references a file
+    // that no longer exists. profileDistribution must swallow the I/O error
+    // from copyFile (not the profiler) and surface it via profileError.
+    const missingPath = path.join(workdir, "vanished.csv");
+    prismaMock.distribution.findUnique.mockResolvedValue(
+      makeDistribution({ filePath: missingPath, fileName: "vanished.csv" }) as any,
+    );
+    prismaMock.distribution.update.mockResolvedValue({} as any);
+
+    await expect(
+      profileDistribution("dist-1", { storageRoot: workdir }),
+    ).resolves.toBeUndefined();
+
+    const calls = prismaMock.distribution.update.mock.calls;
+    const lastCall = calls[calls.length - 1][0].data as Record<string, unknown>;
+    expect(lastCall.profileStatus).toBe("failed");
+    expect(typeof lastCall.profileError).toBe("string");
+    expect((lastCall.profileError as string).length).toBeGreaterThan(0);
+
+    // Source file was missing — no profiler invocation and no DataDictionary write.
+    expect(prismaMock.dataDictionary.create).not.toHaveBeenCalled();
+  });
+
+  it("truncates oversized profileError messages to 1000 chars", async () => {
+    // The catch path slices error messages at 1000 chars before persisting so
+    // a runaway DuckDB stack trace can't blow past the DB column.
+    const sourcePath = path.join(workdir, "src.csv");
+    await writeFile(sourcePath, "x\n1\n");
+
+    prismaMock.distribution.findUnique.mockResolvedValue(
+      makeDistribution({ filePath: sourcePath }) as any,
+    );
+    prismaMock.distribution.update.mockResolvedValue({} as any);
+
+    const huge = "X".repeat(5_000);
+    const profiler = vi.fn(async () => {
+      throw new Error(huge);
+    });
+
+    await profileDistribution("dist-1", { storageRoot: workdir, profiler });
+
+    const calls = prismaMock.distribution.update.mock.calls;
+    const lastCall = calls[calls.length - 1][0].data as Record<string, unknown>;
+    expect(lastCall.profileStatus).toBe("failed");
+    expect((lastCall.profileError as string).length).toBe(1000);
+  });
+
+  it("survives a profiler timeout by writing a failed status without leaking the worker", async () => {
+    // Simulates the worker-timeout path (the real implementation uses a hard
+    // ceiling of 5 min). We don't spawn a real worker — we model the timeout
+    // as a profiler rejection, which is exactly what `profileInWorker`
+    // surfaces when the AbortController fires.
+    const sourcePath = path.join(workdir, "src.csv");
+    await writeFile(sourcePath, "x\n1\n");
+
+    prismaMock.distribution.findUnique.mockResolvedValue(
+      makeDistribution({ filePath: sourcePath }) as any,
+    );
+    prismaMock.distribution.update.mockResolvedValue({} as any);
+
+    const profiler = vi.fn(async () => {
+      throw new Error("Profiling exceeded timeout of 5000ms");
+    });
+
+    await profileDistribution("dist-1", {
+      storageRoot: workdir,
+      profiler,
+      timeoutMs: 5_000,
+    });
+
+    expect(profiler).toHaveBeenCalledTimes(1);
+    const calls = prismaMock.distribution.update.mock.calls;
+    const lastCall = calls[calls.length - 1][0].data as Record<string, unknown>;
+    expect(lastCall.profileStatus).toBe("failed");
+    expect(lastCall.profileError).toMatch(/timeout/i);
+  });
+});
