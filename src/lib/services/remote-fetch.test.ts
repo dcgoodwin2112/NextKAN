@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { prismaMock } from "@/__mocks__/prisma";
+import { mockDistribution as makeDistribution } from "@/__mocks__/fixtures";
 
 const { mockImportCsv, mockImportJson, mockImportGeoJson, mockImportExcel, mockGenerateTableName, mockUpload } = vi.hoisted(() => ({
   mockImportCsv: vi.fn(),
@@ -105,24 +106,11 @@ describe("extractFilenameFromURL", () => {
 });
 
 describe("fetchAndImportRemoteResource", () => {
-  const mockDistribution = {
+  const mockDistribution = makeDistribution({
     id: "dist-1",
     title: "Test",
-    description: null,
     downloadURL: "https://example.com/data.csv",
-    accessURL: null,
-    mediaType: null,
-    format: null,
-    conformsTo: null,
-    describedBy: null,
-    fileName: null,
-    filePath: null,
-    fileSize: null,
-    datasetId: "ds-1",
-    sortOrder: 0,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
+  });
 
   beforeEach(() => {
     vi.resetAllMocks();

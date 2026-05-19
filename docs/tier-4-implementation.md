@@ -1,5 +1,8 @@
 # Tier 4 — Advanced / Enterprise Implementation Plan
 
+> ⚠️ **Historical — read [docs/pivot-context.md](pivot-context.md) first.**
+> This document describes work completed before the 2026-05 agent-first pivot. **Do not implement new work from this doc** — start at [docs/tier-1.5-agent-first.md](tier-1.5-agent-first.md) instead.
+
 ## Prerequisites
 
 Tiers 1–3 must be fully implemented. The platform should have:

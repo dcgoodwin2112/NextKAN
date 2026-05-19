@@ -1,7 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { ComponentProps } from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ThemeForm } from "./ThemeForm";
+
+type OnSubmit = ComponentProps<typeof ThemeForm>["onSubmit"];
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
@@ -12,11 +15,11 @@ vi.mock("sonner", () => ({
 }));
 
 describe("ThemeForm", () => {
-  let onSubmit: ReturnType<typeof vi.fn>;
+  let onSubmit: ReturnType<typeof vi.fn<OnSubmit>>;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    onSubmit = vi.fn().mockResolvedValue(undefined);
+    onSubmit = vi.fn<OnSubmit>().mockResolvedValue(undefined);
   });
 
   it("renders form fields", () => {

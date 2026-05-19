@@ -18,7 +18,7 @@ async function requireTokenPermission(userId: string) {
     throw new Error("Unauthorized");
   }
 
-  return session;
+  return session as typeof session & { user: NonNullable<typeof session.user> };
 }
 
 export async function createToken(userId: string, input: CreateTokenInput) {

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { prismaMock } from "@/__mocks__/prisma";
+import { mockDistribution as makeDistribution } from "@/__mocks__/fixtures";
 
 const mockImportCsv = vi.fn();
 const mockImportJson = vi.fn();
@@ -53,23 +54,13 @@ describe("addDistribution", () => {
     mockImportExcel.mockClear();
   });
   it("validates input", async () => {
-    prismaMock.distribution.create.mockResolvedValue({
+    prismaMock.distribution.create.mockResolvedValue(makeDistribution({
       id: "dist-1",
       title: "CSV Data",
-      description: null,
       downloadURL: "https://example.com/data.csv",
-      accessURL: null,
       mediaType: "text/csv",
       format: "CSV",
-      conformsTo: null,
-      describedBy: null,
-      fileName: null,
-      filePath: null,
-      fileSize: null,
-      datasetId: "ds-1",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
+    }));
 
     const result = await addDistribution("ds-1", {
       title: "CSV Data",
@@ -89,23 +80,16 @@ describe("addDistribution", () => {
   });
 
   it("triggers datastore import for CSV with filePath", async () => {
-    const dist = {
+    const dist = makeDistribution({
       id: "dist-csv",
       title: "CSV",
-      description: null,
       downloadURL: "https://example.com/data.csv",
-      accessURL: null,
       mediaType: "text/csv",
       format: "CSV",
-      conformsTo: null,
-      describedBy: null,
       fileName: "data.csv",
       filePath: "/uploads/data.csv",
       fileSize: 1024,
-      datasetId: "ds-1",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    });
     prismaMock.distribution.create.mockResolvedValue(dist);
 
     await addDistribution("ds-1", {
@@ -122,23 +106,16 @@ describe("addDistribution", () => {
   });
 
   it("triggers datastore import for JSON with filePath", async () => {
-    const dist = {
+    const dist = makeDistribution({
       id: "dist-json",
       title: "JSON",
-      description: null,
       downloadURL: "https://example.com/data.json",
-      accessURL: null,
       mediaType: "application/json",
       format: "JSON",
-      conformsTo: null,
-      describedBy: null,
       fileName: "data.json",
       filePath: "/uploads/data.json",
       fileSize: 512,
-      datasetId: "ds-1",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    });
     prismaMock.distribution.create.mockResolvedValue(dist);
 
     await addDistribution("ds-1", {
@@ -156,23 +133,16 @@ describe("addDistribution", () => {
   });
 
   it("triggers datastore import for GeoJSON with filePath", async () => {
-    const dist = {
+    const dist = makeDistribution({
       id: "dist-geojson",
       title: "GeoJSON",
-      description: null,
       downloadURL: "https://example.com/data.geojson",
-      accessURL: null,
       mediaType: "application/geo+json",
       format: "GeoJSON",
-      conformsTo: null,
-      describedBy: null,
       fileName: "data.geojson",
       filePath: "/uploads/data.geojson",
       fileSize: 1024,
-      datasetId: "ds-1",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    });
     prismaMock.distribution.create.mockResolvedValue(dist);
 
     await addDistribution("ds-1", {
@@ -191,23 +161,16 @@ describe("addDistribution", () => {
   });
 
   it("triggers datastore import for XLSX with filePath", async () => {
-    const dist = {
+    const dist = makeDistribution({
       id: "dist-xlsx",
       title: "Excel",
-      description: null,
       downloadURL: "https://example.com/data.xlsx",
-      accessURL: null,
       mediaType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       format: "XLSX",
-      conformsTo: null,
-      describedBy: null,
       fileName: "data.xlsx",
       filePath: "/uploads/data.xlsx",
       fileSize: 4096,
-      datasetId: "ds-1",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    });
     prismaMock.distribution.create.mockResolvedValue(dist);
 
     await addDistribution("ds-1", {
@@ -225,23 +188,16 @@ describe("addDistribution", () => {
   });
 
   it("triggers datastore import for XLS with filePath", async () => {
-    const dist = {
+    const dist = makeDistribution({
       id: "dist-xls",
       title: "Legacy Excel",
-      description: null,
       downloadURL: "https://example.com/data.xls",
-      accessURL: null,
       mediaType: "application/vnd.ms-excel",
       format: "XLS",
-      conformsTo: null,
-      describedBy: null,
       fileName: "data.xls",
       filePath: "/uploads/data.xls",
       fileSize: 2048,
-      datasetId: "ds-1",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    });
     prismaMock.distribution.create.mockResolvedValue(dist);
 
     await addDistribution("ds-1", {
@@ -259,23 +215,16 @@ describe("addDistribution", () => {
   });
 
   it("does not trigger import for unsupported types", async () => {
-    prismaMock.distribution.create.mockResolvedValue({
+    prismaMock.distribution.create.mockResolvedValue(makeDistribution({
       id: "dist-pdf",
       title: "PDF",
-      description: null,
       downloadURL: "https://example.com/doc.pdf",
-      accessURL: null,
       mediaType: "application/pdf",
       format: "PDF",
-      conformsTo: null,
-      describedBy: null,
       fileName: "doc.pdf",
       filePath: "/uploads/doc.pdf",
       fileSize: 2048,
-      datasetId: "ds-1",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
+    }));
 
     await addDistribution("ds-1", {
       title: "PDF",
@@ -299,23 +248,13 @@ describe("addDistribution remote fetch", () => {
   });
 
   it("calls fetchAndImportRemoteResource when downloadURL present, no filePath", async () => {
-    const dist = {
+    const dist = makeDistribution({
       id: "dist-remote",
       title: "Remote CSV",
-      description: null,
       downloadURL: "https://example.com/data.csv",
-      accessURL: null,
       mediaType: "text/csv",
       format: "CSV",
-      conformsTo: null,
-      describedBy: null,
-      fileName: null,
-      filePath: null,
-      fileSize: null,
-      datasetId: "ds-1",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    });
     prismaMock.distribution.create.mockResolvedValue(dist);
 
     await addDistribution("ds-1", {
@@ -329,23 +268,16 @@ describe("addDistribution remote fetch", () => {
   });
 
   it("does NOT call fetchAndImportRemoteResource when filePath is present", async () => {
-    const dist = {
+    const dist = makeDistribution({
       id: "dist-local",
       title: "Local CSV",
-      description: null,
       downloadURL: "https://example.com/data.csv",
-      accessURL: null,
       mediaType: "text/csv",
       format: "CSV",
-      conformsTo: null,
-      describedBy: null,
       fileName: "data.csv",
       filePath: "/uploads/data.csv",
       fileSize: 1024,
-      datasetId: "ds-1",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    });
     prismaMock.distribution.create.mockResolvedValue(dist);
 
     await addDistribution("ds-1", {
@@ -362,23 +294,11 @@ describe("addDistribution remote fetch", () => {
   });
 
   it("does NOT call fetchAndImportRemoteResource when downloadURL is absent", async () => {
-    const dist = {
+    const dist = makeDistribution({
       id: "dist-access",
       title: "Access Only",
-      description: null,
-      downloadURL: null,
       accessURL: "https://example.com/api",
-      mediaType: null,
-      format: null,
-      conformsTo: null,
-      describedBy: null,
-      fileName: null,
-      filePath: null,
-      fileSize: null,
-      datasetId: "ds-1",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    });
     prismaMock.distribution.create.mockResolvedValue(dist);
 
     await addDistribution("ds-1", {

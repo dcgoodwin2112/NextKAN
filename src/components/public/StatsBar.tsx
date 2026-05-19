@@ -1,5 +1,11 @@
 import { Database, Building2, FileDown, FileType } from "lucide-react";
-import type { CatalogStats } from "@/lib/services/discovery";
+
+export interface CatalogStats {
+  datasets: number;
+  organizations: number;
+  distributions: number;
+  formats: number;
+}
 
 interface StatsBarProps {
   stats: CatalogStats;

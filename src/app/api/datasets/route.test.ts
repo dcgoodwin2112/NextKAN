@@ -16,7 +16,7 @@ vi.mock("@/lib/auth", () => ({
   auth: () => mockAuth(),
 }));
 
-function makeRequest(url: string, options?: RequestInit) {
+function makeRequest(url: string, options?: ConstructorParameters<typeof NextRequest>[1]) {
   return new NextRequest(url, options);
 }
 
@@ -106,7 +106,7 @@ describe("POST /api/datasets", () => {
         {
           code: "invalid_type",
           expected: "string",
-          received: "undefined",
+          input: undefined,
           path: ["title"],
           message: "Required",
         },

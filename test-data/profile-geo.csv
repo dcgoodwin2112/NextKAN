@@ -1,0 +1,5 @@
+station_id,name,latitude,longitude,reading
+S001,Capitol,38.8899,-77.0091,72.4
+S002,Mall,38.8895,-77.0353,71.8
+S003,Tidal,38.8881,-77.0410,73.1
+S004,Anacostia,38.8740,-76.9756,70.5

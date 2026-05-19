@@ -6,6 +6,8 @@ import {
   DatasetTheme,
   Theme,
   DatasetSeries,
+  DataDictionary,
+  DataDictionaryField,
 } from "@/generated/prisma/client";
 
 type OrganizationWithParent = Organization & {
@@ -16,9 +18,13 @@ type DatasetThemeWithTheme = DatasetTheme & {
   theme: Theme;
 };
 
+export type DistributionWithDictionary = Distribution & {
+  dataDictionary?: (DataDictionary & { fields: DataDictionaryField[] }) | null;
+};
+
 export type DatasetWithRelations = Dataset & {
   publisher: OrganizationWithParent;
-  distributions: Distribution[];
+  distributions: DistributionWithDictionary[];
   keywords: DatasetKeyword[];
   themes: DatasetThemeWithTheme[];
   series?: DatasetSeries | null;

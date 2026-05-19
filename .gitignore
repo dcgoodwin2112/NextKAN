@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # prisma databases
 dev.db
@@ -42,6 +43,12 @@ prisma/*.db-journal
 # uploads
 public/uploads/*
 !public/uploads/.gitkeep
+
+# agent-first storage (Parquet + original resource files)
+storage/*
+!storage/resources
+storage/resources/*
+!storage/resources/.gitkeep
 
 # playwright
 /test-results/
@@ -55,3 +62,8 @@ public/uploads/*
 next-env.d.ts
 
 /src/generated/prisma
+
+# local editor/agent config
+.claude/
+.vscode/
+.idea/

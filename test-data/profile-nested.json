@@ -1,0 +1,5 @@
+[
+  {"id": 1, "name": "Alice", "tags": ["alpha","beta"], "score": 3.14},
+  {"id": 2, "name": "Bob", "tags": ["beta"], "score": 2.71},
+  {"id": 3, "name": "Carol", "tags": ["alpha","gamma"], "score": 1.41}
+]

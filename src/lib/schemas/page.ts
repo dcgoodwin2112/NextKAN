@@ -17,8 +17,8 @@ export const pageCreateSchema = z.object({
   template: z.enum(PAGE_TEMPLATES).default("default"),
 });
 
-export type PageCreateInput = z.infer<typeof pageCreateSchema>;
+export type PageCreateInput = z.input<typeof pageCreateSchema>;
 
 export const pageUpdateSchema = pageCreateSchema.partial();
 
-export type PageUpdateInput = z.infer<typeof pageUpdateSchema>;
+export type PageUpdateInput = z.input<typeof pageUpdateSchema>;

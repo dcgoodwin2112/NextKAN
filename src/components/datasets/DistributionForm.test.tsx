@@ -1,21 +1,25 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { ComponentProps } from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 import { DistributionForm } from "./DistributionForm";
+
+type OnAdd = ComponentProps<typeof DistributionForm>["onAdd"];
+type OnCancel = ComponentProps<typeof DistributionForm>["onCancel"];
 
 vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }));
 
 describe("DistributionForm", () => {
-  let mockOnAdd: ReturnType<typeof vi.fn>;
-  let mockOnCancel: ReturnType<typeof vi.fn>;
+  let mockOnAdd: ReturnType<typeof vi.fn<OnAdd>>;
+  let mockOnCancel: ReturnType<typeof vi.fn<OnCancel>>;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockOnAdd = vi.fn();
-    mockOnCancel = vi.fn();
+    mockOnAdd = vi.fn<OnAdd>();
+    mockOnCancel = vi.fn<OnCancel>();
     global.fetch = vi.fn();
   });
 

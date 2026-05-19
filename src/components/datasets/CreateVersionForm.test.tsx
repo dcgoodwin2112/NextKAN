@@ -1,18 +1,21 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { ComponentProps } from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CreateVersionForm } from "./CreateVersionForm";
+
+type OnSubmit = ComponentProps<typeof CreateVersionForm>["onSubmit"];
 
 vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }));
 
 describe("CreateVersionForm", () => {
-  let onSubmit: ReturnType<typeof vi.fn>;
+  let onSubmit: ReturnType<typeof vi.fn<OnSubmit>>;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    onSubmit = vi.fn().mockResolvedValue(undefined);
+    onSubmit = vi.fn<OnSubmit>().mockResolvedValue(undefined);
   });
 
   it("renders form fields", () => {

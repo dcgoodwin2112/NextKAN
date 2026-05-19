@@ -4,7 +4,7 @@ import type { DatasetWithRelations } from "@/lib/schemas/dcat-us";
 
 const datasetIncludes = {
   publisher: { include: { parent: true } },
-  distributions: true,
+  distributions: { include: { dataDictionary: { include: { fields: true } } } },
   keywords: true,
   themes: { include: { theme: true } },
 } as const;
@@ -61,15 +61,16 @@ export async function getOrgDashboardData(orgId: string): Promise<OrgDashboardDa
     else if (d.status === "archived") datasetCounts.archived++;
   }
 
-  // Quality scores for published datasets
+  // Quality scores for published datasets (stored as percentage 0-100).
   const scored: { id: string; title: string; status: string; qualityScore: number; modified: Date }[] = [];
   let qualitySum = 0;
   let qualityCount = 0;
   for (const d of datasets) {
-    const score = calculateQualityScore(d).overall;
-    scored.push({ id: d.id, title: d.title, status: d.status, qualityScore: score, modified: d.modified });
+    const q = calculateQualityScore(d);
+    const percent = q.maxScore > 0 ? Math.round((q.overall / q.maxScore) * 100) : 0;
+    scored.push({ id: d.id, title: d.title, status: d.status, qualityScore: percent, modified: d.modified });
     if (d.status === "published") {
-      qualitySum += score;
+      qualitySum += percent;
       qualityCount++;
     }
   }

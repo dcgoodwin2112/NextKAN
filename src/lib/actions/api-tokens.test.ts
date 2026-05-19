@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { asMock } from "@/__mocks__/prisma";
 
 vi.mock("@/lib/db", () => ({
   prisma: {
@@ -53,7 +54,7 @@ beforeEach(() => {
 describe("createToken", () => {
   it("creates a token for self", async () => {
     mockAuth.mockResolvedValue(editorSession);
-    mockPrisma.apiToken.create.mockResolvedValue({
+    asMock(mockPrisma.apiToken.create).mockResolvedValue({
       id: "token-1",
       userId: "editor-1",
       name: "My Token",
@@ -71,7 +72,7 @@ describe("createToken", () => {
   });
 
   it("admin can create token for another user", async () => {
-    mockPrisma.apiToken.create.mockResolvedValue({
+    asMock(mockPrisma.apiToken.create).mockResolvedValue({
       id: "token-2",
       userId: "editor-1",
       name: "Admin Created",
@@ -105,14 +106,14 @@ describe("listTokens", () => {
   it("returns tokens for self", async () => {
     mockAuth.mockResolvedValue(editorSession);
     const tokens = [{ id: "t1", name: "Token 1", prefix: "nkan_abc1" }];
-    mockPrisma.apiToken.findMany.mockResolvedValue(tokens as any);
+    asMock(mockPrisma.apiToken.findMany).mockResolvedValue(tokens as any);
 
     const result = await listTokens("editor-1");
     expect(result).toEqual(tokens);
   });
 
   it("admin can list another user's tokens", async () => {
-    mockPrisma.apiToken.findMany.mockResolvedValue([]);
+    asMock(mockPrisma.apiToken.findMany).mockResolvedValue([]);
     const result = await listTokens("editor-1");
     expect(result).toEqual([]);
   });
@@ -126,24 +127,24 @@ describe("listTokens", () => {
 describe("revokeToken", () => {
   it("revokes own token", async () => {
     mockAuth.mockResolvedValue(editorSession);
-    mockPrisma.apiToken.findUnique.mockResolvedValue({
+    asMock(mockPrisma.apiToken.findUnique).mockResolvedValue({
       id: "token-1",
       userId: "editor-1",
       name: "My Token",
     } as any);
-    mockPrisma.apiToken.delete.mockResolvedValue({} as any);
+    asMock(mockPrisma.apiToken.delete).mockResolvedValue({} as any);
 
     await revokeToken("token-1");
     expect(mockPrisma.apiToken.delete).toHaveBeenCalledWith({ where: { id: "token-1" } });
   });
 
   it("admin can revoke another user's token", async () => {
-    mockPrisma.apiToken.findUnique.mockResolvedValue({
+    asMock(mockPrisma.apiToken.findUnique).mockResolvedValue({
       id: "token-1",
       userId: "editor-1",
       name: "Token",
     } as any);
-    mockPrisma.apiToken.delete.mockResolvedValue({} as any);
+    asMock(mockPrisma.apiToken.delete).mockResolvedValue({} as any);
 
     await revokeToken("token-1");
     expect(mockPrisma.apiToken.delete).toHaveBeenCalled();
@@ -151,7 +152,7 @@ describe("revokeToken", () => {
 
   it("editor cannot revoke another user's token", async () => {
     mockAuth.mockResolvedValue(editorSession);
-    mockPrisma.apiToken.findUnique.mockResolvedValue({
+    asMock(mockPrisma.apiToken.findUnique).mockResolvedValue({
       id: "token-1",
       userId: "other-user",
       name: "Token",
@@ -161,7 +162,7 @@ describe("revokeToken", () => {
   });
 
   it("throws for nonexistent token", async () => {
-    mockPrisma.apiToken.findUnique.mockResolvedValue(null);
+    asMock(mockPrisma.apiToken.findUnique).mockResolvedValue(null);
     await expect(revokeToken("nope")).rejects.toThrow("Token not found");
   });
 });

@@ -102,11 +102,14 @@ function makeDataset(overrides: Partial<DatasetWithRelations> = {}): DatasetWith
 }
 
 describe("calculateQualityScore", () => {
-  it("fully complete dataset scores 100", () => {
+  it("fully complete dataset (no profiled columns) scores 100/100", () => {
     const dataset = makeDataset();
     const result = calculateQualityScore(dataset);
     expect(result.overall).toBe(100);
+    expect(result.maxScore).toBe(100);
     expect(result.suggestions).toHaveLength(0);
+    // Agent dims are skipped when no dictionary fields exist
+    expect(result.breakdown.some((b) => b.category.startsWith("Agent:"))).toBe(false);
   });
 
   it("dataset missing title/description scores lower", () => {
@@ -206,6 +209,187 @@ describe("calculateQualityScore", () => {
     const result = calculateQualityScore(dataset);
     expect(result.overall).toBe(0);
     expect(result.suggestions.length).toBe(14); // One per check
+  });
+});
+
+describe("calculateQualityScore — agent-readiness dimensions", () => {
+  type Field = {
+    id: string;
+    dictionaryId: string;
+    name: string;
+    title: string | null;
+    type: string;
+    description: string | null;
+    format: string | null;
+    constraints: string | null;
+    sortOrder: number;
+    duckdbType: string | null;
+    rowCount: number | null;
+    nullCount: number | null;
+    distinctCount: number | null;
+    min: string | null;
+    max: string | null;
+    sampleValues: string | null;
+    enumValues: string | null;
+    filterable: boolean;
+    aggregatable: boolean;
+    isPii: boolean;
+    isGeometry: boolean;
+    crs: string | null;
+    descriptionSource: string | null;
+    profiledAt: Date | null;
+    extensions: string | null;
+  };
+
+  function field(overrides: Partial<Field> = {}): Field {
+    return {
+      id: "f1",
+      dictionaryId: "dict-1",
+      name: "col",
+      title: null,
+      type: "string",
+      description: null,
+      format: null,
+      constraints: null,
+      sortOrder: 0,
+      duckdbType: null,
+      rowCount: null,
+      nullCount: null,
+      distinctCount: null,
+      min: null,
+      max: null,
+      sampleValues: null,
+      enumValues: null,
+      filterable: false,
+      aggregatable: false,
+      isPii: false,
+      isGeometry: false,
+      crs: null,
+      descriptionSource: null,
+      profiledAt: null,
+      extensions: null,
+      ...overrides,
+    };
+  }
+
+  function datasetWithFields(fields: Field[]): DatasetWithRelations {
+    const base = makeDataset();
+    return {
+      ...base,
+      distributions: [
+        {
+          ...base.distributions[0],
+          dataDictionary: {
+            id: "dict-1",
+            distributionId: base.distributions[0].id,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            fields,
+          },
+        },
+      ],
+    } as unknown as DatasetWithRelations;
+  }
+
+  it("includes Agent dimensions in breakdown when fields exist", () => {
+    const ds = datasetWithFields([field({ name: "id" })]);
+    const result = calculateQualityScore(ds);
+    const agentCategories = result.breakdown
+      .filter((b) => b.category.startsWith("Agent:"))
+      .map((b) => b.category);
+    expect(agentCategories).toEqual([
+      "Agent: Column Documentation",
+      "Agent: Filterable Documentation",
+      "Agent: PII Safety",
+    ]);
+    expect(result.maxScore).toBe(115);
+  });
+
+  it("awards full Column Documentation when every field has description + unit", () => {
+    const ds = datasetWithFields([
+      field({ name: "amount", description: "Sale amount (unit: USD)" }),
+      field({ name: "qty", description: "Units sold", extensions: JSON.stringify({ unit: "each" }) }),
+    ]);
+    const b = calculateQualityScore(ds).breakdown.find((x) => x.category === "Agent: Column Documentation")!;
+    expect(b.score).toBe(5);
+    expect(b.details).toMatch(/All columns/);
+  });
+
+  it("deducts proportionally when columns lack description or unit", () => {
+    const ds = datasetWithFields([
+      field({ name: "amount", description: "Sale amount (unit: USD)" }),
+      field({ name: "notes", description: "Just text, no unit" }),
+      field({ name: "blank" }),
+      field({ name: "blank2" }),
+    ]);
+    const b = calculateQualityScore(ds).breakdown.find((x) => x.category === "Agent: Column Documentation")!;
+    // 1 of 4 documented → round(1/4 * 5) = 1
+    expect(b.score).toBe(1);
+    expect(b.details).toBe("1/4 columns have both description and unit");
+  });
+
+  it("Filterable Documentation skips when no filterable columns exist", () => {
+    const ds = datasetWithFields([
+      field({ name: "id", filterable: false }),
+      field({ name: "notes", filterable: false }),
+    ]);
+    const b = calculateQualityScore(ds).breakdown.find((x) => x.category === "Agent: Filterable Documentation")!;
+    expect(b.score).toBe(5);
+    expect(b.details).toMatch(/no filterable columns/);
+  });
+
+  it("Filterable Documentation deducts when filterable columns lack descriptions", () => {
+    const ds = datasetWithFields([
+      field({ name: "region", filterable: true, description: "US region" }),
+      field({ name: "state", filterable: true, description: null }),
+      field({ name: "city", filterable: true, description: "" }),
+    ]);
+    const b = calculateQualityScore(ds).breakdown.find((x) => x.category === "Agent: Filterable Documentation")!;
+    expect(b.score).toBe(2); // round(1/3 * 5) = 2
+    expect(b.details).toBe("1/3 filterable columns have descriptions");
+  });
+
+  it("PII Safety: full credit when no PII detected", () => {
+    const ds = datasetWithFields([
+      field({ name: "amount", sampleValues: JSON.stringify([1, 2, 3]) }),
+      field({ name: "region", sampleValues: JSON.stringify(["East", "West"]) }),
+    ]);
+    const b = calculateQualityScore(ds).breakdown.find((x) => x.category === "Agent: PII Safety")!;
+    expect(b.score).toBe(5);
+    expect(b.details).toMatch(/No PII detected/);
+  });
+
+  it("PII Safety: partial credit when PII is detected AND flagged", () => {
+    const ds = datasetWithFields([
+      field({
+        name: "email",
+        sampleValues: JSON.stringify(["a@b.com", "c@d.com", "e@f.com"]),
+        isPii: true,
+      }),
+    ]);
+    const b = calculateQualityScore(ds).breakdown.find((x) => x.category === "Agent: PII Safety")!;
+    expect(b.score).toBe(3);
+    expect(b.details).toMatch(/flagged correctly/);
+  });
+
+  it("PII Safety: zero when PII is detected but NOT flagged", () => {
+    const ds = datasetWithFields([
+      field({
+        name: "email",
+        sampleValues: JSON.stringify(["a@b.com", "c@d.com", "e@f.com"]),
+        isPii: false,
+      }),
+    ]);
+    const b = calculateQualityScore(ds).breakdown.find((x) => x.category === "Agent: PII Safety")!;
+    expect(b.score).toBe(0);
+    expect(b.details).toMatch(/not flagged: email/);
+  });
+
+  it("Agent dims are skipped when no distribution has dictionary fields", () => {
+    const ds = makeDataset();
+    const result = calculateQualityScore(ds);
+    expect(result.breakdown.some((b) => b.category.startsWith("Agent:"))).toBe(false);
+    expect(result.maxScore).toBe(100);
   });
 });
 

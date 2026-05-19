@@ -1,0 +1,5 @@
+id,name,value
+1,Alice,100
+2,"Bob with unclosed quote,200
+3,Carol,not-a-number-here-but-thats-fine
+broken row with too few columns

@@ -4,6 +4,7 @@ import { getQualityTier } from "@/lib/services/data-quality";
 
 interface QualityBadgeProps {
   score: number;
+  maxScore?: number;
   showScore?: boolean;
 }
 
@@ -15,16 +16,17 @@ const bgColors: Record<string, string> = {
   F: "bg-danger-subtle border-danger",
 };
 
-export function QualityBadge({ score, showScore = true }: QualityBadgeProps) {
-  const tier = getQualityTier(score);
+export function QualityBadge({ score, maxScore = 100, showScore = true }: QualityBadgeProps) {
+  const percent = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
+  const tier = getQualityTier(percent);
 
   return (
     <span
       className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${bgColors[tier.label] || ""} ${tier.color}`}
-      title={`Data quality: ${score}/100 (${tier.label})`}
+      title={`Data quality: ${score}/${maxScore} (${tier.label})`}
     >
       {tier.label}
-      {showScore && <span className="text-text-muted">({score}%)</span>}
+      {showScore && <span className="text-text-muted">({percent}%)</span>}
     </span>
   );
 }

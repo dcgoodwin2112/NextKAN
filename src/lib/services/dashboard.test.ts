@@ -204,7 +204,10 @@ describe("getDashboardData — stats", () => {
       distributions: [{
         id: "dist-1", title: "CSV", description: null, downloadURL: null, accessURL: null,
         mediaType: "text/csv", format: "CSV", conformsTo: null, describedBy: null,
-        fileName: null, filePath: null, fileSize: null, datasetId: "d1",
+        fileName: null, filePath: null, fileSize: null, sortOrder: 0,
+        originalPath: null, parquetPath: null, rowCount: null,
+        profiledAt: null, profileStatus: "none", profileError: null,
+        datasetId: "d1",
         createdAt: new Date(), updatedAt: new Date(),
       }],
       themes: [{

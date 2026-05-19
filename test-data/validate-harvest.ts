@@ -402,9 +402,7 @@ async function cleanup() {
       await prisma.datasetTheme.deleteMany({ where: { datasetId: id } }).catch(() => {});
       await prisma.datasetVersion.deleteMany({ where: { datasetId: id } }).catch(() => {});
       await prisma.comment.deleteMany({ where: { datasetId: id } }).catch(() => {});
-      await prisma.analyticsEvent.deleteMany({ where: { datasetId: id } }).catch(() => {});
-      await prisma.dataDictionary.deleteMany({ where: { datasetId: id } }).catch(() => {});
-      await prisma.savedChart.deleteMany({ where: { datasetId: id } }).catch(() => {});
+      await prisma.analyticsEvent.deleteMany({ where: { entityType: "dataset", entityId: id } }).catch(() => {});
     }
     const deleted = await prisma.dataset.deleteMany({
       where: { id: { in: createdDatasetIds } },

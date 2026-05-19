@@ -49,7 +49,15 @@ export const datasetCreateSchema = z.object({
   previousVersion: z.string().max(255).optional(),
 });
 
-export const datasetUpdateSchema = datasetCreateSchema.partial();
+export const datasetUpdateSchema = datasetCreateSchema
+  .partial()
+  .extend({
+    status: datasetStatusEnum.optional(),
+    accessLevel: z
+      .enum(["public", "restricted public", "non-public"])
+      .optional(),
+    language: z.string().optional(),
+  });
 
-export type DatasetCreateInput = z.infer<typeof datasetCreateSchema>;
-export type DatasetUpdateInput = z.infer<typeof datasetUpdateSchema>;
+export type DatasetCreateInput = z.input<typeof datasetCreateSchema>;
+export type DatasetUpdateInput = z.input<typeof datasetUpdateSchema>;

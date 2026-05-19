@@ -1,0 +1,6 @@
+id,name,score,is_active,joined_at
+1,Alice,3.14,true,2024-01-15
+2,Bob,2.71,false,2024-02-20
+3,Carol,1.41,true,2024-03-05
+4,Dan,0.58,false,2024-04-10
+5,Eve,9.81,true,2024-05-25

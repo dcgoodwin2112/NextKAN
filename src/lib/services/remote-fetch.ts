@@ -171,6 +171,23 @@ export async function fetchAndImportRemoteResource(
         const { importExcelToDatastore } = await import("@/lib/services/datastore");
         await importExcelToDatastore(updated);
       }
+
+      // Agent-first profiling sidecar. Isolated from the SQLite import above.
+      const profilable =
+        mediaType === "text/csv" ||
+        mediaType === "application/json" ||
+        mediaType === "application/geo+json";
+      if (profilable) {
+        const { profileDistribution } = await import(
+          "@/lib/services/profile-distribution"
+        );
+        try {
+          await profileDistribution(distributionId);
+        } catch {
+          // profileDistribution already records failures on Distribution;
+          // never let this break the remote-fetch flow.
+        }
+      }
     }
   } catch (error) {
     const message =
