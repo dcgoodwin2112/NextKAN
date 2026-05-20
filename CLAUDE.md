@@ -145,10 +145,6 @@ Tests silence pino via `LOG_LEVEL=silent` set in `vitest.setup.ts`. Set `LOG_LEV
 
 Date rendering is currently scattered across components — `toLocaleDateString()`, `toISOString().split("T")[0]`, ad-hoc "X ago" math. There is no shared formatter. **Don't centralize in passing**; when a feature touches enough date-rendering surface to warrant it, do that work as its own task. New code should prefer `toLocaleDateString()` for human-facing dates and ISO strings for machine-facing ones.
 
-## Git
-
-- Always use `--no-gpg-sign` on commits (GPG signing hangs in non-interactive contexts)
-
 ## Common Commands
 
 ```bash
