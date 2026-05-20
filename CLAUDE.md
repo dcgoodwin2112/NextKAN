@@ -63,7 +63,7 @@ These are built and working, but the agent-first pivot says don't invest impleme
 - Analytics dashboard (`src/app/admin/analytics/`)
 - Link checker (`src/app/admin/link-check/`)
 - Themes admin UI (`src/app/admin/themes/`)
-- Swagger UI `/api-docs` page (the OpenAPI JSON itself is still useful)
+- `/api-docs` reference page (the OpenAPI JSON itself is still useful)
 - Faceted search UI polish (the facet computation backend stays)
 
 Keep these stable, fix outright bugs if reported, but don't extend them. Retirement of any individual feature happens only after the MCP server is proven and an actual conflict is identified.
