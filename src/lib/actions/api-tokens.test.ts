@@ -100,6 +100,56 @@ describe("createToken", () => {
   it("validates input with Zod", async () => {
     await expect(createToken("admin-1", { name: "" })).rejects.toThrow();
   });
+
+  it("persists scope and returns it in the result (admin scope path)", async () => {
+    asMock(mockPrisma.apiToken.create).mockResolvedValue({
+      id: "token-admin",
+      userId: "admin-1",
+      name: "MCP Bot",
+      tokenHash: "hashed",
+      prefix: "nkan_abc1",
+      scope: "admin",
+      rateLimitMultiplier: 1,
+      expiresAt: null,
+      lastUsedAt: null,
+      createdAt: new Date("2024-01-01"),
+    });
+
+    const result = await createToken("admin-1", { name: "MCP Bot", scope: "admin" });
+    expect(result.scope).toBe("admin");
+    expect(mockPrisma.apiToken.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ scope: "admin" }),
+      }),
+    );
+  });
+
+  it("rejects admin-scope creation from a non-global-admin session", async () => {
+    mockAuth.mockResolvedValue(editorSession);
+    await expect(
+      createToken("editor-1", { name: "Forbidden", scope: "admin" }),
+    ).rejects.toThrow(/admin/i);
+    expect(mockPrisma.apiToken.create).not.toHaveBeenCalled();
+  });
+
+  it("allows read-scope creation from any user managing their own tokens", async () => {
+    mockAuth.mockResolvedValue(editorSession);
+    asMock(mockPrisma.apiToken.create).mockResolvedValue({
+      id: "token-r",
+      userId: "editor-1",
+      name: "Read-only",
+      tokenHash: "hashed",
+      prefix: "nkan_abc1",
+      scope: "read",
+      rateLimitMultiplier: 1,
+      expiresAt: null,
+      lastUsedAt: null,
+      createdAt: new Date("2024-01-01"),
+    });
+
+    const result = await createToken("editor-1", { name: "Read-only", scope: "read" });
+    expect(result.scope).toBe("read");
+  });
 });
 
 describe("listTokens", () => {

@@ -1,5 +1,7 @@
 import type { Context, MiddlewareHandler } from "hono";
 
+import { mcpAuthContext } from "../context";
+
 /**
  * Per-IP token-bucket rate limiter. Two windows are enforced:
  *   - perMinute: short-burst protection (default 60)
@@ -8,6 +10,13 @@ import type { Context, MiddlewareHandler } from "hono";
  * Both buckets must have budget for a request to pass. Buckets are kept in
  * memory; restart resets them. Suitable for a single-instance deployment.
  * For multi-instance, swap in Redis (out of scope for v1).
+ *
+ * Authenticated requests with a token-level `rateLimitMultiplier` get
+ * proportionally higher effective ceilings against the same per-IP bucket.
+ * Bucket counts still increment by 1 per request, so anonymous traffic
+ * from the same IP shares the resource budget — the multiplier only raises
+ * the threshold for the *current* request. Anonymous requests use the
+ * configured ceiling exactly (multiplier = 1).
  */
 export interface RateLimitOptions {
   perMinute?: number;
@@ -47,16 +56,21 @@ export function createRateLimit(opts: RateLimitOptions = {}): {
   const now = opts.now ?? Date.now;
   const buckets = new Map<string, Bucket>();
 
-  const setBudgetHeaders = (c: Context, bucket: Bucket) => {
-    c.header("X-RateLimit-Limit-Minute", String(perMinute));
+  const setBudgetHeaders = (
+    c: Context,
+    bucket: Bucket,
+    effectivePerMinute: number,
+    effectivePerHour: number,
+  ) => {
+    c.header("X-RateLimit-Limit-Minute", String(effectivePerMinute));
     c.header(
       "X-RateLimit-Remaining-Minute",
-      String(Math.max(0, perMinute - bucket.minuteCount)),
+      String(Math.max(0, effectivePerMinute - bucket.minuteCount)),
     );
-    c.header("X-RateLimit-Limit-Hour", String(perHour));
+    c.header("X-RateLimit-Limit-Hour", String(effectivePerHour));
     c.header(
       "X-RateLimit-Remaining-Hour",
-      String(Math.max(0, perHour - bucket.hourCount)),
+      String(Math.max(0, effectivePerHour - bucket.hourCount)),
     );
   };
 
@@ -83,12 +97,21 @@ export function createRateLimit(opts: RateLimitOptions = {}): {
       bucket.hourResetAt = t + HOUR_MS;
     }
 
-    if (bucket.minuteCount >= perMinute || bucket.hourCount >= perHour) {
-      const retryMs = bucket.minuteCount >= perMinute
+    // Multiplier comes from the auth middleware that ran earlier in the
+    // chain; absent context (anonymous) means multiplier = 1.
+    const multiplier = mcpAuthContext.getStore()?.rateLimitMultiplier ?? 1;
+    const effectivePerMinute = perMinute * multiplier;
+    const effectivePerHour = perHour * multiplier;
+
+    if (
+      bucket.minuteCount >= effectivePerMinute ||
+      bucket.hourCount >= effectivePerHour
+    ) {
+      const retryMs = bucket.minuteCount >= effectivePerMinute
         ? bucket.minuteResetAt - t
         : bucket.hourResetAt - t;
       c.header("Retry-After", String(Math.max(1, Math.ceil(retryMs / 1000))));
-      setBudgetHeaders(c, bucket);
+      setBudgetHeaders(c, bucket, effectivePerMinute, effectivePerHour);
       // JSON-RPC envelope so MCP clients parse the error consistently with
       // every other error response on /mcp. The middleware runs before the
       // JSON-RPC body is parsed, so the request id is unknown — `null` is
@@ -109,7 +132,7 @@ export function createRateLimit(opts: RateLimitOptions = {}): {
 
     bucket.minuteCount += 1;
     bucket.hourCount += 1;
-    setBudgetHeaders(c, bucket);
+    setBudgetHeaders(c, bucket, effectivePerMinute, effectivePerHour);
     await next();
   };
 

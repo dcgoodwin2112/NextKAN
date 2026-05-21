@@ -67,3 +67,6 @@ next-env.d.ts
 .claude/
 .vscode/
 .idea/
+
+# Local MCP client config — may contain per-developer bearer tokens
+.mcp.json

@@ -1,7 +1,10 @@
 import path from "node:path";
 
+import { ErrorCode } from "@modelcontextprotocol/sdk/types.js";
+
 import { prisma } from "@/lib/db";
 
+import { mcpAuthContext, type McpAuthContext } from "../context";
 import { logger } from "../logger";
 import { toolError } from "./errors";
 
@@ -143,6 +146,31 @@ export async function loadResourceWithColumns(
     datasetStatus: distribution.dataset.status,
     columns,
   };
+}
+
+/** Assert the current request was authenticated with at least the given scope.
+ *  Throws UNAUTHORIZED otherwise. This is defense-in-depth: anonymous clients
+ *  should never reach an admin tool handler because admin tools are filtered
+ *  out of `tools/list` for unauthenticated requests (see `createMcpServer`).
+ *  Still, every admin tool calls this on entry so a bug in registration or a
+ *  malformed client request cannot bypass the gate. */
+export function requireScope(scope: "admin"): McpAuthContext {
+  const auth = mcpAuthContext.getStore();
+  if (!auth) {
+    throw toolError({
+      errorType: "UNAUTHORIZED",
+      message: "This tool requires authentication. Provide a bearer token with the required scope.",
+      code: ErrorCode.InvalidRequest,
+    });
+  }
+  if (scope === "admin" && auth.scope !== "admin") {
+    throw toolError({
+      errorType: "UNAUTHORIZED",
+      message: `This tool requires an 'admin' scope token; this token's scope is '${auth.scope}'.`,
+      code: ErrorCode.InvalidRequest,
+    });
+  }
+  return auth;
 }
 
 /** Lookup a column by name; throws COLUMN_NOT_FOUND if absent. */

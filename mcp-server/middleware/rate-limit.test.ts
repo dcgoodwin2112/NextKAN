@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Hono } from "hono";
 
+import { mcpAuthContext, type McpAuthContext } from "../context";
 import { createRateLimit, defaultIpOf } from "./rate-limit";
 
 function makeApp(opts: Parameters<typeof createRateLimit>[0] = {}) {
@@ -99,5 +100,56 @@ describe("createRateLimit", () => {
       req: { header: () => undefined },
     } as unknown as Parameters<typeof defaultIpOf>[0];
     expect(defaultIpOf(c)).toBe("unknown");
+  });
+
+  it("raises the effective ceiling by the auth context's multiplier", async () => {
+    // Configured limit is 2/min; an authenticated multiplier=3 client should
+    // get 6 requests through, anonymous traffic from the same IP would still
+    // hit the configured 2.
+    const { app } = makeApp({ perMinute: 2, perHour: 100 });
+    const auth: McpAuthContext = {
+      user: {
+        id: "u1",
+        email: "u@example.com",
+        name: null,
+        role: "admin",
+        organizationId: null,
+      },
+      scope: "admin",
+      rateLimitMultiplier: 3,
+    };
+    const headers = { "x-forwarded-for": "8.8.8.8" };
+
+    const runAuthed = (path: string) =>
+      mcpAuthContext.run(auth, () => app.request(path, { headers }));
+
+    for (let i = 0; i < 6; i++) {
+      const res = await runAuthed("/");
+      expect(res.status).toBe(200);
+    }
+    const blocked = await runAuthed("/");
+    expect(blocked.status).toBe(429);
+  });
+
+  it("reports the effective ceiling on the X-RateLimit-Limit-Minute header", async () => {
+    const { app } = makeApp({ perMinute: 10, perHour: 100 });
+    const auth: McpAuthContext = {
+      user: {
+        id: "u1",
+        email: "u@example.com",
+        name: null,
+        role: "admin",
+        organizationId: null,
+      },
+      scope: "admin",
+      rateLimitMultiplier: 4,
+    };
+
+    const res = await mcpAuthContext.run(auth, () =>
+      app.request("/", { headers: { "x-forwarded-for": "9.9.9.9" } }),
+    );
+    expect(res.status).toBe(200);
+    expect(res.headers.get("X-RateLimit-Limit-Minute")).toBe("40");
+    expect(res.headers.get("X-RateLimit-Limit-Hour")).toBe("400");
   });
 });

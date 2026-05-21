@@ -1,9 +1,24 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+import { mcpAuthContext, type McpAuthContext } from "../context";
 import { logger } from "../logger";
 import { toolError } from "./errors";
-import { withToolErrorHandling } from "./helpers";
+import { requireScope, withToolErrorHandling } from "./helpers";
+
+function authFixture(scope: "read" | "admin"): McpAuthContext {
+  return {
+    user: {
+      id: "user-1",
+      email: "u@example.com",
+      name: null,
+      role: "admin",
+      organizationId: null,
+    },
+    scope,
+    rateLimitMultiplier: 1,
+  };
+}
 
 describe("withToolErrorHandling", () => {
   beforeEach(() => {
@@ -42,5 +57,40 @@ describe("withToolErrorHandling", () => {
     });
     expect((payload as { err: Error }).err).toBeInstanceOf(Error);
     expect(msg).toBe("mcp tool query_dataset failed");
+  });
+});
+
+describe("requireScope", () => {
+  it("throws UNAUTHORIZED outside any auth context (anonymous request)", () => {
+    expect(() => requireScope("admin")).toThrow(/authentication/i);
+    try {
+      requireScope("admin");
+    } catch (err) {
+      expect((err as { data?: { errorType?: string } }).data?.errorType).toBe(
+        "UNAUTHORIZED",
+      );
+    }
+  });
+
+  it("throws UNAUTHORIZED when the token is read-scoped", () => {
+    mcpAuthContext.run(authFixture("read"), () => {
+      expect(() => requireScope("admin")).toThrow(/admin/);
+      try {
+        requireScope("admin");
+      } catch (err) {
+        expect((err as { data?: { errorType?: string } }).data?.errorType).toBe(
+          "UNAUTHORIZED",
+        );
+      }
+    });
+  });
+
+  it("returns the auth context for an admin-scoped token", () => {
+    const auth = authFixture("admin");
+    mcpAuthContext.run(auth, () => {
+      const result = requireScope("admin");
+      expect(result.scope).toBe("admin");
+      expect(result.user.id).toBe("user-1");
+    });
   });
 });

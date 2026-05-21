@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { NativeSelect } from "@/components/ui/native-select";
 import {
   Table,
   TableBody,
@@ -40,6 +41,7 @@ interface Token {
   id: string;
   name: string;
   prefix: string;
+  scope?: string;
   lastUsedAt: string | null;
   expiresAt: string | null;
   createdAt: string;
@@ -47,13 +49,20 @@ interface Token {
 
 interface ApiTokenSectionProps {
   userId: string;
+  /** Current session user's role. Controls whether the "admin" scope option
+   *  is offered in the create modal — only global admins can mint admin
+   *  tokens. Defaults to `"viewer"` so callers that haven't passed a role
+   *  (e.g. older tests) don't accidentally surface privileged options. */
+  userRole?: string;
 }
 
-export function ApiTokenSection({ userId }: ApiTokenSectionProps) {
+export function ApiTokenSection({ userId, userRole = "viewer" }: ApiTokenSectionProps) {
+  const canCreateAdminScope = userRole === "admin";
   const [tokens, setTokens] = useState<Token[]>([]);
   const [loading, setLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
   const [newTokenName, setNewTokenName] = useState("");
+  const [newTokenScope, setNewTokenScope] = useState<"read" | "admin">("read");
   const [newTokenExpiry, setNewTokenExpiry] = useState("");
   const [plaintext, setPlaintext] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
@@ -76,7 +85,10 @@ export function ApiTokenSection({ userId }: ApiTokenSectionProps) {
   async function handleCreate() {
     setCreating(true);
     try {
-      const body: Record<string, string> = { name: newTokenName };
+      const body: Record<string, string> = {
+        name: newTokenName,
+        scope: newTokenScope,
+      };
       if (newTokenExpiry) body.expiresAt = newTokenExpiry;
 
       const res = await fetch(`/api/users/${userId}/tokens`, {
@@ -129,6 +141,7 @@ export function ApiTokenSection({ userId }: ApiTokenSectionProps) {
     setCreateOpen(false);
     setPlaintext(null);
     setNewTokenName("");
+    setNewTokenScope("read");
     setNewTokenExpiry("");
   }
 
@@ -189,7 +202,29 @@ export function ApiTokenSection({ userId }: ApiTokenSectionProps) {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="token-expiry">Expiry (optional)</Label>
+                  <Label htmlFor="token-scope">Scope</Label>
+                  <NativeSelect
+                    id="token-scope"
+                    value={newTokenScope}
+                    onChange={(e) =>
+                      setNewTokenScope(e.target.value as "read" | "admin")
+                    }
+                  >
+                    <option value="read">read — public catalog access</option>
+                    {canCreateAdminScope && (
+                      <option value="admin">
+                        admin — required for admin MCP tools
+                      </option>
+                    )}
+                  </NativeSelect>
+                  {!canCreateAdminScope && (
+                    <p className="mt-1 text-xs text-text-muted">
+                      Only global admins can mint admin-scoped tokens.
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <Label htmlFor="token-expiry">Expiry (optional, max 1 year)</Label>
                   <Input
                     id="token-expiry"
                     type="date"
@@ -223,6 +258,7 @@ export function ApiTokenSection({ userId }: ApiTokenSectionProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
+                <TableHead>Scope</TableHead>
                 <TableHead>Prefix</TableHead>
                 <TableHead>Created</TableHead>
                 <TableHead>Last Used</TableHead>
@@ -234,6 +270,17 @@ export function ApiTokenSection({ userId }: ApiTokenSectionProps) {
               {tokens.map((token) => (
                 <TableRow key={token.id}>
                   <TableCell>{token.name}</TableCell>
+                  <TableCell>
+                    <span
+                      className={
+                        token.scope === "admin"
+                          ? "rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-900 dark:bg-amber-900/30 dark:text-amber-200"
+                          : "rounded bg-zinc-100 px-2 py-0.5 text-xs text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+                      }
+                    >
+                      {token.scope ?? "read"}
+                    </span>
+                  </TableCell>
                   <TableCell className="font-mono text-xs">
                     {token.prefix}...
                   </TableCell>

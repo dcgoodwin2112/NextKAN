@@ -470,15 +470,23 @@ model CustomFieldDefinition {
 }
 
 model ApiToken {
-  id         String    @id @default(uuid())
-  userId     String
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name       String
-  tokenHash  String    @unique
-  prefix     String
-  lastUsedAt DateTime?
-  expiresAt  DateTime?
-  createdAt  DateTime  @default(now())
+  id                  String    @id @default(uuid())
+  userId              String
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name                String
+  tokenHash           String    @unique
+  prefix              String
+  // "read" — anonymous-equivalent access; can call public REST + MCP tools.
+  // "admin" — required to call admin-tier MCP tools (mutations) and is the
+  // bearer-token equivalent of a logged-in admin user.
+  scope               String    @default("read")
+  // Per-token rate-limit budget multiplier on the MCP server's per-IP bucket.
+  // 1 = same as anonymous. Raise per-token only when a specific integration
+  // needs elevated headroom; default stays at 1.
+  rateLimitMultiplier Int       @default(1)
+  lastUsedAt          DateTime?
+  expiresAt           DateTime?
+  createdAt           DateTime  @default(now())
 
   @@index([userId])
   @@index([expiresAt])
