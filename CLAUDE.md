@@ -127,6 +127,7 @@ Equal in importance to `/data.json`. The MCP server (sibling process at `mcp-ser
 - **Storage paths** for the new Parquet/profile pipeline are relative to `NEXTKAN_STORAGE_PATH`, never absolute. New uploads go under `storage/resources/<distributionId>/`. Existing uploads under `public/uploads/` keep working via `Distribution.filePath`.
 - **DuckDB helpers** live under `src/lib/duckdb/` (NOT `src/lib/datastore/`, which would collide with `src/lib/services/datastore.ts`).
 - **MCP server** code lives in `mcp-server/` (sibling directory at repo root); it imports Prisma from `@/generated/prisma/client` and shares the same database as the admin.
+- **MCP admin tools** require a scoped `ApiToken` (`scope = "admin"`) passed as `Authorization: Bearer nkan_…`. The auth middleware is at `mcp-server/middleware/auth.ts`; the per-request context is `mcp-server/context.ts`; admin handlers call `requireScope("admin")` on entry and `cache.reset()` on successful mutation. Public tools stay anonymous. Full contract in `docs/mcp-server-spec.md` → `## Authentication`.
 
 ### Server action return shapes
 

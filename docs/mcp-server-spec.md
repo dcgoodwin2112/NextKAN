@@ -23,7 +23,7 @@ The MCP server is a separate Node.js process (`mcp-server/`) sharing the NextKAN
 
 - **Transport:** Streamable HTTP (MCP spec 2025-11-25), single `/mcp` endpoint accepting POST and GET.
 - **Session mode:** Stateless. No session storage, no `MCP-Session-Id` issuance. Each request is independent.
-- **Authentication:** Anonymous read by default. No write tools in v1. Bearer token mechanism documented but not implemented.
+- **Authentication:** Anonymous read by default for the six core tools. Admin-tier tools (writes) require an `admin`-scoped `ApiToken` passed as `Authorization: Bearer nkan_…`. See `## Authentication` below.
 - **Concurrency:** In-process query queue (`p-limit`, concurrency = 4). Per-IP rate limiting.
 - **Caching:** LRU result cache with 60-second TTL, keyed on tool name + sorted input hash.
 - **Process model:** One sibling Node.js process, deployed alongside the Next.js admin via Docker Compose.
@@ -386,6 +386,71 @@ USING SAMPLE n ROWS;
 -- PII columns are omitted from the SELECT list.
 ```
 
+## Authentication
+
+The six core tools above are anonymous by default. Admin-tier tools (writes) require a scoped bearer token.
+
+### Token model
+
+`ApiToken` (the same Prisma model used by the admin REST surface) carries two MCP-relevant columns:
+
+- `scope`: `"read"` (default) or `"admin"`. Only `"admin"` tokens may call admin-tier tools.
+- `rateLimitMultiplier`: integer, default `1`. Per-token multiplier on the per-IP rate-limit ceiling. Raise selectively for trusted integrations.
+
+Tokens are SHA-256 hashed at rest with an `nkan_` plaintext prefix. The user-facing UI at `/admin/account` mints and revokes them; the plaintext is shown exactly once at creation. Only users with the global `admin` role may mint `"admin"`-scoped tokens.
+
+### Request flow
+
+1. Client sends `Authorization: Bearer nkan_…` on every `/mcp` request that needs admin tools.
+2. `mcp-server/middleware/auth.ts` looks the hash up via `validateMcpToken()`, attaches the resolved user + scope to a request-scoped `AsyncLocalStorage` (`mcp-server/context.ts`), and lets the request continue.
+3. Empty or absent `Authorization` header → request proceeds as anonymous (context = `null`).
+4. Non-empty `Authorization` header that fails to resolve → 401 JSON-RPC `-32003` (`UNAUTHORIZED`). The middleware never falls back to anonymous on a failed bearer.
+
+### Tool tier filtering
+
+`createMcpServer(cache, auth)` reads the auth context. `registerPublicTools` runs unconditionally; `registerAdminTools` runs only when `auth?.scope === "admin"`. Anonymous and `"read"`-scoped clients never see admin tools in `tools/list`, and `tools/call` for an unknown tool fails at the SDK level.
+
+Defense in depth: every admin tool handler also calls `requireScope("admin")` on entry, so a registration bug cannot bypass the gate.
+
+### Org scoping
+
+Admin tools that touch a specific dataset check the publisher organization:
+
+- `user.role === "admin"` (global admin) — may edit any dataset.
+- Any other role — `user.organizationId` must equal `dataset.publisherId`, else `FORBIDDEN`.
+
+### Rate-limit interaction
+
+The middleware order is `auth → rateLimit → concurrency`. The rate limiter reads `auth.rateLimitMultiplier` from the context and scales its per-IP ceiling for the current request only. Counts still increment by 1 per request, so anonymous traffic sharing an IP still consumes from the same bucket.
+
+### Activity log
+
+Admin mutations write an `ActivityLog` row via the shared `logActivity()` helper:
+
+```ts
+{
+  action: "dataset:updated",
+  entityType: "dataset",
+  entityId,
+  entityName,
+  userId: auth.user.id,
+  userName: auth.user.name ?? auth.user.email ?? null,
+  details: { source: "mcp", field, from, to },
+}
+```
+
+The `source: "mcp"` field distinguishes MCP-originated mutations from Server Action / REST mutations in audit views.
+
+### Cache invalidation on mutation
+
+Admin tools that mutate state call `cache.reset()` on success. The cache exposes no per-key invalidation today; a `deleteByPrefix` helper is tracked as future work (see `~/.claude/plans/users-dgoodwin-sites-nextkan-mcp-admin-tokens.md`). Whole-cache reset is acceptable because mutations are rare and the TTL is 60 s.
+
+### Admin tools (v1)
+
+| Tool                          | Required scope | Notes |
+|-------------------------------|----------------|-------|
+| `update_dataset_description`  | `admin`        | Replaces one dataset's description. No-op short-circuit when the value is unchanged. Returns `{ ok, datasetId, modified, before }`. |
+
 ## Cross-cutting concerns
 
 ### Rate limiting
@@ -500,6 +565,8 @@ Standard error types:
 | `RATE_LIMIT_EXCEEDED`       | -32000   | Per-IP rate limit exceeded                             |
 | `QUERY_TIMEOUT`             | -32001   | DuckDB query exceeded timeout                          |
 | `MEMORY_LIMIT_EXCEEDED`     | -32002   | DuckDB hit memory limit                                |
+| `UNAUTHORIZED`              | -32003   | Bearer token missing, invalid, expired, or lacks scope |
+| `FORBIDDEN`                 | -32600   | Authenticated, but user's org doesn't match the entity |
 | `INTERNAL_ERROR`            | -32603   | Unexpected server error                                |
 
 Error messages should be informative and actionable. For `COLUMN_NOT_FILTERABLE`, include suggested alternatives: "Column `description` is not filterable. Filterable columns on this resource: `region`, `year`, `category`."
@@ -580,9 +647,9 @@ Note both services mount the same storage volume and connect to the same databas
 
 Document but don't implement:
 
-- **Bearer token authentication.** Optional per-deployment, used for elevated rate limits. Schema: tokens stored on a `MCPToken` Prisma model, hashed, with `rateLimitMultiplier` and `expiresAt`.
-- **OAuth 2.1 with PKCE.** For deployments that need per-user attribution. Would use the `mcp-auth` library or similar.
-- **Write tools** (`publish_dataset`, `update_column_description`). Would require auth and a write path through Server Actions.
+- **OAuth 2.1 + PKCE / Dynamic Client Registration.** Required for Claude.ai / Desktop Connectors, which don't accept static bearer tokens. Bearer-token auth via `ApiToken` (shipped) is the lazy path; OAuth is the spec-aligned path. Tracked in `docs/backlog.md` → "MCP Server → OAuth 2.1 + PKCE for MCP admin tools".
+- **Additional admin tools** beyond `update_dataset_description`: e.g. `update_column_description`, `publish_dataset`, `archive_dataset`. Each follows the Phase 4 template — `requireScope("admin")`, optional org check, Prisma write, `logActivity`, `cache.reset()`.
+- **Per-key cache invalidation** (`cache.deleteByPrefix`). Replaces the current whole-cache reset on mutation. Worth doing when the catalog grows or admin mutations become frequent.
 - **stdio transport.** For local-Claude-Desktop scenarios. Trivially added later (different entry point, same tools).
 - **Quack protocol.** DuckDB's new multi-writer client-server protocol. Not needed for single-process NextKAN, but interesting for multi-node deployments.
 - **DuckLake format.** Multi-writer Parquet via PostgreSQL catalog. Not needed for v1.

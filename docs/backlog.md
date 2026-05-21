@@ -87,6 +87,40 @@ Documented but not committed to a schedule. Apply going forward; do not retrofit
 
 ---
 
+## MCP Server
+
+### OAuth 2.1 + PKCE for MCP admin tools
+
+**Priority:** Medium
+**Status:** Unblocked — Option A (static bearer-token auth via `ApiToken`) shipped 2026-05-20. OAuth is strictly additive: it adds a second credential path for clients that won't accept static tokens, without changing the existing path.
+**Reason:** Static bearer tokens work for Claude Code (`.mcp.json` headers) but Claude.ai / Desktop Connectors require OAuth. Spec-compliant auth unlocks every Claude client and any future MCP host (Cowork, third-party agents).
+
+#### Scope
+
+- **Resource Server metadata:** add `/.well-known/oauth-protected-resource` (RFC 9728) to `mcp-server/`, declaring required scopes (`catalog:read`, `catalog:admin`)
+- **Authorization Server:** stand up an OAuth 2.1 + PKCE endpoint on the Next.js app, backed by the existing `User` table. Options to evaluate: extend NextAuth v5 with a custom OAuth provider, mount `node-oidc-provider`, or front NextAuth with a hosted IdP (WorkOS AuthKit, Auth0). Decision pending.
+- **Authorization Server metadata:** `/.well-known/oauth-authorization-server` (RFC 8414)
+- **Dynamic Client Registration (RFC 7591):** so Claude.ai can self-register without manual config
+- **Bearer token validation in MCP middleware:** swap the static-token path for JWT verification using the AS's signing keys (JWKS). Reuse the same `scope`-aware tool gating from Option A.
+- **Coexistence with static tokens:** keep `ApiToken` bearer auth working for CLI / CI use cases; the middleware accepts either.
+- **Reference library:** evaluate [`mcp-auth/js`](https://github.com/mcp-auth/js) for the Resource Server side (~5-line drop-in)
+
+#### Key Files
+
+- `mcp-server/middleware/auth.ts` — extend to validate JWTs against JWKS
+- `mcp-server/routes/well-known.ts` (new) — RFC 9728 metadata
+- `src/app/.well-known/oauth-authorization-server/route.ts` (new) — RFC 8414
+- `src/app/oauth/` (new) — authorize, token, register, JWKS endpoints
+- `prisma/schema.prisma` — `OAuthClient` model for DCR, signing key storage
+
+#### Out of scope until requested
+
+- Refresh-token rotation policies beyond the spec defaults
+- Per-organization scopes (single-tenant scopes for v1)
+- Consent-screen UX polish (functional but minimal)
+
+---
+
 ## Developer Experience
 
 ### Extension & MCP Developer Guide
