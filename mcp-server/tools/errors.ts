@@ -12,7 +12,18 @@ export type ToolErrorType =
   | "INVALID_INPUT"
   | "QUERY_TIMEOUT"
   | "MEMORY_LIMIT_EXCEEDED"
-  | "INTERNAL_ERROR";
+  | "INTERNAL_ERROR"
+  // Defense-in-depth for admin-tier tools. Anonymous clients should not see
+  // these tools in tools/list at all (they're filtered at registration time
+  // in createMcpServer), so this error should be unreachable in normal use.
+  // It still fires if a misbehaving client constructs a tools/call request
+  // for an admin tool while unauthenticated.
+  | "UNAUTHORIZED"
+  // Authenticated but the token's user lacks permission for the requested
+  // entity — e.g. an `orgAdmin` editing a dataset owned by a different org.
+  // Distinguished from UNAUTHORIZED so agents can tell "log in" apart from
+  // "you can't touch this resource."
+  | "FORBIDDEN";
 
 interface ToolErrorOptions {
   errorType: ToolErrorType;
