@@ -3,7 +3,9 @@ import { cors } from "hono/cors";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 
 import { createResultCache } from "./cache";
+import { mcpAuthContext } from "./context";
 import { logger } from "./logger";
+import { createAuthMiddleware } from "./middleware/auth";
 import { createConcurrencyLimiter } from "./middleware/concurrency";
 import { createRateLimit } from "./middleware/rate-limit";
 import { createMcpServer, SERVER_NAME, SERVER_VERSION } from "./server";
@@ -12,6 +14,12 @@ export interface BuildAppOptions {
   rateLimit?: ReturnType<typeof createRateLimit>;
   concurrency?: ReturnType<typeof createConcurrencyLimiter>;
   cache?: ReturnType<typeof createResultCache>;
+  /**
+   * Auth middleware. Injectable for tests so we can stub the token validator.
+   * Defaults to `createAuthMiddleware()`, which calls the real
+   * `validateMcpToken` against the DB.
+   */
+  authMiddleware?: ReturnType<typeof createAuthMiddleware>;
   /**
    * Liveness/readiness probe for the `/health` endpoint. Returns `true` when
    * DuckDB is reachable. The default is `() => true` so tests don't need to
@@ -37,6 +45,7 @@ export function buildApp(opts: BuildAppOptions = {}) {
   const rateLimit = opts.rateLimit ?? createRateLimit();
   const concurrency = opts.concurrency ?? createConcurrencyLimiter();
   const cache = opts.cache ?? createResultCache();
+  const authMiddleware = opts.authMiddleware ?? createAuthMiddleware();
   const getDuckDbReady = opts.getDuckDbReady ?? (() => true);
   const uptime = opts.uptime ?? (() => process.uptime());
 
@@ -72,6 +81,10 @@ export function buildApp(opts: BuildAppOptions = {}) {
     return c.json(body, duckdbReady ? 200 : 503);
   });
 
+  // Order matters: auth must run first so the rate-limit middleware (and any
+  // downstream code that reads `mcpAuthContext.getStore()`) sees a populated
+  // context. Concurrency runs last because it only cares about queue depth.
+  app.use("/mcp", authMiddleware);
   app.use("/mcp", rateLimit.middleware);
   app.use("/mcp", concurrency.middleware);
 
@@ -83,7 +96,13 @@ export function buildApp(opts: BuildAppOptions = {}) {
       enableJsonResponse: true,
     });
 
-    const server = createMcpServer(cache);
+    // Auth middleware ran first and either populated the context with a
+    // resolved token or short-circuited with 401. By the time we reach the
+    // tool handler, the store reflects this request's auth state — `null`
+    // for anonymous, an object for authenticated. Tool registration uses
+    // this to decide which tier of tools to expose.
+    const auth = mcpAuthContext.getStore() ?? null;
+    const server = createMcpServer(cache, auth);
     try {
       await server.connect(transport);
       const response = await transport.handleRequest(c.req.raw);
