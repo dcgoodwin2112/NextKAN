@@ -167,6 +167,81 @@ describe("ApiTokenSection", () => {
     expect(input).toHaveAttribute("readOnly");
   });
 
+  it("offers the admin scope option to global admins", async () => {
+    const user = userEvent.setup();
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve([]),
+    });
+
+    render(<ApiTokenSection userId="user-1" userRole="admin" />);
+    await waitFor(() => {
+      expect(screen.getByText("No API tokens yet.")).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByText("Create Token"));
+    const scopeSelect = screen.getByLabelText("Scope") as HTMLSelectElement;
+    const optionValues = Array.from(scopeSelect.options).map((o) => o.value);
+    expect(optionValues).toContain("admin");
+    expect(optionValues).toContain("read");
+  });
+
+  it("hides the admin scope option from non-admin users", async () => {
+    const user = userEvent.setup();
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve([]),
+    });
+
+    render(<ApiTokenSection userId="user-1" userRole="editor" />);
+    await waitFor(() => {
+      expect(screen.getByText("No API tokens yet.")).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByText("Create Token"));
+    const scopeSelect = screen.getByLabelText("Scope") as HTMLSelectElement;
+    const optionValues = Array.from(scopeSelect.options).map((o) => o.value);
+    expect(optionValues).toEqual(["read"]);
+    expect(
+      screen.getByText(/Only global admins can mint admin-scoped tokens/i),
+    ).toBeInTheDocument();
+  });
+
+  it("renders the scope column for tokens in the list", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () =>
+        Promise.resolve([
+          {
+            id: "ta",
+            name: "Admin Token",
+            prefix: "nkan_aaaa",
+            scope: "admin",
+            createdAt: "2024-01-15T00:00:00.000Z",
+            lastUsedAt: null,
+            expiresAt: null,
+          },
+          {
+            id: "tr",
+            name: "Read Token",
+            prefix: "nkan_rrrr",
+            scope: "read",
+            createdAt: "2024-01-15T00:00:00.000Z",
+            lastUsedAt: null,
+            expiresAt: null,
+          },
+        ]),
+    });
+
+    render(<ApiTokenSection userId="user-1" userRole="admin" />);
+    await waitFor(() => {
+      expect(screen.getByText("Admin Token")).toBeInTheDocument();
+    });
+
+    expect(screen.getByText("admin")).toBeInTheDocument();
+    expect(screen.getByText("read")).toBeInTheDocument();
+  });
+
   it("revoke shows confirmation dialog", async () => {
     const user = userEvent.setup();
 

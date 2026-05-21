@@ -24,7 +24,7 @@ export default async function AccountPage() {
         ]}
       />
       <AdminPageHeader title="My Account" />
-      <ApiTokenSection userId={userId} />
+      <ApiTokenSection userId={userId} userRole={role} />
     </div>
   );
 }

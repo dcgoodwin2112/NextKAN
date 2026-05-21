@@ -24,6 +24,15 @@ async function requireTokenPermission(userId: string) {
 export async function createToken(userId: string, input: CreateTokenInput) {
   const session = await requireTokenPermission(userId);
   const validated = createTokenSchema.parse(input);
+
+  // Only global `admin` users may mint `admin`-scoped tokens. `orgAdmin`
+  // and below can still hold an admin token (e.g. one minted for them by a
+  // global admin), but they can't issue one to themselves or to others.
+  const sessionRole = (session.user as { role?: string }).role;
+  if (validated.scope === "admin" && sessionRole !== "admin") {
+    throw new Error("Only global admins can create admin-scoped tokens.");
+  }
+
   const { plaintext, hash, prefix } = generateToken();
 
   const token = await prisma.apiToken.create({
@@ -32,6 +41,7 @@ export async function createToken(userId: string, input: CreateTokenInput) {
       name: validated.name,
       tokenHash: hash,
       prefix,
+      scope: validated.scope,
       expiresAt: validated.expiresAt || null,
     },
   });
@@ -43,12 +53,14 @@ export async function createToken(userId: string, input: CreateTokenInput) {
     entityName: validated.name,
     userId: (session.user as any).id,
     userName: session.user.name,
+    details: { scope: validated.scope },
   }), "activity");
 
   return {
     id: token.id,
     name: token.name,
     prefix: token.prefix,
+    scope: token.scope,
     expiresAt: token.expiresAt,
     createdAt: token.createdAt,
     plaintext,
@@ -64,6 +76,7 @@ export async function listTokens(userId: string) {
       id: true,
       name: true,
       prefix: true,
+      scope: true,
       lastUsedAt: true,
       expiresAt: true,
       createdAt: true,
